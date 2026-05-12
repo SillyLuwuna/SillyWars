@@ -1287,10 +1287,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridTester
   debugShowGrid: 0
   debugCenterSize: 0.1
-  debugPointer: {fileID: 1874810597}
-  debugShowPointerCell: 0
   debugGridColor: {r: 1, g: 0.019995866, b: 0, a: 0}
   debugWalkableColor: {r: 0, g: 0.9093275, b: 1, a: 0}
+  debugPointer: {fileID: 1874810597}
+  debugShowPointerCell: 0
   mapTiles: {fileID: 216695623}
 --- !u!4 &1154549218
 Transform:

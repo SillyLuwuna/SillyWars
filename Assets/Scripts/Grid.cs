@@ -34,11 +34,26 @@ public class Grid<T>
 		);
 	}
 
-	public Tuple<int, int> CellPosFromWorldSpace(Vector2 worldSpaceCoords)
+	public Vector2 WorldSpaceFromCellPos(uint x, uint y)
+	{
+		return CellCenter(x, y);
+	}
+
+	public Vector2 WorldSpaceFromCellPos(Vector2Int cellPos)
+	{
+		return WorldSpaceFromCellPos((uint)cellPos.x, (uint)cellPos.y);
+	}
+
+	public Vector2Int CellPosFromWorldSpace(Vector2 worldSpaceCoords)
 	{
 		int x = (int)Math.Round((worldSpaceCoords.x - (_start.x + _strideHalfsCache)) / _strideWidth);
 		int y = (int)Math.Round((worldSpaceCoords.y - (_start.y + _strideHalfsCache)) / _strideWidth);
-		return new Tuple<int, int>(x, y);
+		return new Vector2Int(x, y);
+	}
+
+	public Vector2Int CellPosFromWorldSpace(float x, float y)
+	{
+		return CellPosFromWorldSpace(new Vector2(x, y));
 	}
 
 	public T this[uint x, uint y]

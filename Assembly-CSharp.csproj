@@ -49,7 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/GridManager.cs" />
+    <Compile Include="Assets/Scripts/Pathfinding.cs" />
     <Compile Include="Assets/Scripts/Cell.cs" />
+    <Compile Include="Assets/Scripts/Path.cs" />
     <Compile Include="Assets/Scripts/Grid.cs" />
   </ItemGroup>
   <ItemGroup>
