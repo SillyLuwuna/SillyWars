@@ -49,26 +49,50 @@ public class Path : IEquatable<Path>
 
 	public override bool Equals(object other)
 	{
-
-	}
-
-	public static bool operator ==(Path left, Path right)
-	{
-
-	}
-
-	public static bool operator !=(Path left, Path right)
-	{
-
+		if (other == null || !(other is Path)) // could be simplified?
+		{
+			return false;
+		}
+		return Equals((Path) other);
 	}
 
 	public bool Equals(Path other)
 	{
+		if (other == null) return false;
+		if (_path.Count != other._path.Count) return false;
 
+		int pathSize = _path.Count;
+		for (int i = 0; i < pathSize; i++)
+		{
+			if (!GameMath.FloatCompare(_path[i].x, other._path[i].x)) return false;
+			if (!GameMath.FloatCompare(_path[i].y, other._path[i].y)) return false;
+		}
+
+		return true;
+	}
+
+	public static bool operator ==(Path left, Path right)
+	{
+		if (left is null) return right is null;
+		return left.Equals(right);
+	}
+
+	public static bool operator !=(Path left, Path right)
+	{
+		return !(left == right);
 	}
 
 	public override int GetHashCode()
 	{
+		HashCode hash = new HashCode();
 
+		int pathSize = _path.Count;
+		for (int i = 0; i < pathSize; i++)
+		{
+			hash.Add(GameMath.RoundToEpsilonHash(_path[i].x));
+			hash.Add(GameMath.RoundToEpsilonHash(_path[i].y));
+		}
+
+		return hash.ToHashCode();
 	}
 }
