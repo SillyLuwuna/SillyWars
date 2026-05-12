@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -128,7 +129,18 @@ public class GridManager : MonoBehaviour
 
 		if (debugShowPointerCell)
 		{
-			Debug.Log(_grid.CellPosFromWorldSpace(debugPointer.transform.position));
+			// Debug.Log(_grid.CellPosFromWorldSpace(debugPointer.transform.position));
+			PriorityQueue<int, float> pq = new PriorityQueue<int, float>(Comparer<float>.Create((x, y) => y.CompareTo(x)));
+			pq.Enqueue(4, 1.3f);
+			pq.Enqueue(2, 1.2f);
+			pq.Enqueue(3, 1.25f);
+			pq.Enqueue(1, 0.2f);
+			pq.Enqueue(5, 2.9f);
+			Debug.Log(pq.Dequeue());
+			Debug.Log(pq.Dequeue());
+			Debug.Log(pq.Dequeue());
+			Debug.Log(pq.Dequeue());
+			Debug.Log(pq.Dequeue());
 		}
 	}
 

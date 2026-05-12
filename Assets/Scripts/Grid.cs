@@ -56,6 +56,21 @@ public class Grid<T>
 		return CellPosFromWorldSpace(new Vector2(x, y));
 	}
 
+	public bool ContainsPosFromWorldSpace(float x, float y)
+	{
+		if (x > _start.x + (_strideWidth * _width)) return false;
+		if (x < _start.x) return false;
+		if (y > _start.y + (_strideWidth * _height)) return false;
+		if (y < _start.y) return false;
+
+		return true;
+	}
+
+	public bool ContainsPosFromWorldSpace(Vector2 pos)
+	{
+		return ContainsPosFromWorldSpace(pos.x, pos.y);
+	}
+
 	public T this[uint x, uint y]
 	{
 		get => _grid[y * _width + x];

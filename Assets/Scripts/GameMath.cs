@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public static class GameMath
 {
@@ -14,5 +15,10 @@ public static class GameMath
 	{
 		// return MathF.Round(toRound / epsilon) * epsilon;
 		return (int)MathF.Round(value * converterMultiplier);
+	}
+
+	public static bool Vector2Compare(Vector2 left, Vector2 right)
+	{
+		return FloatCompare(left.x, right.x) && FloatCompare(left.y, right.y);
 	}
 }
