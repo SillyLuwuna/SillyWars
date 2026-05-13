@@ -11,6 +11,11 @@ public static class GameMath
 		return Math.Abs(left - right) < epsilon;
 	}
 
+	public static bool FloatLte(float left, float right)
+	{
+		return left <= (right + epsilon);
+	}
+
 	public static int RoundToEpsilonHash(float value)
 	{
 		// return MathF.Round(toRound / epsilon) * epsilon;

@@ -13,6 +13,11 @@ public class GridManager : MonoBehaviour
 	public GameObject debugPointer;
 	public bool debugShowPointerCell;
 
+	public GameObject debugPathStartPointer;
+	public GameObject debugPathGoalPointer;
+	public Color debugPathColor;
+	public bool debugShowPath;
+
 	[Header("Initialize")]
 	public Tilemap mapTiles;
 
@@ -129,18 +134,23 @@ public class GridManager : MonoBehaviour
 
 		if (debugShowPointerCell)
 		{
-			// Debug.Log(_grid.CellPosFromWorldSpace(debugPointer.transform.position));
-			PriorityQueue<int, float> pq = new PriorityQueue<int, float>(Comparer<float>.Create((x, y) => y.CompareTo(x)));
-			pq.Enqueue(4, 1.3f);
-			pq.Enqueue(2, 1.2f);
-			pq.Enqueue(3, 1.25f);
-			pq.Enqueue(1, 0.2f);
-			pq.Enqueue(5, 2.9f);
-			Debug.Log(pq.Dequeue());
-			Debug.Log(pq.Dequeue());
-			Debug.Log(pq.Dequeue());
-			Debug.Log(pq.Dequeue());
-			Debug.Log(pq.Dequeue());
+			Debug.Log(_grid.CellPosFromWorldSpace(debugPointer.transform.position));
+		}
+
+		if (debugShowPath)
+		{
+			Pathfinding pathfinding = new Pathfinding(_grid);
+			Path path = pathfinding.GetPath(debugPathStartPointer.transform.position, debugPathGoalPointer.transform.position);
+			Gizmos.color = debugPathColor;
+			for (int i = 0; i < path.PointCount; i++)
+			{
+				Gizmos.DrawSphere(path.PointAt(i), debugCenterSize);
+				// Debug.Log(i + ":\t" + path.PointAt(i));
+			}
+			if (path.PointCount <= 0)
+			{
+				Debug.Log("no path found!");
+			}
 		}
 	}
 

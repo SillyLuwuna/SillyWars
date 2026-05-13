@@ -21,6 +21,16 @@ public class Path : IEquatable<Path>
 		_path.Add(point);
 	}
 
+	public void Reverse()
+	{
+		_path.Reverse();
+	}
+
+	public Vector2 PointAt(int i)
+	{
+		return _path[i];
+	}
+
 	public float Length
 	{
 		get
