@@ -54,6 +54,7 @@
     <Compile Include="Assets/Scripts/PathNode.cs" />
     <Compile Include="Assets/Scripts/Cell.cs" />
     <Compile Include="Assets/Scripts/Path.cs" />
+    <Compile Include="Assets/Scripts/GoalChaser.cs" />
     <Compile Include="Assets/Scripts/PriorityQueue.cs" />
     <Compile Include="Assets/Scripts/Grid.cs" />
   </ItemGroup>

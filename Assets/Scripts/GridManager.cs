@@ -154,6 +154,11 @@ public class GridManager : MonoBehaviour
 		}
 	}
 
+	public Pathfinding GetPathfinding()
+	{
+		return new Pathfinding(_grid);
+	}
+
     // Update is called once per frame
     void Update()
     {

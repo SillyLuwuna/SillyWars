@@ -54,10 +54,13 @@ public class PathNode : IEquatable<PathNode>
 			return children;
 		}
 
-		if (gridPos.x - 1 >= 0 && grid[gridPos.x - 1, gridPos.y].IsWalkable)
+		if (gridPos.x - 1 >= 0)
 		{
-			Vector2 childPos = grid.WorldSpaceFromCellPos(new Vector2Int(gridPos.x - 1, gridPos.y));
-			children.Add(new PathNode(childPos.x, childPos.y, this, goalX, goalY));
+			if (grid[gridPos.x - 1, gridPos.y].IsWalkable)
+			{
+				Vector2 childPos = grid.WorldSpaceFromCellPos(new Vector2Int(gridPos.x - 1, gridPos.y));
+				children.Add(new PathNode(childPos.x, childPos.y, this, goalX, goalY));
+			}
 
 			if (gridPos.y - 1 >= 0 && grid[gridPos.x - 1, gridPos.y - 1].IsWalkable)
 			{
@@ -72,10 +75,13 @@ public class PathNode : IEquatable<PathNode>
 			}
 		}
 
-		if (gridPos.x + 1 < grid.Width && grid[gridPos.x + 1, gridPos.y].IsWalkable)
+		if (gridPos.x + 1 < grid.Width)
 		{
-			Vector2 childPos = grid.WorldSpaceFromCellPos(new Vector2Int(gridPos.x + 1, gridPos.y));
-			children.Add(new PathNode(childPos.x, childPos.y, this, goalX, goalY));
+			if (grid[gridPos.x + 1, gridPos.y].IsWalkable)
+			{
+				Vector2 childPos = grid.WorldSpaceFromCellPos(new Vector2Int(gridPos.x + 1, gridPos.y));
+				children.Add(new PathNode(childPos.x, childPos.y, this, goalX, goalY));
+			}
 
 			if (gridPos.y - 1 >= 0 && grid[gridPos.x + 1, gridPos.y - 1].IsWalkable)
 			{
