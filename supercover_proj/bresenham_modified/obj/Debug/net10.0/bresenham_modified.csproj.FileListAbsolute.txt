@@ -1,0 +1,14 @@
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.GeneratedMSBuildEditorConfig.editorconfig
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.AssemblyInfoInputs.cache
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.AssemblyInfo.cs
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.csproj.CoreCompileInputs.cache
+/home/luna/Documents/code/bresenham_modified/bin/Debug/net10.0/bresenham_modified
+/home/luna/Documents/code/bresenham_modified/bin/Debug/net10.0/bresenham_modified.deps.json
+/home/luna/Documents/code/bresenham_modified/bin/Debug/net10.0/bresenham_modified.runtimeconfig.json
+/home/luna/Documents/code/bresenham_modified/bin/Debug/net10.0/bresenham_modified.dll
+/home/luna/Documents/code/bresenham_modified/bin/Debug/net10.0/bresenham_modified.pdb
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.dll
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/refint/bresenham_modified.dll
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.pdb
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/bresenham_modified.genruntimeconfig.cache
+/home/luna/Documents/code/bresenham_modified/obj/Debug/net10.0/ref/bresenham_modified.dll
