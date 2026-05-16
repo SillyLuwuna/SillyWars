@@ -47,8 +47,17 @@ TagManager:
   - name: Ground
     uniqueID: 1704312497
     locked: 0
+  - name: Buildings
+    uniqueID: 4010022355
+    locked: 0
   - name: Characters
     uniqueID: 2116271055
+    locked: 0
+  - name: Fog
+    uniqueID: 2818248881
+    locked: 0
+  - name: UI
+    uniqueID: 1606995105
     locked: 0
   m_RenderingLayers:
   - Default
