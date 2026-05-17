@@ -74,8 +74,8 @@ public class Path : IEquatable<Path>
 		int pathSize = _path.Count;
 		for (int i = 0; i < pathSize; i++)
 		{
-			if (!GameMath.FloatCompare(_path[i].x, other._path[i].x)) return false;
-			if (!GameMath.FloatCompare(_path[i].y, other._path[i].y)) return false;
+			if (!GameMath.FloatEq(_path[i].x, other._path[i].x)) return false;
+			if (!GameMath.FloatEq(_path[i].y, other._path[i].y)) return false;
 		}
 
 		return true;

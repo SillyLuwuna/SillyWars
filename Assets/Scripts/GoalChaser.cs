@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class GoalChaser : MonoBehaviour
@@ -8,6 +7,7 @@ public class GoalChaser : MonoBehaviour
 	public float speed;
 
 	private Pathfinding _pathfinder;
+	private PathOptimizer _pathOptimizer;
 
 	private Path _path;
 	private int _currWaypoint;
@@ -15,7 +15,9 @@ public class GoalChaser : MonoBehaviour
     void Start()
     {
 		_pathfinder = gridManager.GetPathfinding();
+		_pathOptimizer = gridManager.GetPathOptimizer();
 		_path = _pathfinder.GetPath(transform.position, goal.transform.position);
+		_path = _pathOptimizer.OptimizePath(_path);
 		_currWaypoint = 1;
     }
 

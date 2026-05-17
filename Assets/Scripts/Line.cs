@@ -1,10 +1,13 @@
+using System;
+using UnityEngine;
+
 public class Line
 {
 	private float _a;
 	private float _b;
 	private float _c;
 
-	public Line(Vec2 first, Vec2 second)
+	public Line(Vector2 first, Vector2 second)
 	{
 		_a = first.y - second.y;
 		_b = second.x - first.x;
@@ -13,7 +16,7 @@ public class Line
 
 	public float Fx(float y)
 	{
-		if (MathSelf.FloatEq(_a, 0.0f))
+		if (GameMath.FloatEq(_a, 0.0f))
 		{
 			throw new DivideByZeroException("cannot calculate f(y) when a = 0");
 		}
@@ -23,7 +26,7 @@ public class Line
 
 	public float Fy(float x)
 	{
-		if (MathSelf.FloatEq(_b, 0.0f))
+		if (GameMath.FloatEq(_b, 0.0f))
 		{
 			throw new DivideByZeroException("cannot calculate f(x) when b = 0");
 		}
@@ -31,8 +34,8 @@ public class Line
 		return - (_a * x + _c) / _b;
 	}
 	
-	public bool IsHorizontal => MathSelf.FloatEq(_a, 0.0f);
-	public bool IsVertical => MathSelf.FloatEq(_b, 0.0f);
+	public bool IsHorizontal => GameMath.FloatEq(_a, 0.0f);
+	public bool IsVertical => GameMath.FloatEq(_b, 0.0f);
 
 	public override string ToString()
 	{

@@ -2296,11 +2296,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/luna/Documents/code/bresenham_modified_tests/tests.csproj",
+      "projectUniqueName": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified_tests/tests.csproj",
       "projectName": "tests",
-      "projectPath": "/home/luna/Documents/code/bresenham_modified_tests/tests.csproj",
+      "projectPath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified_tests/tests.csproj",
       "packagesPath": "/home/luna/.nuget/packages/",
-      "outputPath": "/home/luna/Documents/code/bresenham_modified_tests/obj/",
+      "outputPath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified_tests/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/luna/.nuget/NuGet/NuGet.Config"
@@ -2315,8 +2315,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/home/luna/Documents/code/bresenham_modified/bresenham_modified.csproj": {
-              "projectPath": "/home/luna/Documents/code/bresenham_modified/bresenham_modified.csproj"
+            "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified/bresenham_modified.csproj": {
+              "projectPath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified/bresenham_modified.csproj"
             }
           }
         }

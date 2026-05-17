@@ -26,7 +26,7 @@ public class Grid<T>
 		_strideHalfsCache = _strideWidth / 2.0f;
 	}
 
-	public Vector2 CellCenter(uint x, uint y)
+	public Vector2 CellCenter(int x, int y)
 	{
 		return new Vector2(
 			_start.x + x * _strideWidth + _strideHalfsCache,
@@ -34,14 +34,14 @@ public class Grid<T>
 		);
 	}
 
-	public Vector2 WorldSpaceFromCellPos(uint x, uint y)
+	public Vector2 WorldSpaceFromCellPos(int x, int y)
 	{
 		return CellCenter(x, y);
 	}
 
 	public Vector2 WorldSpaceFromCellPos(Vector2Int cellPos)
 	{
-		return WorldSpaceFromCellPos((uint)cellPos.x, (uint)cellPos.y);
+		return WorldSpaceFromCellPos((int)cellPos.x, (int)cellPos.y);
 	}
 
 	public Vector2Int CellPosFromWorldSpace(Vector2 worldSpaceCoords)
@@ -71,6 +71,26 @@ public class Grid<T>
 		return ContainsPosFromWorldSpace(pos.x, pos.y);
 	}
 
+	public float RightEdgeX(Vector2Int pos)
+	{
+		return WorldSpaceFromCellPos(pos).x + _strideHalfsCache;
+	}
+
+	public float LeftEdgeX(Vector2Int pos)
+	{
+		return WorldSpaceFromCellPos(pos).x - _strideHalfsCache;
+	}
+
+	public float UpEdgeY(Vector2Int pos)
+	{
+		return WorldSpaceFromCellPos(pos).y + _strideHalfsCache;
+	}
+
+	public float DownEdgeY(Vector2Int pos)
+	{
+		return WorldSpaceFromCellPos(pos).y - _strideHalfsCache;
+	}
+
 	public T this[uint x, uint y]
 	{
 		get => _grid[y * _width + x];
@@ -91,3 +111,5 @@ public class Grid<T>
 		}
 	}
 }
+
+

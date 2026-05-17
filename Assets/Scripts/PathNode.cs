@@ -120,13 +120,13 @@ public class PathNode : IEquatable<PathNode>
 
 	private bool TrueEquals(PathNode other)
 	{
-		return GameMath.FloatCompare(X, other.X) && GameMath.FloatCompare(Y, other.Y);
+		return GameMath.FloatEq(X, other.X) && GameMath.FloatEq(Y, other.Y);
 	}
 
 	public bool Equals(PathNode other)
 	{
 		// if (other == null) return false;
-		return GameMath.FloatCompare(X, other.X) && GameMath.FloatCompare(Y, other.Y);
+		return GameMath.FloatEq(X, other.X) && GameMath.FloatEq(Y, other.Y);
 		// return TrueEquals(other);
 	}
 

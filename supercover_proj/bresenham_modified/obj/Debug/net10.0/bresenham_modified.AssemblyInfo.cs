@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("bresenham_modified")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d87917e91af0ec72eeb2e32f54e246472f232c63")]
 [assembly: System.Reflection.AssemblyProductAttribute("bresenham_modified")]
 [assembly: System.Reflection.AssemblyTitleAttribute("bresenham_modified")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

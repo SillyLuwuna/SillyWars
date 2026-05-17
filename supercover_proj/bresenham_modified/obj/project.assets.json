@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/luna/Documents/code/bresenham_modified/bresenham_modified.csproj",
+      "projectUniqueName": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified/bresenham_modified.csproj",
       "projectName": "bresenham_modified",
-      "projectPath": "/home/luna/Documents/code/bresenham_modified/bresenham_modified.csproj",
+      "projectPath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified/bresenham_modified.csproj",
       "packagesPath": "/home/luna/.nuget/packages/",
-      "outputPath": "/home/luna/Documents/code/bresenham_modified/obj/",
+      "outputPath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/luna/.nuget/NuGet/NuGet.Config"
@@ -348,13 +348,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }

@@ -25,7 +25,7 @@ public class Grid<T>
 		_strideHalfsCache = _strideWidth / 2.0f;
 	}
 
-	public Vec2 CellCenter(uint x, uint y)
+	public Vec2 CellCenter(int x, int y)
 	{
 		return new Vec2(
 			_start.x + x * _strideWidth + _strideHalfsCache,
@@ -33,14 +33,14 @@ public class Grid<T>
 		);
 	}
 
-	public Vec2 WorldSpaceFromCellPos(uint x, uint y)
+	public Vec2 WorldSpaceFromCellPos(int x, int y)
 	{
 		return CellCenter(x, y);
 	}
 
 	public Vec2 WorldSpaceFromCellPos(Vec2Int cellPos)
 	{
-		return WorldSpaceFromCellPos((uint)cellPos.x, (uint)cellPos.y);
+		return WorldSpaceFromCellPos((int)cellPos.x, (int)cellPos.y);
 	}
 
 	public Vec2Int CellPosFromWorldSpace(Vec2 worldSpaceCoords)

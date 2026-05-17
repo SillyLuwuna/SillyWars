@@ -48,14 +48,17 @@
     <Analyzer Include="/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Scripts/GridRaycast.cs" />
     <Compile Include="Assets/Scripts/GridManager.cs" />
     <Compile Include="Assets/Scripts/GameMath.cs" />
     <Compile Include="Assets/Scripts/Pathfinding.cs" />
     <Compile Include="Assets/Scripts/PathNode.cs" />
     <Compile Include="Assets/Scripts/Cell.cs" />
     <Compile Include="Assets/Scripts/Path.cs" />
+    <Compile Include="Assets/Scripts/Line.cs" />
     <Compile Include="Assets/Scripts/GoalChaser.cs" />
     <Compile Include="Assets/Scripts/PriorityQueue.cs" />
+    <Compile Include="Assets/Scripts/PathOptimizer.cs" />
     <Compile Include="Assets/Scripts/Grid.cs" />
   </ItemGroup>
   <ItemGroup>

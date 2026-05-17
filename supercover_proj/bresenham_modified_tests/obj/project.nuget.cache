@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Vy9AtwbDKO8=",
+  "dgSpecHash": "okPotiA2sMU=",
   "success": true,
-  "projectFilePath": "/home/luna/Documents/code/bresenham_modified_tests/tests.csproj",
+  "projectFilePath": "/home/luna/Documents/code/silly_wars/silly_wars/supercover_proj/bresenham_modified_tests/tests.csproj",
   "expectedPackageFiles": [
     "/home/luna/.nuget/packages/microsoft.applicationinsights/2.23.0/microsoft.applicationinsights.2.23.0.nupkg.sha512",
     "/home/luna/.nuget/packages/microsoft.codecoverage/18.0.0/microsoft.codecoverage.18.0.0.nupkg.sha512",

@@ -23,22 +23,32 @@ public class GridRaycast<T>
 		if (MathSelf.FloatLt(end.x, start.x))
 		{
 			negX = true;
+			start.x = -start.x;
 			end.x = -end.x;
 		}
 
 		if (MathSelf.FloatLt(end.y, start.y))
 		{
 			negY = true;
+			start.y = -start.y;
 			end.y = -end.y;
 		}
 
 		if (MathSelf.FloatLt((end.x - start.x), (end.y - start.y)))
 		{
 			swap = true;
+
 			float tmp = end.x;
 			end.x = end.y;
 			end.y = tmp;
+
+			tmp = start.x;
+			start.x = start.y;
+			start.y = tmp;
 		}
+
+		Console.WriteLine("start: " + start);
+		Console.WriteLine("end: " + end);
 
 		return CastRayFirstOctant(start, end, negX, negY, swap);
 	}
@@ -46,13 +56,21 @@ public class GridRaycast<T>
 	// continuous modification of supercover line algorithm
 	private List<Vec2Int> CastRayFirstOctant(Vec2 start, Vec2 end, bool negX, bool negY, bool swap)
 	{
+		Console.WriteLine("swap: " + swap);
+		Console.WriteLine("negX: " + negX);
+		Console.WriteLine("negY: " + negY);
 		List<Vec2Int> collisions = new List<Vec2Int>();
 
+		// Vec2 offset = start;
+		// end = new Vec2(end.x - start.x, end.y - start.y);
+		// start = new Vec2(0, 0);
+
 		Line ray = new Line(start, end);
+		Console.WriteLine(ray);
 
 		Vec2 curr = start;
 		Vec2Int currGridPos = _grid.CellPosFromWorldSpace(curr);
-		collisions.Add(currGridPos);
+		collisions.Add(GetTranslatedPosition(currGridPos, negX, negY, swap));
 
 		while (MathSelf.FloatLte(curr.x, end.x))
 		{
@@ -60,6 +78,11 @@ public class GridRaycast<T>
 			float upY = _grid.UpEdgeY(currGridPos);
 
 			float rayY = ray.Fy(rightX);
+
+			Console.WriteLine("rightX: " + rightX);
+			Console.WriteLine("upY: " + upY);
+			Console.WriteLine("rayY: " + rayY);
+			Console.WriteLine("currGridPos: " + currGridPos);
 
 			if (MathSelf.FloatEq(rayY, upY))
 			{
@@ -80,14 +103,16 @@ public class GridRaycast<T>
 
 	private Vec2Int GetTranslatedPosition(Vec2Int pos, bool negX, bool negY, bool swap)
 	{
-		if (negX) pos.x = -pos.x;
-		if (negY) pos.y = -pos.y;
+		Vec2 realPos = _grid.WorldSpaceFromCellPos(pos);
 		if (swap)
 		{
-			int tmp = pos.x;
-			pos.x = pos.y;
-			pos.y = tmp;
+			float tmp = realPos.x;
+			realPos.x = realPos.y;
+			realPos.y = tmp;
 		}
-		return pos;
+		if (negX) realPos.x = -realPos.x;
+		if (negY) realPos.y = -realPos.y;
+		Vec2Int negPos = _grid.CellPosFromWorldSpace(realPos);
+		return negPos;
 	}
 }

@@ -122,9 +122,9 @@ public class GridManager : MonoBehaviour
 		if (debugShowGrid)
 		{
 			Start();
-			for (uint i = 0; i < _height; i++)
+			for (int i = 0; i < _height; i++)
 			{
-				for (uint j = 0; j < _width; j++)
+				for (int j = 0; j < _width; j++)
 				{
 					Gizmos.color = _grid[j, i].IsWalkable ? debugWalkableColor : debugGridColor;
 					Gizmos.DrawSphere(_grid.CellCenter(j, i), debugCenterSize);
@@ -141,6 +141,8 @@ public class GridManager : MonoBehaviour
 		{
 			Pathfinding pathfinding = new Pathfinding(_grid);
 			Path path = pathfinding.GetPath(debugPathStartPointer.transform.position, debugPathGoalPointer.transform.position);
+			PathOptimizer pathOptimizer = new PathOptimizer(_grid);
+			path = pathOptimizer.OptimizePath(path);
 			Gizmos.color = debugPathColor;
 			for (int i = 0; i < path.PointCount; i++)
 			{
@@ -157,6 +159,11 @@ public class GridManager : MonoBehaviour
 	public Pathfinding GetPathfinding()
 	{
 		return new Pathfinding(_grid);
+	}
+
+	public PathOptimizer GetPathOptimizer()
+	{
+		return new PathOptimizer(_grid);
 	}
 
     // Update is called once per frame
