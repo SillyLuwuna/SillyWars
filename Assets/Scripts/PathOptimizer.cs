@@ -26,7 +26,7 @@ public class PathOptimizer
 		int trySkip = 2;
 		optimizedPath.Add(path.PointAt(curr));
 
-		for (int i = 0; i < path.PointCount - 2; i++)
+		while (trySkip < path.PointCount)
 		{
 			List<Vector2Int> collisions = _gridRaycast.CastRay(path.PointAt(curr), path.PointAt(trySkip));
 
@@ -34,14 +34,12 @@ public class PathOptimizer
 			for (int j = 0; j < collisions.Count; j++)
 			{
 				Vector2Int collision = collisions[j];
-				// Debug.Log(collision);
 				if (!_grid[collision.x, collision.y].IsWalkable)
 				{
 					isSkippable = false;
 					break;
 				}
 			}
-			// Debug.Log("");
 			
 			if (isSkippable)
 			{

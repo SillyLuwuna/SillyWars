@@ -70,9 +70,11 @@ public class GridRaycast<T>
 
 		Vec2 curr = start;
 		Vec2Int currGridPos = _grid.CellPosFromWorldSpace(curr);
+		Vec2Int endGridPos = _grid.CellPosFromWorldSpace(end);
 		collisions.Add(GetTranslatedPosition(currGridPos, negX, negY, swap));
 
-		while (MathSelf.FloatLte(curr.x, end.x))
+		// while (MathSelf.FloatLt(curr.x, end.x))
+		while (currGridPos.x != endGridPos.x || currGridPos.y != endGridPos.y)
 		{
 			float rightX = _grid.RightEdgeX(currGridPos);
 			float upY = _grid.UpEdgeY(currGridPos);
@@ -83,6 +85,10 @@ public class GridRaycast<T>
 			Console.WriteLine("upY: " + upY);
 			Console.WriteLine("rayY: " + rayY);
 			Console.WriteLine("currGridPos: " + currGridPos);
+			Console.WriteLine("actual: " + GetTranslatedPosition(currGridPos, negX, negY, swap));
+			Console.WriteLine("curr: " + curr);
+			Console.WriteLine("end: " + end);
+			Console.WriteLine();
 
 			if (MathSelf.FloatEq(rayY, upY))
 			{
@@ -99,6 +105,11 @@ public class GridRaycast<T>
 			curr = _grid.WorldSpaceFromCellPos(currGridPos);
 		}
 		return collisions;
+	}
+
+	private bool IsValidPos(Vec2Int pos, Vec2Int end)
+	{
+		return pos.x <= end.x && pos.y <= end.y;
 	}
 
 	private Vec2Int GetTranslatedPosition(Vec2Int pos, bool negX, bool negY, bool swap)

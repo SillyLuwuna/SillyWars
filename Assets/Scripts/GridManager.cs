@@ -122,6 +122,9 @@ public class GridManager : MonoBehaviour
 		if (debugShowGrid)
 		{
 			Start();
+			Gizmos.color = new Color(0, 1, 1);
+			Gizmos.DrawSphere(_grid.CellCenter(24, 21), debugCenterSize * 1.1f);
+
 			for (int i = 0; i < _height; i++)
 			{
 				for (int j = 0; j < _width; j++)

@@ -45,6 +45,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(8, 2));
 		expectedVals.Add(new Vec2Int(9, 2));
 		expectedVals.Add(new Vec2Int(9, 3));
+		expectedVals.Add(new Vec2Int(10, 3));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -53,6 +54,7 @@ public sealed class Test1
 		List<Vec2Int> collisions = raycast.CastRay(first, second);
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -64,7 +66,7 @@ public sealed class Test1
 	{
 		// Arrange
 		Vec2 first = new Vec2(0.0f, 0.0f);
-		Vec2 second = new Vec2(10.0f, 5.0f);
+		Vec2 second = new Vec2(8.0f, 4.0f);
 
 		List<Vec2Int> expectedVals = new List<Vec2Int>();
 
@@ -85,8 +87,6 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(7, 4));
 		expectedVals.Add(new Vec2Int(8, 3));
 		expectedVals.Add(new Vec2Int(8, 4));
-		expectedVals.Add(new Vec2Int(9, 4));
-		expectedVals.Add(new Vec2Int(9, 5));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -95,6 +95,7 @@ public sealed class Test1
 		List<Vec2Int> collisions = raycast.CastRay(first, second);
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -110,6 +111,7 @@ public sealed class Test1
 
 		List<Vec2Int> expectedVals = new List<Vec2Int>();
 
+		expectedVals.Add(new Vec2Int(-6, -2));
 		expectedVals.Add(new Vec2Int(-5, -2));
 		expectedVals.Add(new Vec2Int(-4, -2));
 		expectedVals.Add(new Vec2Int(-4, -1));
@@ -129,8 +131,13 @@ public sealed class Test1
 
 		// Act
 		List<Vec2Int> collisions = raycast.CastRay(first, second);
+		foreach (Vec2Int collision in collisions)
+		{
+			Console.WriteLine(collision);
+		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -158,6 +165,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(2, 7));
 		expectedVals.Add(new Vec2Int(2, 8));
 		expectedVals.Add(new Vec2Int(2, 9));
+		expectedVals.Add(new Vec2Int(3, 9));
 		expectedVals.Add(new Vec2Int(3, 10));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
@@ -171,6 +179,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -212,6 +221,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -240,6 +250,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(-9, 2));
 		expectedVals.Add(new Vec2Int(-10, 2));
 		expectedVals.Add(new Vec2Int(-10, 3));
+		expectedVals.Add(new Vec2Int(-11, 3));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -252,6 +263,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -280,6 +292,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(-9, -3));
 		expectedVals.Add(new Vec2Int(-10, -3));
 		expectedVals.Add(new Vec2Int(-10, -4));
+		expectedVals.Add(new Vec2Int(-11, -4));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -292,6 +305,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -320,6 +334,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(-3, -9));
 		expectedVals.Add(new Vec2Int(-3, -10));
 		expectedVals.Add(new Vec2Int(-4, -10));
+		expectedVals.Add(new Vec2Int(-4, -11));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -332,6 +347,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -360,6 +376,7 @@ public sealed class Test1
 		expectedVals.Add(new Vec2Int(2, -9));
 		expectedVals.Add(new Vec2Int(2, -10));
 		expectedVals.Add(new Vec2Int(3, -10));
+		expectedVals.Add(new Vec2Int(3, -11));
 
 		Grid<int> grid = new Grid<int>(new Vec2(0, 0), 1, 10, 10);
 		GridRaycast<int> raycast = new GridRaycast<int>(grid);
@@ -372,6 +389,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -413,6 +431,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -443,6 +462,7 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);
@@ -474,6 +494,75 @@ public sealed class Test1
 		}
 
 		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
+		foreach (Vec2Int expected in expectedVals)
+		{
+			Assert.Contains(expected, collisions);
+		}
+	}
+
+	[TestMethod]
+	public void TestOnNonStandard2()
+	{
+		// Arrange
+		Vec2 first = new Vec2(-28.89f, 3.59f);
+		Vec2 second = new Vec2(-26.50f, 1.50f);
+
+		List<Vec2Int> expectedVals = new List<Vec2Int>();
+
+		expectedVals.Add(new Vec2Int(2, 10));
+		expectedVals.Add(new Vec2Int(2, 9));
+		expectedVals.Add(new Vec2Int(3, 9));
+		expectedVals.Add(new Vec2Int(3, 8));
+		expectedVals.Add(new Vec2Int(4, 8));
+
+		Grid<int> grid = new Grid<int>(new Vec2(-31.00f, -7.00f), 1.0f, 40, 24);
+		GridRaycast<int> raycast = new GridRaycast<int>(grid);
+
+		// Act
+		List<Vec2Int> collisions = raycast.CastRay(first, second);
+		foreach (Vec2Int collision in collisions)
+		{
+			Console.WriteLine(collision);
+		}
+
+		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
+		foreach (Vec2Int expected in expectedVals)
+		{
+			Assert.Contains(expected, collisions);
+		}
+	}
+
+	[TestMethod]
+	public void TestOnNonStandard3()
+	{
+		// Arrange
+		Vec2 first = new Vec2(-6.5f, 7.5f);
+		Vec2 second = new Vec2(-6.39f, 13.73f);
+
+		List<Vec2Int> expectedVals = new List<Vec2Int>();
+
+		expectedVals.Add(new Vec2Int(24, 14));
+		expectedVals.Add(new Vec2Int(24, 15));
+		expectedVals.Add(new Vec2Int(24, 16));
+		expectedVals.Add(new Vec2Int(24, 17));
+		expectedVals.Add(new Vec2Int(24, 18));
+		expectedVals.Add(new Vec2Int(24, 19));
+		expectedVals.Add(new Vec2Int(24, 20));
+
+		Grid<int> grid = new Grid<int>(new Vec2(-31.00f, -7.00f), 1.0f, 40, 24);
+		GridRaycast<int> raycast = new GridRaycast<int>(grid);
+
+		// Act
+		List<Vec2Int> collisions = raycast.CastRay(first, second);
+		foreach (Vec2Int collision in collisions)
+		{
+			Console.WriteLine(collision);
+		}
+
+		// Assert
+		Assert.HasCount(expectedVals.Count, collisions);
 		foreach (Vec2Int expected in expectedVals)
 		{
 			Assert.Contains(expected, collisions);

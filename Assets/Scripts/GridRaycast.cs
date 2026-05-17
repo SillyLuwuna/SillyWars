@@ -10,7 +10,7 @@ public class GridRaycast<T>
 		_grid = grid;
 	}
 
-	public List<Vector2Int> CastRay(Vector2 start, Vector2 end)
+	public List<Vector2Int> CastRay(Vector2 start, Vector2 end, bool strictIntersections=false)
 	{
 		if (GameMath.FloatEq(start.x, end.x) && GameMath.FloatEq(start.y, end.y))
 		{
@@ -23,8 +23,8 @@ public class GridRaycast<T>
 		bool negY = false;
 		bool swap = false;
 
-		Debug.Log("start: " + start);
-		Debug.Log("end: " + end);
+		// Debug.Log("start: " + start);
+		// Debug.Log("end: " + end);
 
 		if (GameMath.FloatLt(end.x, start.x))
 		{
@@ -53,17 +53,17 @@ public class GridRaycast<T>
 			start.y = tmp;
 		}
 
-		Debug.Log("start: " + start);
-		Debug.Log("end: " + end);
-		Debug.Log("negX: " + negX);
-		Debug.Log("negY: " + negY);
-		Debug.Log("swap: " + swap);
+		// Debug.Log("start: " + start);
+		// Debug.Log("end: " + end);
+		// Debug.Log("negX: " + negX);
+		// Debug.Log("negY: " + negY);
+		// Debug.Log("swap: " + swap);
 
-		return CastRayFirstOctant(start, end, negX, negY, swap);
+		return CastRayFirstOctant(start, end, negX, negY, swap, strictIntersections);
 	}
 
 	// continuous modification of supercover line algorithm
-	private List<Vector2Int> CastRayFirstOctant(Vector2 start, Vector2 end, bool negX, bool negY, bool swap)
+	private List<Vector2Int> CastRayFirstOctant(Vector2 start, Vector2 end, bool negX, bool negY, bool swap, bool strictIntersections)
 	{
 		List<Vector2Int> collisions = new List<Vector2Int>();
 
@@ -71,17 +71,18 @@ public class GridRaycast<T>
 
 		Vector2 curr = start;
 		Vector2Int currGridPos = _grid.CellPosFromWorldSpace(curr);
+		Vector2Int endGridPos = _grid.CellPosFromWorldSpace(end);
 		collisions.Add(GetTranslatedPosition(currGridPos, negX, negY, swap));
 
-		while (GameMath.FloatLte(curr.x, end.x))
+		while (currGridPos.x != endGridPos.x || currGridPos.y != endGridPos.y)
 		{
-			Debug.Log(currGridPos);
+			// Debug.Log(currGridPos);
 			float rightX = _grid.RightEdgeX(currGridPos);
 			float upY = _grid.UpEdgeY(currGridPos);
 
 			float rayY = ray.Fy(rightX);
 
-			if (GameMath.FloatEq(rayY, upY))
+			if (strictIntersections && GameMath.FloatEq(rayY, upY))
 			{
 				Vector2Int downRight = new Vector2Int(currGridPos.x + 1, currGridPos.y);
 				Vector2Int upLeft = new Vector2Int(currGridPos.x, currGridPos.y + 1);
