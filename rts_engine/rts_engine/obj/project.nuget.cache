@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "ZmDpus698Z8=",
+  "success": true,
+  "projectFilePath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_engine.csproj",
+  "expectedPackageFiles": [
+    "/home/luna/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.4/microsoft.aspnetcore.app.ref.10.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}
