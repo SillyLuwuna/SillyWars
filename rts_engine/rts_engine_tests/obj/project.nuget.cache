@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "K69S4LKpyUg=",
+  "dgSpecHash": "E7RS0QweRtw=",
   "success": true,
   "projectFilePath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_tests/tests.csproj",
   "expectedPackageFiles": [
@@ -24,7 +24,7 @@
     "/home/luna/.nuget/packages/mstest.testadapter/4.0.1/mstest.testadapter.4.0.1.nupkg.sha512",
     "/home/luna/.nuget/packages/mstest.testframework/4.0.1/mstest.testframework.4.0.1.nupkg.sha512",
     "/home/luna/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
-    "/home/luna/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.4/microsoft.aspnetcore.app.ref.10.0.4.nupkg.sha512"
+    "/home/luna/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.8/microsoft.aspnetcore.app.ref.10.0.8.nupkg.sha512"
   ],
   "logs": []
 }

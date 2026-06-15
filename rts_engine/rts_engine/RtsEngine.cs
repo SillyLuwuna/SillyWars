@@ -4,13 +4,11 @@ public class RtsEngine
 {
 	public bool HasStarted { get; private set; }
 	private WorldState _state;
-	private Grid<Cell> _grid;
 
 	public RtsEngine(WorldState state)
 	{
 		HasStarted = false;
 		_state = state;
-		// _grid = map;
 	}
 
 	public void Start()

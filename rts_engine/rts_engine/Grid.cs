@@ -2,21 +2,32 @@ namespace RtsEngine;
 
 using System;
 
+// public class Grid<T> : ISerializable<Grid<T>> where T : new()
 public class Grid<T>
 {
 	public uint Width => _width;
 	public uint Height => _height;
 
-	private T[] _grid;
+	protected T[] _grid;
 
-	private Vec2 _start;
-	private float _strideWidth;
-	private uint _width;
-	private uint _height;
+	protected Vec2 _start;
+	protected float _strideWidth;
+	protected uint _width;
+	protected uint _height;
 
 	private float _strideHalfsCache;
 
-	public Grid(Vec2 start, float strideWidth, uint width, uint height)
+	public Grid()
+	{
+		_grid = Array.Empty<T>();
+	}
+
+	public Grid(Vec2 start, float strideWidth, uint width, uint height) : this()
+	{
+		Construct(start, strideWidth, width, height);
+	}
+
+	protected void Construct(Vec2 start, float strideWidth, uint width, uint height)
 	{
 		_start = new Vec2(start.x, start.y);
 		_strideWidth = strideWidth;
@@ -59,10 +70,10 @@ public class Grid<T>
 
 	public bool ContainsPosFromWorldSpace(float x, float y)
 	{
-		if (x > _start.x + (_strideWidth * _width)) return false;
-		if (x < _start.x) return false;
-		if (y > _start.y + (_strideWidth * _height)) return false;
-		if (y < _start.y) return false;
+		if (F.Gt(x, _start.x + (_strideWidth * _width))) return false;
+		if (F.Lt(x, _start.x)) return false;
+		if (F.Gt(y, _start.y + (_strideWidth * _height))) return false;
+		if (F.Lt(y, _start.y)) return false;
 
 		return true;
 	}
@@ -104,12 +115,23 @@ public class Grid<T>
 		set => _grid[y * _width + x] = value;
 	}
 
+	public T this[int i]
+	{
+		get => _grid[i];
+		set => _grid[i] = value;
+	}
+
 	public void Fill(Func<T> factory)
 	{
 		for (int i = 0; i < _grid.Length; i++)
 		{
 			_grid[i] = factory();
 		}
+	}
+
+	public uint Size()
+	{
+		return _width * _height;
 	}
 }
 

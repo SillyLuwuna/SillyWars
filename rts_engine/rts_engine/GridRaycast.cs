@@ -1,6 +1,6 @@
 namespace RtsEngine;
 
-public class GridRaycast<T>
+public class GridRaycast<T> where T : new()
 {
 	private Grid<T> _grid;
 
@@ -52,7 +52,6 @@ public class GridRaycast<T>
 		List<Vec2Int> collisions = new List<Vec2Int>();
 
 		Line ray = new Line(start, end);
-		Console.WriteLine(ray);
 
 		Vec2 curr = start;
 		Vec2Int currGridPos = _grid.CellPosFromWorldSpace(curr);

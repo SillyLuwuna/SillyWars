@@ -1,6 +1,6 @@
 namespace RtsEngine;
 
-public struct Vec2 : IEquatable<Vec2>
+public struct Vec2 : IEquatable<Vec2>, ISerializable<Vec2>
 {
 	public float x;
 	public float y;
@@ -54,5 +54,17 @@ public struct Vec2 : IEquatable<Vec2>
 	public override string ToString()
 	{
 		return "(" + x + ", " + y + ")";
+	}
+
+	public void Serialize(BinaryWriter writer)
+	{
+		writer.Write(x);
+		writer.Write(y);
+	}
+
+	public void Deserialize(BinaryReader reader)
+	{
+		x = reader.ReadSingle();
+		y = reader.ReadSingle();
 	}
 }
