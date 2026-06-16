@@ -48,18 +48,19 @@
     <Analyzer Include="/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Scripts/GridRaycast.cs" />
-    <Compile Include="Assets/Scripts/GridManager.cs" />
-    <Compile Include="Assets/Scripts/GameMath.cs" />
-    <Compile Include="Assets/Scripts/Pathfinding.cs" />
-    <Compile Include="Assets/Scripts/PathNode.cs" />
-    <Compile Include="Assets/Scripts/Cell.cs" />
-    <Compile Include="Assets/Scripts/Path.cs" />
-    <Compile Include="Assets/Scripts/Line.cs" />
-    <Compile Include="Assets/Scripts/GoalChaser.cs" />
-    <Compile Include="Assets/Scripts/PriorityQueue.cs" />
-    <Compile Include="Assets/Scripts/PathOptimizer.cs" />
-    <Compile Include="Assets/Scripts/Grid.cs" />
+    <Compile Include="Assets/Scripts/Old/PathOptimizer.cs" />
+    <Compile Include="Assets/Scripts/NetworkClient.cs" />
+    <Compile Include="Assets/Scripts/Old/Path.cs" />
+    <Compile Include="Assets/Scripts/Old/GridManager.cs" />
+    <Compile Include="Assets/Scripts/Old/PriorityQueue.cs" />
+    <Compile Include="Assets/Scripts/Old/Grid.cs" />
+    <Compile Include="Assets/Scripts/Old/GameMath.cs" />
+    <Compile Include="Assets/Scripts/Old/PathNode.cs" />
+    <Compile Include="Assets/Scripts/Old/Line.cs" />
+    <Compile Include="Assets/Scripts/Old/GoalChaser.cs" />
+    <Compile Include="Assets/Scripts/Old/Cell.cs" />
+    <Compile Include="Assets/Scripts/Old/GridRaycast.cs" />
+    <Compile Include="Assets/Scripts/Old/Pathfinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
@@ -637,6 +638,10 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Library/PackageCache/com.unity.collections@aea9d3bd5e19/Unity.Collections.Tests/System.Runtime.CompilerServices.Unsafe/System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SillyWars.Engine.Shared">
+      <HintPath>Assets/Plugins/SillyWars.Engine.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">

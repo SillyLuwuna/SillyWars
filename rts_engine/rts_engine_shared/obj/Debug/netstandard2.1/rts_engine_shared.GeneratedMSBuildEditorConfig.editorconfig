@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = rts_engine_shared
+build_property.ProjectDir = /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_shared/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
