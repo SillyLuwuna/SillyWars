@@ -18,11 +18,10 @@ using Networking;
 		}
 
 		WorldState? state = new WorldState(grid);
-		SerializableGrid<Cell>? map = state.Map;
 
-		for (int i = 0; i < map.Size(); i++)
+		for (int i = 0; i < state.Map.Size(); i++)
 		{
-			Console.Write(map[i].IsWalkable + " ");
+			Console.Write(state.Map[i].IsWalkable + " ");
 		}
 		Console.WriteLine();
 
@@ -48,13 +47,12 @@ using Networking;
 		// Load
 
 		state = WorldState.Load("test.smap");
-		map = state.Map;
 
 		Console.WriteLine();
 		Console.WriteLine();
-		for (int i = 0; i < map.Size(); i++)
+		for (int i = 0; i < state.Map.Size(); i++)
 		{
-			Console.Write(map[i].IsWalkable + " ");
+			Console.Write(state.Map[i].IsWalkable + " ");
 		}
 		Console.WriteLine();
 
@@ -68,55 +66,62 @@ using Networking;
 
 
 
-		// Send over network
-		Server server = new Server(13774, 1);
-		server.MessageReceived += HandleMessage;
-		server.ConnectionEstablished += HandleConnection;
-
-		_ = server.StartAsync();
-
-		// Client client = new Client();
-		// await Task.Delay(500);
-		// await client.ConnectAsync("localhost", 13774);
-		// await client.SendAsync(Serializer.ToBytes(state));
-
+		// // Send over network
+		// Server server = new Server(13774, 1);
+		// server.MessageReceived += HandleMessage;
+		// server.ConnectionEstablished += HandleConnection;
+		//
+		// _ = server.StartAsync();
+		//
+		// // Client client = new Client();
+		// // await Task.Delay(500);
+		// // await client.ConnectAsync("localhost", 13774);
+		// // await client.SendAsync(Serializer.ToBytes(state));
+		//
+		// // Console.ReadKey();
+		// // await Task.Delay(5000);
+		//
+		// // await server.SendData(Serializer.ToBytes(state), 0);
+		//
 		// Console.ReadKey();
-		// await Task.Delay(5000);
+		// server.Stop();
 
-		// await server.SendData(Serializer.ToBytes(state), 0);
+		RtsEngine engine = new RtsEngine(state);
+		_ = engine.Start();
 
 		Console.ReadKey();
-		server.Stop();
+
+		engine.Stop();
 	}
 
-	private static void HandleMessage(object? sender, byte[] data)
-	{
-		WorldState state = Serializer.FromBytes<WorldState>(data);
-		SerializableGrid<Cell> map = state.Map;
-
-		Console.WriteLine();
-		Console.WriteLine();
-		for (int i = 0; i < map.Size(); i++)
-		{
-			Console.Write(map[i].IsWalkable + " ");
-		}
-		Console.WriteLine();
-
-		for (int i = 0; i < 10; i++)
-		{
-			Console.Write(state.Entities[i].Pos + " ");
-			Console.Write("Worker? " + (state.Entities[i] is Worker));
-			Console.WriteLine();
-		}
-	}
-
-	private static async void HandleConnection(object? sender, TcpClient client)
-	{
-		Server server = (Server)sender!;
-
-		WorldState state = WorldState.Load("test.smap");
-		await server.SendData(Serializer.ToBytes(state), 0);
-	}
+	// private static void HandleMessage(object? sender, byte[] data)
+	// {
+	// 	WorldState state = Serializer.FromBytes<WorldState>(data);
+	// 	SerializableGrid<Cell> map = state.Map;
+	//
+	// 	Console.WriteLine();
+	// 	Console.WriteLine();
+	// 	for (int i = 0; i < map.Size(); i++)
+	// 	{
+	// 		Console.Write(map[i].IsWalkable + " ");
+	// 	}
+	// 	Console.WriteLine();
+	//
+	// 	for (int i = 0; i < 10; i++)
+	// 	{
+	// 		Console.Write(state.Entities[i].Pos + " ");
+	// 		Console.Write("Worker? " + (state.Entities[i] is Worker));
+	// 		Console.WriteLine();
+	// 	}
+	// }
+	//
+	// private static async void HandleConnection(object? sender, TcpClient client)
+	// {
+	// 	Server server = (Server)sender!;
+	//
+	// 	WorldState state = WorldState.Load("test.smap");
+	// 	await server.SendData(Serializer.ToBytes(state), 0);
+	// }
 }
 
 }

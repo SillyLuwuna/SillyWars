@@ -20,14 +20,12 @@ public class GameServer : MonoBehaviour
 	private readonly ConcurrentQueue<byte[]> _dataQueue = new ConcurrentQueue<byte[]>();
 	// private byte[]? _data;
 	// private readonly object _dataLock = new object();
-	private System.Diagnostics.Stopwatch stopwatch;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
 		Console.SetOut(new UnityTextWriter());
 		StartCoroutine(ConnectToServer());
-		stopwatch = new System.Diagnostics.Stopwatch();
     }
 
 	private class UnityTextWriter : TextWriter
@@ -75,7 +73,6 @@ public class GameServer : MonoBehaviour
 
 	private void ProcessData(byte[] data)
 	{
-		Debug.Log(stopwatch.ElapsedMilliseconds);
 		Debug.Log($"Received {data.Length} bytes");
 
 		WorldState state = Serializer.FromBytes<WorldState>(data);
@@ -83,7 +80,6 @@ public class GameServer : MonoBehaviour
 
 	private void HandleData(object? sender, byte[] data)
 	{
-		stopwatch.Start();
 		_dataQueue.Enqueue(data);
 		// lock (_dataLock)
 		// {

@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RtsEngine.Networking
@@ -15,7 +16,8 @@ public class Server
 
 	private readonly TcpListener _listener;
 	private readonly List<TcpClient> _clients;
-	private readonly object _clientsLock;
+	// private readonly object _clientsLock;
+	private readonly SemaphoreSlim _clientsSemaphore;
 	private readonly int _requiredClients;
 
 	private bool _isRunning;
@@ -26,7 +28,8 @@ public class Server
 	{
 		_listener = new TcpListener(IPAddress.Any, port);
 		_clients = new List<TcpClient>();
-		_clientsLock = new object();
+		// _clientsLock = new object();
+		_clientsSemaphore = new SemaphoreSlim(1, 1);
 		_requiredClients = requiredClients;
 		_isRunning = false;
 	}
@@ -99,34 +102,49 @@ public class Server
 
 	public async Task SendData(byte[] data, int id)
 	{
-		lock (_clientsLock)
+		await _clientsSemaphore.WaitAsync();
+
+		await TrySendData(data, _clients[id]);
+		_clientsSemaphore.Release();
+	}
+
+	public async Task BroadcastData(byte[] data)
+	{
+		await _clientsSemaphore.WaitAsync();
+		foreach (TcpClient client in _clients)
 		{
-			TcpClient client = _clients[id];
-			try
-			{
-				NetworkStream stream = client.GetStream();
+			await TrySendData(data, client);
+		}
+		_clientsSemaphore.Release();
+	}
 
-				if (data.Length > _MAX_DATA_LENGTH)
-				{
-					Console.WriteLine($"Message too large ({data.Length}) bytes");
-					return;
-				}
+	private async Task TrySendData(byte[] data, TcpClient client)
+	{
+		try
+		{
+			NetworkStream stream = client.GetStream();
 
-				byte[] lengthBytes = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(data.Length));
-				stream.Write(lengthBytes, 0, 4);
-				stream.Write(data, 0, data.Length);
-			}
-			catch (Exception ex)
+			if (data.Length > _MAX_DATA_LENGTH)
 			{
-				// client may have disconnected
-				Console.WriteLine($"Error sending: {ex.Message}");
+				Console.WriteLine($"Message too large ({data.Length}) bytes");
+				return;
 			}
+
+			byte[] lengthBytes = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(data.Length));
+			await stream.WriteAsync(lengthBytes, 0, 4);
+			await stream.WriteAsync(data, 0, data.Length);
+		}
+		catch (Exception ex)
+		{
+			// client may have disconnected
+			Console.WriteLine($"Error sending: {ex.Message}");
 		}
 	}
 
 	private void HandleConnection(TcpClient client)
 	{
-		lock (_clientsLock)
+		_clientsSemaphore.Wait();
+		try
 		{
 			if (_clients.Count >= _requiredClients)
 			{
@@ -137,6 +155,10 @@ public class Server
 
 			_clients.Add(client);
 		}
+		finally
+		{
+			_clientsSemaphore.Release();
+		}
 
 		Console.WriteLine($"Accepted connection ({_clients.Count}/{_requiredClients})");
 		OnConnectionEstablished(client);
@@ -145,9 +167,14 @@ public class Server
 
 	private void HandleDisconnection(TcpClient client)
 	{
-		lock (_clientsLock)
+		_clientsSemaphore.Wait();
+		try
 		{
 			_clients.Remove(client);
+		}
+		finally
+		{
+			_clientsSemaphore.Release();
 		}
 		client.Close();
 		Console.WriteLine($"Client disconnected ({_clients.Count}/{_requiredClients})");
@@ -156,7 +183,9 @@ public class Server
 	public void Stop()
 	{
 		_isRunning = false;
-		lock (_clientsLock)
+
+		_clientsSemaphore.Wait();
+		try
 		{
 			foreach (TcpClient client in _clients)
 			{
@@ -164,6 +193,11 @@ public class Server
 			}
 			_clients.Clear();
 		}
+		finally
+		{
+			_clientsSemaphore.Release();
+		}
+
 		_listener.Stop();
 		Console.WriteLine("Server stopped");
 	}
