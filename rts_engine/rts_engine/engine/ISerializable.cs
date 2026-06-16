@@ -1,7 +1,13 @@
-public interface ISerializable<T> where T : new()
+namespace RtsEngine;
+
+// public interface ISerializable<T>
+public interface ISerializable
 {
-	void Serialize(BinaryWriter writer);
-	void Deserialize(BinaryReader reader);
+	public void SerializeFields(BinaryWriter writer);
+	public void DeserializeFields(BinaryReader reader);
+	// public abstract static T Deserialize(BinaryReader reader);
+
+	// public 
 
 	// public byte[] ToBytes()
 	// {

@@ -1,4 +1,5 @@
 namespace RtsEngine;
+using Map;
 
 using System;
 using System.Collections.Generic;

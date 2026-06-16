@@ -1,6 +1,6 @@
 namespace RtsEngine.Units;
 
-public enum UnitType
+public enum UnitType : byte
 {
 	Worker,
 	Knight

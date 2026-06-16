@@ -1,11 +1,11 @@
 namespace RtsEngine.Units;
 
-public struct UnitState
+public struct UnitState : ISerializable
 {
 	private byte _stateFlags;
-	public static byte WALK_MASK = (1 << 0);
-	public static byte AGGRO_MASK = (1 << 1);
-	public static byte GOAL_MASK = (1 << 2) | (1 << 3);
+	public const byte WALK_MASK = (1 << 0);
+	public const byte AGGRO_MASK = (1 << 1);
+	public const byte GOAL_MASK = (1 << 2) | (1 << 3);
 
 	// 1 bit - idle/walking (movement)
 	// 2 bit - neutral/aggro (aggressiveness)
@@ -19,7 +19,7 @@ public struct UnitState
 			if (value)
 				_stateFlags |= WALK_MASK;
 			else
-				_stateFlags &= (byte)~WALK_MASK;
+				_stateFlags &= unchecked((byte)~WALK_MASK);
 		}
 	}
 
@@ -52,8 +52,18 @@ public struct UnitState
 		get => (UnitGoal)((_stateFlags & GOAL_MASK) >> 2);
 		set
 		{
-			_stateFlags &= (byte)~GOAL_MASK;
+			_stateFlags &= unchecked((byte)~GOAL_MASK);
 			_stateFlags |= (byte)((int)value << 2);
 		}
+	}
+
+	public void SerializeFields(BinaryWriter writer)
+	{
+		writer.Write(_stateFlags);
+	}
+
+	public void DeserializeFields(BinaryReader reader)
+	{
+		_stateFlags = reader.ReadByte();
 	}
 }

@@ -1,4 +1,5 @@
 namespace RtsEngine;
+using Map;
 using System.Collections.Generic;
 
 public class PathOptimizer

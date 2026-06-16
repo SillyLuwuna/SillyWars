@@ -1,8 +1,8 @@
 namespace RtsEngine.Units;
 
-public class Worker : BaseUnit, ISerializable
+public class Knight : BaseUnit
 {
-	public Worker(Vec2 pos) : base(pos)
+	public Knight(Vec2 pos) : base(pos)
 	{
 		HP = 3;
 		Range = 0.5f;
@@ -12,7 +12,7 @@ public class Worker : BaseUnit, ISerializable
 		Sight = 3;
 		TrainCost = 10;
 		TrainTime = 15.0f;
-		Type = UnitType.Worker;
+		Type = UnitType.Knight;
 	}
 
 	public override void SerializeFields(BinaryWriter writer)

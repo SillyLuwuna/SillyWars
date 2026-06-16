@@ -1,13 +1,16 @@
 namespace RtsEngine;
 
-public class SerializableGrid<T> : Grid<T>, ISerializable<Grid<T>> where T : ISerializable<T>, new()
+public class SerializableGrid<T> : Grid<T>, ISerializable where T : ISerializable
 {
 	public SerializableGrid() : base() {}
-	public SerializableGrid(Vec2 start, float strideWidth, uint width, uint height) : base(start, strideWidth, width, height) { }
-
-	public void Serialize(BinaryWriter writer)
+	public SerializableGrid(Vec2 start, float strideWidth, uint width, uint height)
 	{
-		_start.Serialize(writer);
+		base.Construct(start, strideWidth, width, height);
+	}
+
+	public void SerializeFields(BinaryWriter writer)
+	{
+		Serializer.Serialize(writer, _start);
 		writer.Write(_strideWidth);
 		writer.Write(_width);
 		writer.Write(_height);
@@ -26,30 +29,27 @@ public class SerializableGrid<T> : Grid<T>, ISerializable<Grid<T>> where T : ISe
 				continue;
 			}
 
-			((ISerializable<T>)curr).Serialize(writer);
+			Serializer.Serialize(writer, curr);
 		}
 	}
 
-	public void Deserialize(BinaryReader reader)
+	public void DeserializeFields(BinaryReader reader)
 	{
-		Vec2 start = new Vec2();
-		start.Deserialize(reader);
+		Vec2 start = Serializer.Deserialize<Vec2>(reader);
 		float strideWidth = reader.ReadSingle();
 		uint width = reader.ReadUInt32();
 		uint height = reader.ReadUInt32();
 
-		Construct(start, strideWidth, width, height);
-
 		uint gridSize = width * height;
+
+		base.Construct(start, strideWidth, width, height);
 
 		for (int i = 0; i < gridSize; i++)
 		{
 			bool hasValue = reader.ReadBoolean();
 			if (!hasValue) continue;
 
-			T curr = new T();
-			((ISerializable<T>)curr).Deserialize(reader);
-			_grid[i] = curr;
+			_grid[i] = Serializer.Deserialize<T>(reader);
 		}
 	}
 }

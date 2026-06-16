@@ -1,6 +1,6 @@
 namespace RtsEngine;
 
-public struct Vec2Int : IEquatable<Vec2Int>, ISerializable<Vec2Int>
+public struct Vec2Int : IEquatable<Vec2Int>, ISerializable
 {
 	public int x;
 	public int y;
@@ -49,13 +49,13 @@ public struct Vec2Int : IEquatable<Vec2Int>, ISerializable<Vec2Int>
 		return "(" + x + ", " + y + ")";
 	}
 
-	public void Serialize(BinaryWriter writer)
+	public void SerializeFields(BinaryWriter writer)
 	{
 		writer.Write(x);
 		writer.Write(y);
 	}
 
-	public void Deserialize(BinaryReader reader)
+	public void DeserializeFields(BinaryReader reader)
 	{
 		x = reader.ReadInt32();
 		y = reader.ReadInt32();

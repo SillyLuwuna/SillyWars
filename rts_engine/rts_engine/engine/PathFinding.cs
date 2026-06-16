@@ -1,4 +1,5 @@
 namespace RtsEngine;
+using Map;
 using System.Collections.Generic;
 
 #nullable enable
@@ -8,8 +9,8 @@ public class PathFinding
 	private Vec2 _start;
 	private Vec2 _goal;
 	private Grid<Cell> _grid;
-	private Vec2Int _startGrid;
-	private Vec2Int _goalGrid;
+	// private Vec2Int _startGrid;
+	// private Vec2Int _goalGrid;
 
 	public PathFinding(Grid<Cell> grid)
 	{
