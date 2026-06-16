@@ -2,8 +2,9 @@ namespace RtsEngine;
 using Units;
 using Map;
 using System.IO.Compression;
+using System.Diagnostics.CodeAnalysis;
 
-public class WorldState
+public class WorldState : ISerializable
 {
 	public SerializableGrid<Cell> Map;
 	public List<Entity> Entities;
@@ -11,9 +12,43 @@ public class WorldState
 
 	public WorldState(SerializableGrid<Cell> map)
 	{
+		Init(map);
+	}
+
+	[MemberNotNull(nameof(Map), nameof(Entities), nameof(Units))]
+	private void Init(SerializableGrid<Cell> map)
+	{
 		Map = map;
 		Entities = new();
 		Units = new();
+	}
+
+	public void SerializeFields(BinaryWriter writer)
+	{
+		Serializer.Serialize(writer, Map);
+
+		writer.Write(Entities.Count);
+		foreach (Entity entity in Entities)
+		{
+			Serializer.Serialize(writer, entity);
+		}
+	}
+
+	public void DeserializeFields(BinaryReader reader)
+	{
+		SerializableGrid<Cell> map = Serializer.Deserialize<SerializableGrid<Cell>>(reader);
+		Init(map);
+
+		int entitiesNum = reader.ReadInt32();
+		for (int i = 0; i < entitiesNum; i++)
+		{
+			Entity curr = Serializer.Deserialize<Entity>(reader);
+			Entities.Add(curr);
+			if (curr is BaseUnit currBase)
+			{
+				Units.Add(currBase);
+			}
+		}
 	}
 
 	public static WorldState Load(string file)
@@ -22,25 +57,7 @@ public class WorldState
 		using GZipStream gzip = new GZipStream(fs, CompressionMode.Decompress);
 		using BinaryReader reader = new BinaryReader(gzip);
 
-		SerializableGrid<Cell> map = Serializer.Deserialize<SerializableGrid<Cell>>(reader);
-
-		List<Entity> entities = new();
-		List<BaseUnit> units = new();
-		int entitiesNum = reader.ReadInt32();
-		for (int i = 0; i < entitiesNum; i++)
-		{
-			Entity curr = Serializer.Deserialize<Entity>(reader);
-			entities.Add(curr);
-			if (curr is BaseUnit currBase)
-			{
-				units.Add(currBase);
-			}
-		}
-
-		WorldState state = new WorldState(map);
-		state.Entities = entities;
-
-		return state;
+		return Serializer.Deserialize<WorldState>(reader);
 	}
 
 	public void Save(string file)
@@ -49,12 +66,6 @@ public class WorldState
 		using GZipStream gzip = new GZipStream(fs, CompressionLevel.Fastest);
 		using BinaryWriter writer = new BinaryWriter(gzip);
 
-		Serializer.Serialize(writer, Map);
-
-		writer.Write(Entities.Count);
-		foreach (Entity entity in Entities)
-		{
-			Serializer.Serialize(writer, entity);
-		}
+		Serializer.Serialize(writer, this);
 	}
 }

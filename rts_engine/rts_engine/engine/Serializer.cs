@@ -30,4 +30,22 @@ public static class Serializer
 
 		obj.SerializeFields(writer);
 	}
+
+	public static byte[] ToBytes<T>(T obj) where T : ISerializable
+	{
+		using MemoryStream ms = new MemoryStream();
+		using BinaryWriter writer = new BinaryWriter(ms);
+
+		Serialize(writer, obj);
+
+		return ms.ToArray();
+	}
+
+	public static T FromBytes<T>(byte[] data) where T : ISerializable
+	{
+		using MemoryStream ms = new MemoryStream(data);
+		using BinaryReader reader = new BinaryReader(ms);
+
+		return Deserialize<T>(reader);
+	}
 }
