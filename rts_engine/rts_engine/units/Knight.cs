@@ -1,4 +1,5 @@
-namespace RtsEngine.Units;
+namespace RtsEngine.Units
+{
 
 public class Knight : BaseUnit
 {
@@ -29,4 +30,5 @@ public class Knight : BaseUnit
 	{
 		base.Tick();
 	}
+}
 }

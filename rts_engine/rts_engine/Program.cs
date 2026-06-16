@@ -1,4 +1,7 @@
-﻿namespace RtsEngine;
+﻿// #nullable enable
+
+namespace RtsEngine
+{
 using Map;
 using Units;
 using Networking;
@@ -102,4 +105,6 @@ public static class Program
 			Console.WriteLine();
 		}
 	}
+}
+
 }

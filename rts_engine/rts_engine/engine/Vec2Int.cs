@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public struct Vec2Int : IEquatable<Vec2Int>, ISerializable
 {
@@ -30,7 +31,8 @@ public struct Vec2Int : IEquatable<Vec2Int>, ISerializable
 
 	public override bool Equals(object? obj)
 	{
-		if (obj is not Vec2Int other) return false;
+		// if (obj is not Vec2Int other) return false;
+		if (!(obj is Vec2Int other)) return false;
 		return this == (Vec2Int)obj;
 	}
 
@@ -60,4 +62,5 @@ public struct Vec2Int : IEquatable<Vec2Int>, ISerializable
 		x = reader.ReadInt32();
 		y = reader.ReadInt32();
 	}
+}
 }

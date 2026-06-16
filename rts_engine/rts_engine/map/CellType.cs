@@ -1,8 +1,10 @@
-namespace RtsEngine.Map;
+namespace RtsEngine.Map
+{
 
 public enum CellType : byte
 {
 	Empty,
 	Ground,
 	Structure
+}
 }

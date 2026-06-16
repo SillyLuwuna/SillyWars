@@ -1,7 +1,8 @@
-// using System.Runtime.Serialization;
+// using System.Runtime.Serialization
 using System.Runtime.CompilerServices;
 
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public static class Serializer
 {
@@ -48,4 +49,5 @@ public static class Serializer
 
 		return Deserialize<T>(reader);
 	}
+}
 }

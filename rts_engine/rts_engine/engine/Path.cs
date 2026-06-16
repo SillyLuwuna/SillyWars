@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 using System;
 using System.Collections.Generic;
@@ -114,4 +115,5 @@ public class Path : IEquatable<Path>
 
 		return hash.ToHashCode();
 	}
+}
 }

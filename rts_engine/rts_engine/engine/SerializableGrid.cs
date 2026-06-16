@@ -1,6 +1,8 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
-public class SerializableGrid<T> : Grid<T>, ISerializable where T : ISerializable
+// public class SerializableGrid<T> : Grid<T>, ISerializable where T : ISerializable
+public class SerializableGrid<T> : Grid<T>, ISerializable where T : class, ISerializable
 {
 	public SerializableGrid() : base() {}
 	public SerializableGrid(Vec2 start, float strideWidth, uint width, uint height)
@@ -54,3 +56,4 @@ public class SerializableGrid<T> : Grid<T>, ISerializable where T : ISerializabl
 	}
 }
 
+}

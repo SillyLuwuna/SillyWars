@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 using Map;
 
 using System;
@@ -126,7 +127,7 @@ public class PathNode : IEquatable<PathNode>
 
 	public override bool Equals(object? obj)
 	{
-		if (obj is not PathNode other) return false;
+		if (!(obj is PathNode other)) return false;
 		return this == (PathNode)obj;
 	}
 
@@ -147,4 +148,5 @@ public class PathNode : IEquatable<PathNode>
 	{
 		return Pos.GetHashCode();
 	}
+}
 }

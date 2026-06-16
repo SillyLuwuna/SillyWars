@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 using Map;
 using System.Collections.Generic;
 
@@ -111,4 +112,5 @@ public class PathFinding
 
 		return path;
 	}
+}
 }

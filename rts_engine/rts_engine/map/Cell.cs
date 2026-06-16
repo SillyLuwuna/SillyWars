@@ -1,4 +1,5 @@
-namespace RtsEngine.Map;
+namespace RtsEngine.Map
+{
 
 public class Cell : ISerializable
 {
@@ -25,4 +26,5 @@ public class Cell : ISerializable
 	{
 		Type = (CellType)reader.ReadByte();
 	}
+}
 }

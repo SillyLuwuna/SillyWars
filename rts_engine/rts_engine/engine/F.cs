@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 using System;
 
@@ -43,3 +44,4 @@ public static class F
 	}
 }
 
+}

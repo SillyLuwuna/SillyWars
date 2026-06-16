@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public abstract class Entity : ITickable, ISerializable
 {
@@ -30,4 +31,6 @@ public abstract class Entity : ITickable, ISerializable
 	}
 
 	public abstract void Tick();
+}
+
 }

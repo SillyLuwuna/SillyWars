@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 using System;
 
@@ -135,3 +136,4 @@ public class Grid<T>
 	}
 }
 
+}

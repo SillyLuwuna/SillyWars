@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public class Line
 {
@@ -41,4 +42,5 @@ public class Line
 	{
 		return "(" + _a + ")x + (" + _b + ")y + (" + _c + ")";
 	}
+}
 }

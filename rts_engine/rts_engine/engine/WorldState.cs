@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 using Units;
 using Map;
 using System.IO.Compression;
@@ -12,15 +13,16 @@ public class WorldState : ISerializable
 
 	public WorldState(SerializableGrid<Cell> map)
 	{
+		// TODO fix warning on old compiler version
 		Init(map);
 	}
 
-	[MemberNotNull(nameof(Map), nameof(Entities), nameof(Units))]
+	// [MemberNotNull(nameof(Map), nameof(Entities), nameof(Units))]
 	private void Init(SerializableGrid<Cell> map)
 	{
 		Map = map;
-		Entities = new();
-		Units = new();
+		Entities = new List<Entity>();
+		Units = new List<BaseUnit>();
 	}
 
 	public void SerializeFields(BinaryWriter writer)
@@ -68,4 +70,5 @@ public class WorldState : ISerializable
 
 		Serializer.Serialize(writer, this);
 	}
+}
 }

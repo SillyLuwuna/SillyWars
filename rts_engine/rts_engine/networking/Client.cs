@@ -3,7 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace RtsEngine.Networking;
+namespace RtsEngine.Networking
+{
 
 public class Client
 {
@@ -21,7 +22,7 @@ public class Client
 		_client = new TcpClient();
 		_buffer = new byte[8192];
 		_stream = null;
-		_streamLock = new();
+		_streamLock = new object();
 	}
 
 	public async Task ConnectAsync(string host, int port)
@@ -108,4 +109,5 @@ public class Client
 		_client?.Close();
 		Console.WriteLine("Disconnected");
 	}
+}
 }

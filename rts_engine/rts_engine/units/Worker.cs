@@ -1,4 +1,5 @@
-namespace RtsEngine.Units;
+namespace RtsEngine.Units
+{
 
 public class Worker : BaseUnit, ISerializable
 {
@@ -29,4 +30,5 @@ public class Worker : BaseUnit, ISerializable
 	{
 		base.Tick();
 	}
+}
 }

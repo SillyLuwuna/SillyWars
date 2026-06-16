@@ -1,4 +1,5 @@
-namespace RtsEngine.Units;
+namespace RtsEngine.Units
+{
 
 public struct UnitState : ISerializable
 {
@@ -66,4 +67,5 @@ public struct UnitState : ISerializable
 	{
 		_stateFlags = reader.ReadByte();
 	}
+}
 }

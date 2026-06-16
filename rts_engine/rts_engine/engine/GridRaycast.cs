@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public class GridRaycast<T> where T : new()
 {
@@ -102,4 +103,5 @@ public class GridRaycast<T> where T : new()
 		Vec2Int negPos = _grid.CellPosFromWorldSpace(realPos);
 		return negPos;
 	}
+}
 }

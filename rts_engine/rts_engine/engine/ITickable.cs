@@ -1,6 +1,8 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public interface ITickable
 {
 	public void Tick();
+}
 }

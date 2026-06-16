@@ -1,4 +1,5 @@
-namespace RtsEngine;
+namespace RtsEngine
+{
 
 public class RtsEngine
 {
@@ -20,4 +21,5 @@ public class RtsEngine
 	{
 		if (!HasStarted) throw new InvalidOperationException("cannot tick when the engine is not running.");
 	}
+}
 }

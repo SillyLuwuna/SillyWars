@@ -1,4 +1,5 @@
-namespace RtsEngine.Units;
+namespace RtsEngine.Units
+{
 
 public abstract class BaseUnit : Entity, ISerializable
 {
@@ -66,4 +67,5 @@ public abstract class BaseUnit : Entity, ISerializable
 	// {
 	// 	TODO
 	// }
+}
 }

@@ -3,7 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace RtsEngine.Networking;
+namespace RtsEngine.Networking
+{
 
 public class Server
 {
@@ -19,8 +20,8 @@ public class Server
 	public Server(int port, int requiredClients)
 	{
 		_listener = new TcpListener(IPAddress.Any, port);
-		_clients = new();
-		_clientsLock = new();
+		_clients = new List<TcpClient>();
+		_clientsLock = new object();
 		_requiredClients = requiredClients;
 	}
 
@@ -161,4 +162,5 @@ public class Server
 	{
 		MessageReceived?.Invoke(this, data);
 	}
+}
 }
