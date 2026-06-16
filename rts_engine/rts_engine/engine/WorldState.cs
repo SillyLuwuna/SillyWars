@@ -3,10 +3,12 @@ namespace RtsEngine;
 public class WorldState
 {
 	private SerializableGrid<Cell> _map;
+	private List<Entity> _entities;
 
 	public WorldState(SerializableGrid<Cell> map)
 	{
 		_map = map;
+		_entities = new List<Entity>();
 	}
 
 	public static WorldState Load(string file)
