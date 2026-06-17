@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RtsEngine.Data;
 using RtsEngine.Networking;
@@ -20,6 +21,8 @@ public class RtsEngine
 	private WorldState _state;
 	private Clock _clock;
 	private Server _server;
+	private Dictionary<string, uint> _playerIds;
+	private Dictionary<uint, string> _playerEndpoints;
 
 	private int _statInterval;
 	private float _statLoadSum;
@@ -33,11 +36,15 @@ public class RtsEngine
 	{
 		_currentBroadcastTask = null;
 		_broadcastLock = new object();
+		_playerIds = new Dictionary<string, uint>();
+		_playerEndpoints = new Dictionary<uint, string>();
 		IsRunning = false;
 		_state = state;
 		_clock = new Clock(INTERVAL_MS);
 		_clock.Tick += TickSubscriber;
 		_server = new Server(PORT, NUM_PLAYERS);
+		_server.MessageReceived += OnDataReceived;
+		_server.ConnectionEstablished += OnConnectionEstablished;
 		Reset();
 	}
 
@@ -47,6 +54,8 @@ public class RtsEngine
 		_statLoadSum = 0.0f;
 		_statTicks = 0;
 		_statByteSum = 0;
+		_playerEndpoints.Clear();
+		_playerIds.Clear();
 	}
 
 	public async Task Start()
@@ -82,11 +91,7 @@ public class RtsEngine
 			}
 		}
 
-		int numEntities = _state.Entities.Count;
-		for (int i = 0; i < numEntities; i++)
-		{
-			_state.Entities[i].Tick();
-		}
+		_state.TickEntities();
 
 
 		byte[] data = Serializer.ToBytes(_state);
@@ -107,6 +112,36 @@ public class RtsEngine
 			Console.WriteLine($"Error during tick: {ex.Message}");
 		}
 
+	}
+
+	private string GetPlayerEndpoint(string ip, int port)
+	{
+		return $"{ip}{port}";
+	}
+
+	private void OnDataReceived(object? sender, DataEventArgs args)
+	{
+		uint playerId = _playerIds[GetPlayerEndpoint(args.Ip, args.Port)];
+		try
+		{
+			PlayerCommand command = Serializer.FromBytes<PlayerCommand>(args.Data);
+			command._ownerId = playerId;
+
+			command.Execute(_state);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Invalid data received: {ex.Message}");
+		}
+	}
+
+	private void OnConnectionEstablished(object? sender, DataEventArgs args)
+	{
+		string playerEndpoint = GetPlayerEndpoint(args.Ip, args.Port);
+		uint playerId = (uint)_playerIds.Count;
+
+		_playerIds[playerEndpoint] = playerId;
+		_playerEndpoints[playerId] = playerEndpoint;
 	}
 
 	private void CalcStats(int deltaTime, float load, long elapsed)
@@ -142,7 +177,6 @@ public class RtsEngine
 			_statTicks = 0;
 			_statByteSum = 0;
 		}
-
 	}
 }
 }

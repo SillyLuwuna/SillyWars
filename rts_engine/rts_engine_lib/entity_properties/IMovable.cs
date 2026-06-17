@@ -4,7 +4,7 @@ using RtsEngine.Math;
 namespace RtsEngine.EntityProperties
 {
 
-public interface IMover
+public interface IMovable
 {
 	public void Move(Grid<Cell> map, Vec2 pos);
 	public void Halt();

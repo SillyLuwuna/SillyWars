@@ -13,8 +13,9 @@ namespace RtsEngine
 public class WorldState : ISerializable
 {
 	public SerializableGrid<Cell> Map = null!;
-	public List<Entity> Entities = null!;
-	public List<BaseUnit> Units = null!;
+	private Dictionary<uint, Entity> _entitiesId = null!;
+	private List<Entity> _entities = null!;
+	private List<BaseUnit> _units = null!;
 
 	public WorldState(SerializableGrid<Cell> map)
 	{
@@ -26,16 +27,17 @@ public class WorldState : ISerializable
 	private void Init(SerializableGrid<Cell> map)
 	{
 		Map = map;
-		Entities = new List<Entity>();
-		Units = new List<BaseUnit>();
+		_entitiesId = new Dictionary<uint, Entity>();
+		_entities = new List<Entity>();
+		_units = new List<BaseUnit>();
 	}
 
 	public void SerializeFields(BinaryWriter writer)
 	{
 		Serializer.Serialize(writer, Map);
 
-		writer.Write(Entities.Count);
-		foreach (Entity entity in Entities)
+		writer.Write(_entities.Count);
+		foreach (Entity entity in _entities)
 		{
 			Serializer.Serialize(writer, entity);
 		}
@@ -50,11 +52,44 @@ public class WorldState : ISerializable
 		for (int i = 0; i < entitiesNum; i++)
 		{
 			Entity curr = Serializer.Deserialize<Entity>(reader);
-			Entities.Add(curr);
-			if (curr is BaseUnit currBase)
-			{
-				Units.Add(currBase);
-			}
+			AddEntity(curr);
+		}
+	}
+
+	public void AddEntity(Entity entity)
+	{
+		_entities.Add(entity);
+		_entitiesId.Add(entity.Id, entity);
+		if (entity is BaseUnit currBase)
+		{
+			_units.Add(currBase);
+		}
+	}
+
+	public void TickEntities()
+	{
+		int numEntities = _entities.Count;
+		for (int i = 0; i < numEntities; i++)
+		{
+			_entities[i].Tick();
+		}
+	}
+
+	public Entity? GetEntity(uint id)
+	{
+		if (!_entitiesId.ContainsKey(id)) return null;
+
+		return _entitiesId[id];
+	}
+
+	public void RemoveEntity(Entity entity)
+	{
+		// can be optimized by lazy deleting from arrays
+		_entities.Remove(entity);
+		_entitiesId.Remove(entity.Id);
+		if (entity is BaseUnit currBase)
+		{
+			_units.Remove(currBase);
 		}
 	}
 

@@ -1,7 +1,10 @@
 namespace RtsEngine
 {
+
 public enum CommandType : byte
 {
-	Move
+	Move,
+	Halt
 }
+
 }

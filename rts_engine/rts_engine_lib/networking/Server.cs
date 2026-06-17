@@ -10,6 +10,20 @@ using System.Threading.Tasks;
 namespace RtsEngine.Networking
 {
 
+public class DataEventArgs : EventArgs
+{
+	public byte[] Data { get; private set; }
+	public string Ip { get; private set; }
+	public int Port { get; private set; }
+
+	public DataEventArgs(byte[] data, string ip, int port) : base()
+	{
+		Data = data;
+		Ip = ip;
+		Port = port;
+	}
+}
+
 public class Server
 {
 	private const int _MAX_DATA_LENGTH = 10 * 1024 * 1024;
@@ -21,8 +35,8 @@ public class Server
 	private readonly int _requiredClients;
 
 	private bool _isRunning;
-	public event EventHandler<byte[]>? MessageReceived;
-	public event EventHandler<TcpClient>? ConnectionEstablished;
+	public event EventHandler<DataEventArgs>? MessageReceived;
+	public event EventHandler<DataEventArgs>? ConnectionEstablished;
 
 	public Server(int port, int requiredClients)
 	{
@@ -75,7 +89,7 @@ public class Server
 				if (bytesRead == 0) break;
 
 				Console.WriteLine($"Received {length} bytes");
-				OnMessageReceived(data);
+				OnMessageReceived(data, client);
 			}
 		}
 		catch (Exception ex)
@@ -202,15 +216,21 @@ public class Server
 		Console.WriteLine("Server stopped");
 	}
 
-	private void OnMessageReceived(byte[] data)
+	private void OnMessageReceived(byte[] data, TcpClient client)
 	{
-		MessageReceived?.Invoke(this, data);
+		IPEndPoint? clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+		DataEventArgs dataArgs = new DataEventArgs(data, clientEndPoint!.Address.ToString(), clientEndPoint.Port);
+
+		MessageReceived?.Invoke(this, dataArgs);
 	}
 
 	private void OnConnectionEstablished(TcpClient client)
 	{
+		IPEndPoint? clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+		DataEventArgs dataArgs = new DataEventArgs(null!, clientEndPoint!.Address.ToString(), clientEndPoint.Port);
+
 		// IPEndPoint endPoint = client.Client.RemoteEndPoint as IPEndPoint;
-		ConnectionEstablished?.Invoke(this, client);
+		ConnectionEstablished?.Invoke(this, dataArgs);
 	}
 
 	public int ConnectionCount

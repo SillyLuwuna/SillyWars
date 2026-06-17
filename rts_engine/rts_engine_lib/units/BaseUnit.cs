@@ -7,7 +7,7 @@ using RtsEngine.Map;
 namespace RtsEngine.Units
 {
 
-public abstract class BaseUnit : Entity, ISerializable, IMover
+public abstract class BaseUnit : Entity, ISerializable, IMovable
 {
 	public int HP { get; protected set; }
 	public float Range { get; protected set; }
