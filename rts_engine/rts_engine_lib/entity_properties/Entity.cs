@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using RtsEngine.Data;
 using RtsEngine.Math;
 
-namespace RtsEngine
+namespace RtsEngine.EntityProperties
 {
 
 public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
@@ -59,6 +60,8 @@ public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 	{
 		return (int)Id;
 	}
+
+	public abstract HashSet<CommandType> GetAllowedActions();
 }
 
 }

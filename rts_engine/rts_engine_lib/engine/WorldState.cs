@@ -5,6 +5,7 @@ using System.IO.Compression;
 
 using System.IO;
 using System.Collections.Generic;
+using RtsEngine.EntityProperties;
 
 namespace RtsEngine
 {

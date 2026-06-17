@@ -1,11 +1,13 @@
 using System.IO;
 using RtsEngine.Data;
 using RtsEngine.Math;
+using RtsEngine.EntityProperties;
+using RtsEngine.Map;
 
 namespace RtsEngine.Units
 {
 
-public abstract class BaseUnit : Entity, ISerializable
+public abstract class BaseUnit : Entity, ISerializable, IMover
 {
 	public int HP { get; protected set; }
 	public float Range { get; protected set; }
@@ -16,22 +18,25 @@ public abstract class BaseUnit : Entity, ISerializable
 	public int TrainCost { get; protected set; }
 	public float TrainTime { get; protected set; }
 	public UnitType Type { get; protected set; }
+	protected UnitState _state;
+	public UnitState State { get => _state; }
 
-	public UnitState State { get; protected set; }
-	// Actions!
+	public Map.Path? CurrPath { get; protected set; }
+	public int CurrPathCheckpoint { get; protected set; }
 
-	public float Size { get; private set; } // for unit-unit collision
+	public float Size { get; protected set; } // for unit-unit collision
 
 	public BaseUnit(Vec2 pos, uint ownerId) : base(ownerId)
 	{
 		Pos = pos;
 
 		Size = 0.1f;
+		CurrPath = null;
 	}
 
 	public override void Tick()
 	{
-		// abstract logic
+		Move();
 	}
 
 	public override void SerializeFields(BinaryWriter writer)
@@ -46,7 +51,7 @@ public abstract class BaseUnit : Entity, ISerializable
 		writer.Write(TrainCost);
 		writer.Write(TrainTime);
 		writer.Write((byte)Type);
-		Serializer.Serialize(writer, State);
+		Serializer.Serialize(writer, _state);
 		// State.SerializeFields(writer);
 		writer.Write(Size);
 	}
@@ -63,13 +68,47 @@ public abstract class BaseUnit : Entity, ISerializable
 		TrainCost = reader.ReadInt32();
 		TrainTime = reader.ReadSingle();
 		Type = (UnitType)reader.ReadByte();
-		State = Serializer.Deserialize<UnitState>(reader);
+		_state = Serializer.Deserialize<UnitState>(reader);
 		Size = reader.ReadSingle();
 	}
 
-	// public void Move(Grid<Cell> grid, Vec2 goal)
-	// {
-	// 	TODO
-	// }
+	public void Move(Grid<Cell> map, Vec2 goal)
+	{
+		// can be easily optimized by caching, and seeing when map changes to update cache
+		PathFinding pathfinder = new PathFinding(map);
+		PathOptimizer optimizer = new PathOptimizer(map);
+
+		CurrPath = optimizer.OptimizePath(pathfinder.GetPath(Pos, goal));
+		CurrPathCheckpoint = 1;
+
+		_state.IsWalking = true;
+	}
+
+	public void Move()
+	{
+		if (!_state.IsWalking) return;
+
+		Vec2 target = CurrPath![CurrPathCheckpoint];
+
+		if (target.Distance(Pos) <= MoveSpeed)
+		{
+			Pos = target;
+			CurrPathCheckpoint++;
+			if (CurrPathCheckpoint >= CurrPath.Count)
+			{
+				Halt();
+				return;
+			}
+		}
+
+		Vec2 direction = Pos.To(target).Unit;
+		Pos += direction * MoveSpeed;
+	}
+
+	public void Halt()
+	{
+		_state.IsWalking = false;
+		CurrPath = null;
+	}
 }
 }

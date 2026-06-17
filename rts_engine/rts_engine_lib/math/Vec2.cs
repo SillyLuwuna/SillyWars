@@ -40,6 +40,26 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 		return !(left == right);
 	}
 
+	public static Vec2 operator -(Vec2 left, Vec2 right)
+	{
+		return new Vec2(left.x - right.x, left.y - right.y);
+	}
+
+	public static Vec2 operator +(Vec2 left, Vec2 right)
+	{
+		return new Vec2(left.x + right.x, left.y + right.y);
+	}
+
+	public static Vec2 operator /(Vec2 left, float right)
+	{
+		return new Vec2(left.x / right, left.y / right);
+	}
+
+	public static Vec2 operator *(Vec2 left, float right)
+	{
+		return new Vec2(left.x * right, left.y * right);
+	}
+
 	public override bool Equals(object? obj)
 	{
 		if (!(obj is Vec2 other)) return false;
@@ -71,6 +91,21 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 	{
 		x = reader.ReadSingle();
 		y = reader.ReadSingle();
+	}
+
+	public Vec2 To(Vec2 other)
+	{
+		return other - this;
+	}
+
+	public float Magnitude
+	{
+		get => System.MathF.Sqrt(x * x + y * y);
+	}
+
+	public Vec2 Unit
+	{
+		get => this / Magnitude;
 	}
 }
 }
