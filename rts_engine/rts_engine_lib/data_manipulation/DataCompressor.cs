@@ -1,7 +1,7 @@
 using System.IO;
 using System.IO.Compression;
 
-namespace RtsEngine
+namespace RtsEngine.Data
 {
 
 public static class DataCompressor

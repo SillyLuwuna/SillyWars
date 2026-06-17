@@ -1,8 +1,9 @@
-namespace RtsEngine
-{
-
 using System;
 using System.Collections.Generic;
+using RtsEngine.Math;
+
+namespace RtsEngine.Map
+{
 
 public class Path : IEquatable<Path>
 {

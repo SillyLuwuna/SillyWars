@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using RtsEngine.Math;
 
-namespace RtsEngine
+namespace RtsEngine.Map
 {
 
 public class GridRaycast<T> where T : new()

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using RtsEngine.Data;
 using RtsEngine.Networking;
 
 namespace RtsEngine
@@ -9,8 +10,9 @@ public class RtsEngine
 {
 	public const int TPS = 20;
 	private const int INTERVAL_MS = 1000 / TPS;
-	private const int STAT_INTERVAL_MS = 1000;
 	private const int PORT = 13774;
+
+	private const int STAT_INTERVAL_MS = 1000;
 	
 	private const int NUM_PLAYERS = 1;
 

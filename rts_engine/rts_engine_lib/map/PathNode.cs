@@ -1,9 +1,10 @@
-namespace RtsEngine
-{
-using Map;
-
+using RtsEngine.Map;
+using RtsEngine.Math;
 using System;
 using System.Collections.Generic;
+
+namespace RtsEngine.Map
+{
 
 #nullable enable
 

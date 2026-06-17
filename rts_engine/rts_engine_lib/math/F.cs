@@ -1,4 +1,4 @@
-namespace RtsEngine
+namespace RtsEngine.Math
 {
 
 using System;

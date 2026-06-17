@@ -1,6 +1,8 @@
 using System.IO;
+using RtsEngine.Data;
+using RtsEngine.Math;
 
-namespace RtsEngine
+namespace RtsEngine.Map
 {
 
 // public class SerializableGrid<T> : Grid<T>, ISerializable where T : ISerializable

@@ -1,6 +1,6 @@
 using System;
 
-namespace RtsEngine
+namespace RtsEngine.Math
 {
 
 public class Line

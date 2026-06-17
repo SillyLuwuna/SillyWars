@@ -1,9 +1,11 @@
-namespace RtsEngine
-{
-using Map;
+#nullable enable
+
+using RtsEngine.Map;
+using RtsEngine.Math;
 using System.Collections.Generic;
 
-#nullable enable
+namespace RtsEngine.Map
+{
 
 public class PathFinding
 {

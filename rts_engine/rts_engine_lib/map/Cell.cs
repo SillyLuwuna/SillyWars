@@ -1,4 +1,5 @@
 using System.IO;
+using RtsEngine.Data;
 
 namespace RtsEngine.Map
 {

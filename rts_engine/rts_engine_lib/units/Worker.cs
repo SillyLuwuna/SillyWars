@@ -1,4 +1,6 @@
 using System.IO;
+using RtsEngine.Data;
+using RtsEngine.Math;
 
 namespace RtsEngine.Units
 {

@@ -1,10 +1,11 @@
-namespace RtsEngine
-{
-
+using RtsEngine.Math;
 using System;
 
-// public class Grid<T> : ISerializable<Grid<T>> where T : new()
-public class Grid<T>
+namespace RtsEngine.Map
+{
+
+    // public class Grid<T> : ISerializable<Grid<T>> where T : new()
+    public class Grid<T>
 {
 	public uint Width => _width;
 	public uint Height => _height;
@@ -59,8 +60,8 @@ public class Grid<T>
 
 	public Vec2Int CellPosFromWorldSpace(Vec2 worldSpaceCoords)
 	{
-		int x = (int)Math.Round((worldSpaceCoords.x - (_start.x + _strideHalfsCache)) / _strideWidth);
-		int y = (int)Math.Round((worldSpaceCoords.y - (_start.y + _strideHalfsCache)) / _strideWidth);
+		int x = (int)System.Math.Round((worldSpaceCoords.x - (_start.x + _strideHalfsCache)) / _strideWidth);
+		int y = (int)System.Math.Round((worldSpaceCoords.y - (_start.y + _strideHalfsCache)) / _strideWidth);
 		return new Vec2Int(x, y);
 	}
 

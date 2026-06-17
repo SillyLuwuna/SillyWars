@@ -1,12 +1,13 @@
-namespace RtsEngine
-{
-using Units;
-using Map;
+using RtsEngine.Data;
+using RtsEngine.Units;
+using RtsEngine.Map;
 using System.IO.Compression;
-using System.Diagnostics.CodeAnalysis;
 
 using System.IO;
 using System.Collections.Generic;
+
+namespace RtsEngine
+{
 
 public class WorldState : ISerializable
 {

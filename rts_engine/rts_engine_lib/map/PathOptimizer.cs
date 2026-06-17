@@ -1,7 +1,9 @@
-namespace RtsEngine
-{
-using Map;
 using System.Collections.Generic;
+using RtsEngine.Math;
+using RtsEngine.Map;
+
+namespace RtsEngine.Map
+{
 
 public class PathOptimizer
 {

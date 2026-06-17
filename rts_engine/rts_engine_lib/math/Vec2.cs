@@ -1,7 +1,8 @@
 using System;
 using System.IO;
+using RtsEngine.Data;
 
-namespace RtsEngine
+namespace RtsEngine.Math
 {
 
 public struct Vec2 : IEquatable<Vec2>, ISerializable

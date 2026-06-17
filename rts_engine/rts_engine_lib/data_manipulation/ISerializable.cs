@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace RtsEngine
+namespace RtsEngine.Data
 {
 
 // public interface ISerializable<T>

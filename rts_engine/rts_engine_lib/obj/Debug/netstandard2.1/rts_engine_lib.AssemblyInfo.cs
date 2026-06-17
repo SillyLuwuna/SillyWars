@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SillyWars.Engine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1523dba83cd09f9f88b2067f5a4ac6cfb9fba493")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fad01bc29b55bdcbbc4ce6be4024b98a9d798a7b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SillyWars.Engine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SillyWars.Engine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
