@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Assets/Scripts/Old/PathOptimizer.cs" />
     <Compile Include="Assets/Scripts/GridManager.cs" />
+    <Compile Include="Assets/Scripts/UnitManager.cs" />
     <Compile Include="Assets/Scripts/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/Old/Path.cs" />
     <Compile Include="Assets/Scripts/Old/GridManager.cs" />

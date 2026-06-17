@@ -1,18 +1,20 @@
-﻿namespace RtsEngine
-{
-using Map;
-using Units;
-using Networking;
+﻿using RtsEngine.Map;
+using RtsEngine.Units;
+using RtsEngine.Networking;
 using System.Net.Sockets;
 using System;
 using System.Threading.Tasks;
-    using global::RtsEngine.Math;
-    using global::RtsEngine.Data;
+using RtsEngine.Math;
+using RtsEngine.Data;
 
-    public static class Program
+namespace RtsEngine
+{
+
+public static class Program
 {
 	public static async Task Main()
 	{
+		// Create map
 		SerializableGrid<Cell> grid = new SerializableGrid<Cell>(new Vec2(0, 0), 1, 20, 10);
 
 		for (int i = 0; i < grid.Size(); i++)
@@ -23,85 +25,25 @@ using System.Threading.Tasks;
 
 		WorldState? state = new WorldState(grid);
 
-		// for (int i = 0; i < state.Map.Size(); i++)
-		// {
-		// 	Console.Write(state.Map[i].IsWalkable + " ");
-		// }
-		// Console.WriteLine();
-
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 10; i++)
 		{
-			Vec2 pos = new Vec2(i, i*2);
-			state.Entities.Add(i % 2 == 0 ? new Worker(pos) : new Knight(pos));
+			Vec2 pos = new Vec2(i, (i*2) % 10);
+			uint owner = (((i % 4) == 0) || (((i + 3) % 4) == 0)) ? 0u : 1u;
+			state.Entities.Add(i % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner));
 		}
 
-		// for (int i = 0; i < 10; i++)
-		// {
-		// 	Console.Write(state.Entities[i].Pos + " ");
-		// 	Console.Write("Worker? " + (state.Entities[i] is Worker));
-		// 	Console.WriteLine();
-		// }
-
+		// Save map
 		state.Save("test.smap");
-
-		state = null;
-
-
 
 		// Load
 
 		// WorldState? state = WorldState.Load("test.smap");
 		state = WorldState.Load("test.smap");
 
-		// Console.WriteLine();
-		// Console.WriteLine();
-		// for (int i = 0; i < state.Map.Size(); i++)
-		// {
-		// 	Console.Write(state.Map[i].IsWalkable + " ");
-		// }
-		// Console.WriteLine();
-		//
-		// for (int i = 0; i < 10; i++)
-		// {
-		// 	Console.Write(state.Entities[i].Pos + " ");
-		// 	Console.Write("Worker? " + (state.Entities[i] is Worker));
-		// 	Console.WriteLine();
-		// }
-
-
-
-
-		// Send over network
-		// Server server = new Server(13774, 1);
-		// // server.MessageReceived += HandleMessage;
-		// // server.ConnectionEstablished += HandleConnection;
-		//
-		// _ = server.StartAsync();
-		//
-		// Client client = new Client(1000);
-		// client.MessageReceived += HandleMessage;
-		// await Task.Delay(500);
-		// await client.ConnectAsync("localhost", 13774);
-		// await server.SendData(DataCompressor.CompressData(Serializer.ToBytes(state)), 0);
-		// await client.SendAsync(DataCompressor.CompressData(Serializer.ToBytes(state)));
-
-		// Console.ReadKey();
-		// await Task.Delay(5000);
-
-		// await server.SendData(Serializer.ToBytes(state), 0);
-
-		// Console.ReadKey();
-		// server.Stop();
-
+		// Start engine
 
 		RtsEngine engine = new RtsEngine(state);
 		_ = engine.Start();
-
-		// Console.ReadKey();
-		//
-		// Client client = new Client(1000);
-		// client.MessageReceived += HandleMessage;
-		// await client.ConnectAsync("localhost", 13774);
 
 		Console.ReadKey();
 

@@ -22,7 +22,7 @@ public abstract class BaseUnit : Entity, ISerializable
 
 	public float Size { get; private set; } // for unit-unit collision
 
-	public BaseUnit(Vec2 pos)
+	public BaseUnit(Vec2 pos, uint ownerId) : base(ownerId)
 	{
 		Pos = pos;
 

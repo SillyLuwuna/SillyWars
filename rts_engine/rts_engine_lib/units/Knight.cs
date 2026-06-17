@@ -6,7 +6,7 @@ namespace RtsEngine.Units
 
 public class Knight : BaseUnit
 {
-	public Knight(Vec2 pos) : base(pos)
+	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
 		HP = 3;
 		Range = 0.5f;

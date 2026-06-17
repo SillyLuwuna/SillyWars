@@ -7,7 +7,7 @@ namespace RtsEngine.Units
 
 public class Worker : BaseUnit, ISerializable
 {
-	public Worker(Vec2 pos) : base(pos)
+	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
 		HP = 3;
 		Range = 0.5f;
