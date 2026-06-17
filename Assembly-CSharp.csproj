@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Old/PathOptimizer.cs" />
+    <Compile Include="Assets/Scripts/GridManager.cs" />
     <Compile Include="Assets/Scripts/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/Old/Path.cs" />
     <Compile Include="Assets/Scripts/Old/GridManager.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Assets/Scripts/Old/Line.cs" />
     <Compile Include="Assets/Scripts/Old/GoalChaser.cs" />
     <Compile Include="Assets/Scripts/Old/Cell.cs" />
+    <Compile Include="Assets/Scripts/ConnectButton.cs" />
     <Compile Include="Assets/Scripts/Old/GridRaycast.cs" />
     <Compile Include="Assets/Scripts/Old/Pathfinding.cs" />
   </ItemGroup>
@@ -624,6 +626,10 @@
       <HintPath>Library/PackageCache/com.unity.ext.nunit@ec2d0043d6fc/net40/unity-custom/nunit.framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SillyWars.Engine">
+      <HintPath>Assets/Plugins/SillyWars.Engine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System.IO.Hashing">
       <HintPath>Library/PackageCache/com.unity.collections@aea9d3bd5e19/Unity.Collections.Tests/System.IO.Hashing/System.IO.Hashing.dll</HintPath>
       <Private>False</Private>
@@ -638,14 +644,6 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Library/PackageCache/com.unity.collections@aea9d3bd5e19/Unity.Collections.Tests/System.Runtime.CompilerServices.Unsafe/System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SillyWars.Engine.Shared">
-      <HintPath>Assets/Plugins/SillyWars.Engine.Shared.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="K4os.Hash.xxHash">
-      <HintPath>Assets/Plugins/K4os.Hash.xxHash.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">

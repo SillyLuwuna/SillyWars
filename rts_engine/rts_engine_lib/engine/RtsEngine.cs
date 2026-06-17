@@ -22,8 +22,9 @@ public class RtsEngine
 	private Server _server;
 
 	private int _statInterval;
-	private float _statAvg;
+	private float _statLoadSum;
 	private int _statTicks;
+	private long _statByteSum;
 
 	private Task? _currentBroadcastTask;
 	private readonly object _broadcastLock;
@@ -43,8 +44,9 @@ public class RtsEngine
 	private void Reset()
 	{
 		_statInterval = 0;
-		_statAvg = 0.0f;
+		_statLoadSum = 0.0f;
 		_statTicks = 0;
+		_statByteSum = 0;
 	}
 
 	public async Task Start()
@@ -89,26 +91,13 @@ public class RtsEngine
 
 		byte[] data = Serializer.ToBytes(_state);
 		byte[] compressedData = DataCompressor.CompressData(data);
+		_statByteSum += compressedData.Length * _server.ConnectionCount * 8;
 		_currentBroadcastTask = _server.BroadcastData(compressedData);
 	}
 
 	private void TickSubscriber(object? sender, ClockEventArgs e)
 	{
-		_statInterval += (int)e.DeltaTime;
-		_statAvg += e.Load;
-		_statTicks++;
-		if (_statInterval > STAT_INTERVAL_MS)
-		{
-			float loadAvg = (float)_statAvg/(float)_statTicks;
-			Console.WriteLine($"[{e.ElapsedMs:D8}] Load avg: {loadAvg:F2}");
-			if (loadAvg > 1.0f)
-			{
-				Console.WriteLine("Engine is overloaded!");
-			}
-			_statInterval = 0;
-			_statAvg = 0.0f;
-			_statTicks = 0;
-		}
+		CalcStats(e.DeltaTime, e.Load, e.ElapsedMs);
 		try
 		{
 			Tick();
@@ -116,6 +105,42 @@ public class RtsEngine
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error during tick: {ex.Message}");
+		}
+
+	}
+
+	private void CalcStats(int deltaTime, float load, long elapsed)
+	{
+		_statInterval += (int)deltaTime;
+		_statLoadSum += load;
+		_statTicks++;
+
+		if (_statInterval > STAT_INTERVAL_MS)
+		{
+			float loadAvg = (float)_statLoadSum/(float)_statTicks;
+
+			float totalThroughput = (float)_statByteSum / ((float)_statInterval / 1000.0f);
+			float totalThroughputKb = totalThroughput / 1024.0f;
+
+			float userThroughput = totalThroughput / (float)System.Math.Max(_server.ConnectionCount, 1);
+			float userThroughputKb = userThroughput / 1024.0f;
+
+			float avgPacketSize = (userThroughput * (float)_statInterval / 1000.0f) / 8.0f / _statTicks;
+
+			Console.Write($"[{elapsed:D8}] ");
+			Console.Write($"load: {loadAvg:F2}\t");
+			Console.Write($"tp/utp: {totalThroughputKb:F1}/{userThroughputKb:F1} KBs\t\t");
+			Console.Write($"pkt: {(int)avgPacketSize} B");
+			Console.WriteLine();
+			if (loadAvg > 1.0f)
+			{
+				Console.WriteLine("Engine is overloaded!");
+			}
+
+			_statInterval = 0;
+			_statLoadSum = 0.0f;
+			_statTicks = 0;
+			_statByteSum = 0;
 		}
 
 	}

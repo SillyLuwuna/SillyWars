@@ -21,6 +21,8 @@ public class Client
 	private int _timeoutMs;
 
 	public event EventHandler<byte[]>? MessageReceived;
+	public event Action? Disconnection;
+	public event Action? Connection;
 
 	public Client(int timeoutMs)
 	{
@@ -31,10 +33,15 @@ public class Client
 		_timeoutMs = timeoutMs;
 	}
 
+	public bool IsConnected { get => _client.Connected; }
+
 	public async Task ConnectAsync(string host, int port)
 	{
+		if (IsConnected) return;
+
 		Console.WriteLine("Connecting...");
 
+		_client = new TcpClient();
 		using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(_timeoutMs)))
 		{
 			try
@@ -54,11 +61,13 @@ public class Client
 		if (!_client.Connected)
 		{
 			Console.WriteLine("Could not connect to server");
+			OnDisconnection();
 			throw new TimeoutException("Could not connect to server");
 		}
 
 		_stream = _client.GetStream();
 		Console.WriteLine($"Connected to {host}:{port}");
+		OnConnection();
 		_ = ListenAsync();
 
 	}
@@ -85,7 +94,7 @@ public class Client
 				bytesRead = await ReadFullAsync(data, length);
 				if (bytesRead == 0) break;
 
-				Console.WriteLine($"Received {length} bytes");
+				// Console.WriteLine($"Received {length} bytes");
 				OnMessageReceived(data);
 			}
 		}
@@ -96,6 +105,7 @@ public class Client
 		finally
 		{
 			Disconnect();
+			OnDisconnection();
 		}
 	}
 
@@ -126,13 +136,26 @@ public class Client
 		}
 	}
 
+
 	private void OnMessageReceived(byte[] data)
 	{
 		MessageReceived?.Invoke(this, data);
 	}
 
+	private void OnConnection()
+	{
+		Connection?.Invoke();
+	}
+
+	private void OnDisconnection()
+	{
+		Disconnection?.Invoke();
+	}
+
 	public void Disconnect()
 	{
+		if (!IsConnected) return;
+
 		_stream?.Close();
 		_client?.Close();
 		Console.WriteLine("Disconnected");

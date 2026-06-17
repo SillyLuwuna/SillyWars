@@ -212,5 +212,10 @@ public class Server
 		// IPEndPoint endPoint = client.Client.RemoteEndPoint as IPEndPoint;
 		ConnectionEstablished?.Invoke(this, client);
 	}
+
+	public int ConnectionCount
+	{
+		get => _clients.Count;
+	}
 }
 }

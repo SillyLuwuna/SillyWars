@@ -1,4 +1,4 @@
-public class Cell
-{
-	public bool IsWalkable;
-}
+// public class Cell
+// {
+// 	public bool IsWalkable;
+// }

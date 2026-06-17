@@ -9,24 +9,76 @@ using System.Collections.Concurrent;
 using System;
 using System.Text;
 using System.IO;
+using RtsEngine.Data;
 
-public class GameServer : MonoBehaviour
+public class NetworkClient : MonoBehaviour
 {
+	private static NetworkClient? _instance = null;
+	private static bool _awoken = false;
+
 	public string Ip = "localhost";
 	public int Port = 13774;
 	public int TimeoutMs = 1000;
 
-	private Client? _client;
-	private readonly ConcurrentQueue<byte[]> _dataQueue = new ConcurrentQueue<byte[]>();
-	// private byte[]? _data;
-	// private readonly object _dataLock = new object();
+	private Client _client = null!;
+	private readonly ConcurrentQueue<WorldState> _dataQueue = new ConcurrentQueue<WorldState>();
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+	public event EventHandler<WorldState>? Tick;
+	public event Action? ConnectionLost;
+	public event Action? ConnectionEstablished;
+
+
+	private NetworkClient() { }
+
+	public static NetworkClient Instance()
+	{
+		if (!_awoken || _instance == null)
+		{
+			throw new MethodAccessException("Instance was not initialized yet");
+		}
+
+		// if (_instance == null)
+		// {
+		// 	_instance = new NetworkClient();
+		// }
+
+		return _instance;
+	}
+
+	void Awake()
+	{
+		if (_instance != null && _instance != this)
+		{
+			Destroy(gameObject);
+			return;
+		}
+
+		_instance = this;
+		DontDestroyOnLoad(gameObject);
+		_awoken = true;
+
+		Console.SetOut(new UnityTextWriter());
+
+		StartClient();
+	}
+
+	private void StartClient()
+	{
+		_client = new Client(TimeoutMs);
+		_client.MessageReceived += HandleData;
+		_client.Connection += OnConnectionEstablished;
+		_client.Disconnection += OnConnectionLost;
+	}
+
     void Start()
     {
-		Console.SetOut(new UnityTextWriter());
-		StartCoroutine(ConnectToServer());
+		if (this != _instance) return;
     }
+
+	public void TryConnect()
+	{
+		StartCoroutine(ConnectToServer());
+	}
 
 	private class UnityTextWriter : TextWriter
 	{
@@ -45,15 +97,16 @@ public class GameServer : MonoBehaviour
 
 	private IEnumerator ConnectToServer()
 	{
-		_client = new Client(TimeoutMs);
-		_client.MessageReceived += HandleData;
-
 		Task connectTask = _client.ConnectAsync(Ip, Port);
 		yield return new WaitUntil(() => connectTask.IsCompleted);
 
 		try
 		{
 			connectTask.GetAwaiter().GetResult();
+			if (connectTask.IsFaulted)
+			{
+				throw connectTask.Exception;
+			}
 			Debug.Log("Connected to server!");
 		}
 		catch (Exception ex)
@@ -65,32 +118,51 @@ public class GameServer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		while (_dataQueue.TryDequeue(out byte[]? data))
+		if (!_client.IsConnected) return;
+
+		while (_dataQueue.TryDequeue(out WorldState state))
 		{
-			ProcessData(data);
+			OnSimulationTick(state);
 		}
     }
 
-	private void ProcessData(byte[] data)
+	private void HandleData(object? sender, byte[] data)
 	{
-		Debug.Log($"Received {data.Length} bytes");
+		// Debug.Log($"Received {data.Length} bytes");
 
 		byte[] decompressedData = DataCompressor.DecompressData(data);
 		WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
-		Console.WriteLine(state.Map.Size());
-	}
 
-	private void HandleData(object? sender, byte[] data)
-	{
-		_dataQueue.Enqueue(data);
-		// lock (_dataLock)
-		// {
-		// 	_data = data;
-		// }
+		_dataQueue.Enqueue(state);
 	}
 
 	void OnDestroy()
 	{
 		_client?.Disconnect();
+	}
+
+	private void OnSimulationTick(WorldState state)
+	{
+		Tick?.Invoke(this, state);
+	}
+
+	private void OnConnectionLost()
+	{
+		ConnectionLost?.Invoke();
+	}
+
+	private void OnConnectionEstablished()
+	{
+		ConnectionEstablished?.Invoke();
+	}
+
+	public bool IsConnected()
+	{
+		return _client.IsConnected;
+	}
+
+	public void Disconnect()
+	{
+		_client.Disconnect();
 	}
 }

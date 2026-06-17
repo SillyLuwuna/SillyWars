@@ -6,16 +6,18 @@ using Networking;
 using System.Net.Sockets;
 using System;
 using System.Threading.Tasks;
+    using global::RtsEngine.Math;
+    using global::RtsEngine.Data;
 
-public static class Program
+    public static class Program
 {
 	public static async Task Main()
 	{
-		SerializableGrid<Cell> grid = new SerializableGrid<Cell>(new Vec2(0, 0), 1, 100, 100);
+		SerializableGrid<Cell> grid = new SerializableGrid<Cell>(new Vec2(0, 0), 1, 20, 10);
 
 		for (int i = 0; i < grid.Size(); i++)
 		{
-			if (i % 2 == 0) grid[i] = new Cell(CellType.Ground);
+			if (i % 2 == 0 || i % 3 == 1) grid[i] = new Cell(CellType.Ground);
 			else grid[i] = new Cell(CellType.Empty);
 		}
 
@@ -106,27 +108,27 @@ public static class Program
 		engine.Stop();
 	}
 
-	private static void HandleMessage(object? sender, byte[] data)
-	{
-		byte[] dd = DataCompressor.DecompressData(data);
-		WorldState state = Serializer.FromBytes<WorldState>(dd);
-		SerializableGrid<Cell> map = state.Map;
-
-		Console.WriteLine();
-		Console.WriteLine();
-		for (int i = 0; i < map.Size(); i++)
-		{
-			Console.Write(map[i].IsWalkable + " ");
-		}
-		Console.WriteLine();
-
-		for (int i = 0; i < 10; i++)
-		{
-			Console.Write(state.Entities[i].Pos + " ");
-			Console.Write("Worker? " + (state.Entities[i] is Worker));
-			Console.WriteLine();
-		}
-	}
+	// private static void HandleMessage(object? sender, byte[] data)
+	// {
+	// 	byte[] dd = DataCompressor.DecompressData(data);
+	// 	WorldState state = Serializer.FromBytes<WorldState>(dd);
+	// 	SerializableGrid<Cell> map = state.Map;
+	//
+	// 	Console.WriteLine();
+	// 	Console.WriteLine();
+	// 	for (int i = 0; i < map.Size(); i++)
+	// 	{
+	// 		Console.Write(map[i].IsWalkable + " ");
+	// 	}
+	// 	Console.WriteLine();
+	//
+	// 	for (int i = 0; i < 10; i++)
+	// 	{
+	// 		Console.Write(state.Entities[i].Pos + " ");
+	// 		Console.Write("Worker? " + (state.Entities[i] is Worker));
+	// 		Console.WriteLine();
+	// 	}
+	// }
 
 	//
 	// private static async void HandleConnection(object? sender, TcpClient client)
