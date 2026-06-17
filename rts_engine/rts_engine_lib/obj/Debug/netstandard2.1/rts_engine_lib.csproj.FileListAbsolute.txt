@@ -1,0 +1,11 @@
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/bin/Debug/netstandard2.1/SillyWars.Engine.deps.json
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/bin/Debug/netstandard2.1/SillyWars.Engine.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/bin/Debug/netstandard2.1/SillyWars.Engine.pdb
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.GeneratedMSBuildEditorConfig.editorconfig
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.AssemblyInfoInputs.cache
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.AssemblyInfo.cs
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.csproj.CoreCompileInputs.cache
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.sourcelink.json
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/SillyWars.Engine.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/SillyWars.Engine.pdb
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.csproj.AssemblyReference.cache

@@ -644,6 +644,10 @@
       <HintPath>Assets/Plugins/SillyWars.Engine.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="K4os.Hash.xxHash">
+      <HintPath>Assets/Plugins/K4os.Hash.xxHash.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="netstandard">
       <HintPath>/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/NetStandard/ref/2.1.0/netstandard.dll</HintPath>
       <Private>False</Private>

@@ -75,7 +75,9 @@ public class GameServer : MonoBehaviour
 	{
 		Debug.Log($"Received {data.Length} bytes");
 
-		WorldState state = Serializer.FromBytes<WorldState>(data);
+		byte[] decompressedData = DataCompressor.DecompressData(data);
+		WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
+		Console.WriteLine(state.Map.Size());
 	}
 
 	private void HandleData(object? sender, byte[] data)

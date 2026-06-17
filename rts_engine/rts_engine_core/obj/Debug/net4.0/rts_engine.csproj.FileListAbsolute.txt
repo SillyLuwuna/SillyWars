@@ -1,5 +1,0 @@
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net4.0/rts_engine.GeneratedMSBuildEditorConfig.editorconfig
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net4.0/rts_engine.AssemblyInfoInputs.cache
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net4.0/rts_engine.AssemblyInfo.cs
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net4.0/rts_engine.csproj.CoreCompileInputs.cache
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net4.0/rts_engine.sourcelink.json
