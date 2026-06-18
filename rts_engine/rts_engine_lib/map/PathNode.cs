@@ -41,7 +41,7 @@ public class PathNode : IEquatable<PathNode>
 	{
 		List<PathNode> children = new List<PathNode>(10);
 
-		Vec2Int gridPos = grid.CellPosFromWorldSpace(goal);
+		Vec2Int gridPos = grid.CellPosFromWorldSpace(Pos);
 		Vec2Int goalGridPos = grid.CellPosFromWorldSpace(goal);
 		Vec2 gridWorldPos = grid.WorldSpaceFromCellPos(gridPos);
 

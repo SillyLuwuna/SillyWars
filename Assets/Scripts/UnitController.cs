@@ -2,15 +2,20 @@
 
 using System;
 using System.Collections.Generic;
+using RtsEngine;
+using RtsEngine.Math;
+using RtsEngine.Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class UnitSelection : MonoBehaviour
+public class UnitController : MonoBehaviour
 {
-	private static UnitSelection? _instance = null;
+	private static UnitController? _instance = null;
 	private static bool _awoken = false;
 
 	[SerializeField] private SelectionBoxUI selectionBoxUI = null!;
+	// TODO UnitManager should be singleton
+	[SerializeField] private UnitManager unitManager = null!;
 	private Vector2 _dragStart;
 	private Vector2 _dragEnd;
 	// private Rect _selectionRect;
@@ -18,9 +23,9 @@ public class UnitSelection : MonoBehaviour
 
 	public List<GameObject>? UnitsSelected;
 
-	private UnitSelection() { }
+	private UnitController() { }
 
-	public static UnitSelection Instance()
+	public static UnitController Instance()
 	{
 		if (!_awoken || _instance == null) throw new MethodAccessException("Instance was not initialized yet");
 		return _instance;
@@ -37,10 +42,27 @@ public class UnitSelection : MonoBehaviour
 		_instance = this;
 		DontDestroyOnLoad(gameObject);
 		_awoken = true;
+	}
 
-		Debug.Log("OwO");
+	public void OnRightClick(InputAction.CallbackContext context)
+	{
+		if (context.phase == InputActionPhase.Started)
+		{
+			Vector2 goal = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+			MoveAction(goal);
+		}
+	}
 
-		// SetupCollider();
+	private void MoveAction(Vector2 goal)
+	{
+		if (UnitsSelected == null) return;
+
+		foreach (GameObject obj in UnitsSelected)
+		{
+			BaseUnit unit = unitManager.GetUnit(obj)!;
+			PlayerCommand command = PlayerCommand.MoveCommand(unit, new Vec2(goal.x, goal.y));
+			NetworkClient.Instance().SendCommand(command);
+		}
 	}
 
 	public void OnDrag(InputAction.CallbackContext context)

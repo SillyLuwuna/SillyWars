@@ -578,6 +578,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "RightClickPress",
+                    "type": "PassThrough",
+                    "id": "38565949-2892-42ea-8dd7-9ad0fa03efa7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1005,8 +1014,19 @@
                     "path": "<Mouse>/leftButton",
                     "interactions": "Hold",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Drag",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3c219eb-c08d-4ba3-a98e-5f54da3c07d7",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightClickPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

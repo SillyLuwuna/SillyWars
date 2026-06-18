@@ -3,6 +3,7 @@ using RtsEngine.Data;
 using RtsEngine.Math;
 using RtsEngine.EntityProperties;
 using RtsEngine.Map;
+using System;
 
 namespace RtsEngine.Units
 {
@@ -78,6 +79,8 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 		PathFinding pathfinder = new PathFinding(map);
 		PathOptimizer optimizer = new PathOptimizer(map);
 
+
+		CurrPath = pathfinder.GetPath(Pos, goal);
 		CurrPath = optimizer.OptimizePath(pathfinder.GetPath(Pos, goal));
 		CurrPathCheckpoint = 1;
 
@@ -97,8 +100,8 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 			if (CurrPathCheckpoint >= CurrPath.Count)
 			{
 				Halt();
-				return;
 			}
+			return;
 		}
 
 		Vec2 direction = Pos.To(target).Unit;

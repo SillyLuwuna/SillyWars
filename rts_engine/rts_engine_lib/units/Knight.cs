@@ -19,7 +19,7 @@ public class Knight : BaseUnit
 		Range = 0.5f;
 		AttackDamage = 1;
 		AttackSpeed = 1.0f;
-		MoveSpeed = 0.01f;
+		MoveSpeed = 0.10f;
 		Sight = 3;
 		TrainCost = 10;
 		TrainTime = 15.0f;

@@ -56,13 +56,13 @@
     <Compile Include="Assets/Scripts/Old/Path.cs" />
     <Compile Include="Assets/Scripts/Old/GridManager.cs" />
     <Compile Include="Assets/Scripts/Old/PriorityQueue.cs" />
-    <Compile Include="Assets/Scripts/UnitSelection.cs" />
     <Compile Include="Assets/Scripts/Old/Grid.cs" />
     <Compile Include="Assets/Scripts/Old/GameMath.cs" />
     <Compile Include="Assets/Scripts/Old/PathNode.cs" />
     <Compile Include="Assets/Scripts/Old/Line.cs" />
     <Compile Include="Assets/Scripts/Old/GoalChaser.cs" />
     <Compile Include="Assets/Scripts/Old/Cell.cs" />
+    <Compile Include="Assets/Scripts/UnitController.cs" />
     <Compile Include="Assets/Scripts/ConnectButton.cs" />
     <Compile Include="Assets/Scripts/Old/GridRaycast.cs" />
     <Compile Include="Assets/Scripts/Old/Pathfinding.cs" />

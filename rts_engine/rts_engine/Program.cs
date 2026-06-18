@@ -28,7 +28,7 @@ public static class Program
 
 		for (int i = 0; i < 10; i++)
 		{
-			Vec2 pos = new Vec2(i, (i*2) % 10);
+			Vec2 pos = new Vec2(i + 0.5f, (i*2) % 10 + 0.5f);
 			uint owner = (((i % 4) == 0) || (((i + 3) % 4) == 0)) ? 0u : 1u;
 			Entity curr = i % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
 			state.AddEntity(curr);

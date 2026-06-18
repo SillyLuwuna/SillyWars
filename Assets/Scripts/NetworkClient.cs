@@ -126,6 +126,12 @@ public class NetworkClient : MonoBehaviour
 		}
     }
 
+	public void SendCommand(PlayerCommand command)
+	{
+		// TODO dangerous
+		_ = _client.SendAsync(Serializer.ToBytes(command));
+	}
+
 	private void HandleData(object? sender, byte[] data)
 	{
 		// Debug.Log($"Received {data.Length} bytes");

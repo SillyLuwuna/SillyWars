@@ -19,7 +19,7 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 	public float Distance(Vec2 other)
 	{
 		float dx = other.x - x;
-		float dy = other.y = y;
+		float dy = other.y - y;
 		return MathF.Sqrt(dx * dx + dy * dy);
 	}
 

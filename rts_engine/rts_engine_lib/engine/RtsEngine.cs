@@ -127,6 +127,7 @@ public class RtsEngine
 			PlayerCommand command = Serializer.FromBytes<PlayerCommand>(args.Data);
 			command._ownerId = playerId;
 
+			// TODO command queue
 			command.Execute(_state);
 		}
 		catch (Exception ex)

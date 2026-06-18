@@ -5293,29 +5293,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1428621001}
-  - component: {fileID: 1428621000}
   - component: {fileID: 1428621002}
+  - component: {fileID: 1428621003}
   m_Layer: 0
-  m_Name: UnitSelector
+  m_Name: UnitController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1428621000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1428620999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b32605e5f6187fd3bf9be397f02eac0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnitSelection
-  selectionBoxUI: {fileID: 1309459523}
-  UnitsSelected: []
 --- !u!4 &1428621001
 Transform:
   m_ObjectHideFlags: 0
@@ -5434,8 +5420,8 @@ MonoBehaviour:
     m_ActionName: UI/TrackedDeviceOrientation
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1428621000}
-        m_TargetAssemblyTypeName: UnitSelection, Assembly-CSharp
+      - m_Target: {fileID: 1428621003}
+        m_TargetAssemblyTypeName: UnitController, Assembly-CSharp
         m_MethodName: OnDrag
         m_Mode: 0
         m_Arguments:
@@ -5448,11 +5434,42 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 0064db16-f157-443a-b16e-1cdd9ff35c48
     m_ActionName: 'UI/Drag[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1428621003}
+        m_TargetAssemblyTypeName: UnitController, Assembly-CSharp
+        m_MethodName: OnRightClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 38565949-2892-42ea-8dd7-9ad0fa03efa7
+    m_ActionName: 'UI/RightClickPress[/Mouse/rightButton]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 519420031}
+--- !u!114 &1428621003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428620999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1da3ff5b59b23dcea1253f7b4a08fe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitController
+  selectionBoxUI: {fileID: 1309459523}
+  unitManager: {fileID: 1436162569}
+  UnitsSelected: []
 --- !u!1 &1436162567
 GameObject:
   m_ObjectHideFlags: 0

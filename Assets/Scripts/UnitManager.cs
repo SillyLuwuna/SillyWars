@@ -16,12 +16,14 @@ public class UnitManager : MonoBehaviour
 	public Quaternion spawnRotation = Quaternion.identity;
 
 	private Dictionary<BaseUnit, GameObject> _unitInstances = null!;
+	private Dictionary<int, BaseUnit> _objectUnits = null!;
 	private bool _newConnection;
 
     void Start()
     {
 		_newConnection = true;
 		_unitInstances = new Dictionary<BaseUnit, GameObject>();
+		_objectUnits = new Dictionary<int, BaseUnit>();
 
 		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
 		NetworkClient.Instance().Tick += Tick;
@@ -41,10 +43,18 @@ public class UnitManager : MonoBehaviour
 				Destroy(obj);
 			}
 			_unitInstances.Clear();
+			_objectUnits.Clear();
 			_newConnection = false;
 		}
 
 		UpdateUnits(state.GetUnitView());
+	}
+
+	public BaseUnit? GetUnit(GameObject obj)
+	{
+		int key = obj.GetInstanceID();
+		if (!_objectUnits.ContainsKey(key)) return null;
+		return _objectUnits[key];
 	}
 
 	private void UpdateUnits(List<BaseUnit> units)
@@ -60,6 +70,7 @@ public class UnitManager : MonoBehaviour
 			{
 				GameObject instance = Instantiate(GetCorrespondingObject(unit), pos, spawnRotation);
 				_unitInstances.Add(unit, instance);
+				_objectUnits.Add(instance.GetInstanceID(), unit);
 				continue;
 			}
 
