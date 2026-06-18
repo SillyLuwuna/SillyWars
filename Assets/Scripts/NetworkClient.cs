@@ -13,6 +13,8 @@ using RtsEngine.Data;
 
 public class NetworkClient : MonoBehaviour
 {
+	public static int SERVER_TPS = 20;
+
 	private static NetworkClient? _instance = null;
 	private static bool _awoken = false;
 
@@ -21,7 +23,11 @@ public class NetworkClient : MonoBehaviour
 	public int TimeoutMs = 1000;
 
 	private Client _client = null!;
-	private readonly ConcurrentQueue<WorldState> _dataQueue = new ConcurrentQueue<WorldState>();
+	// private readonly ConcurrentQueue<WorldState> _dataQueue = new ConcurrentQueue<WorldState>();
+	private WorldState _oldState = null!;
+	private WorldState _currState = null!;
+	private object _stateLock = new object();
+	private bool _update = false;
 
 	public event EventHandler<WorldState>? Tick;
 	public event Action? ConnectionLost;
@@ -120,10 +126,17 @@ public class NetworkClient : MonoBehaviour
     {
 		if (!_client.IsConnected) return;
 
-		while (_dataQueue.TryDequeue(out WorldState state))
+		lock (_stateLock)
 		{
-			OnSimulationTick(state);
+			if (!_update) return;
+
+			_update = false;
+			OnSimulationTick(_currState);
 		}
+		// while (_dataQueue.TryDequeue(out WorldState state))
+		// {
+		// 	OnSimulationTick(state);
+		// }
     }
 
 	public void SendCommand(PlayerCommand command)
@@ -139,7 +152,14 @@ public class NetworkClient : MonoBehaviour
 		byte[] decompressedData = DataCompressor.DecompressData(data);
 		WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
 
-		_dataQueue.Enqueue(state);
+		lock (_stateLock)
+		{
+			_oldState = _currState;
+			_currState = state;
+
+			_update = true;
+		}
+		// _dataQueue.Enqueue(state);
 	}
 
 	void OnDestroy()

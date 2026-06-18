@@ -81,6 +81,12 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 
 
 		CurrPath = pathfinder.GetPath(Pos, goal);
+		if (CurrPath.Count <= 1)
+		{
+			Halt();
+			return;
+		}
+
 		CurrPath = optimizer.OptimizePath(pathfinder.GetPath(Pos, goal));
 		CurrPathCheckpoint = 1;
 

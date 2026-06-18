@@ -27,6 +27,7 @@ public class Client
 	public Client(int timeoutMs)
 	{
 		_client = new TcpClient();
+		_client.Client.NoDelay = true;
 		_buffer = new byte[8192];
 		_stream = null;
 		_streamLock = new object();
@@ -42,6 +43,7 @@ public class Client
 		Console.WriteLine("Connecting...");
 
 		_client = new TcpClient();
+		_client.Client.NoDelay = true;
 		using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(_timeoutMs)))
 		{
 			try

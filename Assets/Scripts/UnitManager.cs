@@ -17,6 +17,11 @@ public class UnitManager : MonoBehaviour
 
 	private Dictionary<BaseUnit, GameObject> _unitInstances = null!;
 	private Dictionary<int, BaseUnit> _objectUnits = null!;
+
+	private Dictionary<BaseUnit, Vector3> _movingUnitsGoal = null!;
+
+	private object _updateLock = new object();
+
 	private bool _newConnection;
 
     void Start()
@@ -25,29 +30,74 @@ public class UnitManager : MonoBehaviour
 		_unitInstances = new Dictionary<BaseUnit, GameObject>();
 		_objectUnits = new Dictionary<int, BaseUnit>();
 
+		_movingUnitsGoal = new Dictionary<BaseUnit, Vector3>();
+
 		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
 		NetworkClient.Instance().Tick += Tick;
     }
 
     void Update()
     {
-        
+		lock(_updateLock)
+		{
+			InterpolateUnitsTowardsGoal();
+		}
     }
+
+	private void InterpolateUnitsTowardsGoal()
+	{
+		// deltaTime is update from Update() -> Update(). We should need
+		// the deltaTime also from Tick() -> Update(). To account for position resets
+		float deltaTicks = Time.deltaTime / (1f / (float)NetworkClient.SERVER_TPS);
+
+		List<BaseUnit> completed = new List<BaseUnit>();
+		foreach (BaseUnit unit in _movingUnitsGoal.Keys)
+		{
+			GameObject unitObj = _unitInstances[unit];
+			Vector3 pos = unitObj.transform.position;
+			Vector3 goal = _movingUnitsGoal[unit];
+			Vector3 direction = (goal - pos).normalized;
+			float magnitude = unit.MoveSpeed * deltaTicks;
+
+			if (Vector3.Distance(pos, goal) <= magnitude)
+			{
+				unitObj.transform.position = goal;
+				completed.Add(unit);
+				continue;
+			}
+
+			unitObj.transform.position += direction * magnitude;
+		}
+
+		foreach (BaseUnit unit in completed)
+		{
+			_movingUnitsGoal.Remove(unit);
+		}
+	}
 
 	private void Tick(object? sender, WorldState state)
 	{
-		if (_newConnection)
+		lock(_updateLock)
 		{
-			foreach (GameObject obj in _unitInstances.Values)
+			if (_newConnection)
 			{
-				Destroy(obj);
+				Reset();
 			}
-			_unitInstances.Clear();
-			_objectUnits.Clear();
-			_newConnection = false;
-		}
 
-		UpdateUnits(state.GetUnitView());
+			UpdateUnits(state.GetUnitView());
+		}
+	}
+
+	private void Reset()
+	{
+		foreach (GameObject obj in _unitInstances.Values)
+		{
+			Destroy(obj);
+		}
+		_unitInstances.Clear();
+		_objectUnits.Clear();
+		_movingUnitsGoal.Clear();
+		_newConnection = false;
 	}
 
 	public BaseUnit? GetUnit(GameObject obj)
@@ -63,19 +113,44 @@ public class UnitManager : MonoBehaviour
 		for(int i = 0; i < numUnits; i++)
 		{
 			BaseUnit unit = units[i];
-
-			Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, 0);
-
-			if (!_unitInstances.ContainsKey(unit))
-			{
-				GameObject instance = Instantiate(GetCorrespondingObject(unit), pos, spawnRotation);
-				_unitInstances.Add(unit, instance);
-				_objectUnits.Add(instance.GetInstanceID(), unit);
-				continue;
-			}
-
-			_unitInstances[unit].transform.position = pos;
+			
+			UpdateUnit(unit);
 		}
+	}
+
+	private void UpdateUnit(BaseUnit unit)
+	{
+		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, 0);
+
+		if (IsNewUnit(unit))
+		{
+			SpawnUnit(unit, pos);
+			return;
+		}
+
+		UpdateWalkingGoal(unit, pos);
+	}
+
+	private void UpdateWalkingGoal(BaseUnit unit, Vector3 pos)
+	{
+		if (_movingUnitsGoal.ContainsKey(unit))
+		{
+			_unitInstances[unit].transform.position = _movingUnitsGoal[unit];
+		}
+
+		_movingUnitsGoal[unit] = pos;
+	}
+
+	private bool IsNewUnit(BaseUnit unit)
+	{
+		return !_unitInstances.ContainsKey(unit);
+	}
+
+	private void SpawnUnit(BaseUnit unit, Vector3 pos)
+	{
+		GameObject instance = Instantiate(GetCorrespondingObject(unit), pos, spawnRotation);
+		_unitInstances.Add(unit, instance);
+		_objectUnits.Add(instance.GetInstanceID(), unit);
 	}
 
 	private GameObject GetCorrespondingObject(BaseUnit unit)

@@ -41,6 +41,7 @@ public class Server
 	public Server(int port, int requiredClients)
 	{
 		_listener = new TcpListener(IPAddress.Any, port);
+		_listener.Server.NoDelay = true;
 		_clients = new List<TcpClient>();
 		// _clientsLock = new object();
 		_clientsSemaphore = new SemaphoreSlim(1, 1);
@@ -88,7 +89,6 @@ public class Server
 				bytesRead = await ReadFullAsync(stream, data, length);
 				if (bytesRead == 0) break;
 
-				Console.WriteLine($"Received {length} bytes");
 				OnMessageReceived(data, client);
 			}
 		}

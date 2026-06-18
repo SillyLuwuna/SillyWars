@@ -24,10 +24,17 @@ public class RtsEngine
 	private Dictionary<string, uint> _playerIds;
 	private Dictionary<uint, string> _playerEndpoints;
 
+	private object _commandQueueLock;
+	private Queue<PlayerCommand> _commandQueue;
+
+	private ulong _totalTicks;
 	private int _statInterval;
 	private float _statLoadSum;
 	private int _statTicks;
 	private long _statByteSum;
+	private long _statByteIncSum;
+	private int _statPacketsReceived;
+	private int _statPacketsSent;
 
 	private Task? _currentBroadcastTask;
 	private readonly object _broadcastLock;
@@ -38,6 +45,8 @@ public class RtsEngine
 		_broadcastLock = new object();
 		_playerIds = new Dictionary<string, uint>();
 		_playerEndpoints = new Dictionary<uint, string>();
+		_commandQueue = new Queue<PlayerCommand>();
+		_commandQueueLock = new object();
 		IsRunning = false;
 		_state = state;
 		_clock = new Clock(INTERVAL_MS);
@@ -50,12 +59,21 @@ public class RtsEngine
 
 	private void Reset()
 	{
+		_totalTicks = 0;
 		_statInterval = 0;
 		_statLoadSum = 0.0f;
 		_statTicks = 0;
 		_statByteSum = 0;
+		_statByteIncSum = 0;
+		_statPacketsReceived = 0;
+		_statPacketsSent = 0;
 		_playerEndpoints.Clear();
 		_playerIds.Clear();
+
+		lock(_commandQueueLock)
+		{
+			_commandQueue.Clear();
+		}
 	}
 
 	public async Task Start()
@@ -80,24 +98,50 @@ public class RtsEngine
 	public void Tick()
 	{
 		if (!IsRunning) throw new InvalidOperationException("cannot tick when the engine is not running.");
+		_totalTicks++;
 
+		WaitForPreviousTickBroadcast();
+		ExecutePlayerCommands();
+		UpdateWorldState();
+		BroadcastWorldState();
+	}
+
+	private void WaitForPreviousTickBroadcast()
+	{
 		lock (_broadcastLock)
 		{
 			if (_currentBroadcastTask != null && !_currentBroadcastTask.IsCompleted)
 			{
 				Console.WriteLine("Network bottleneck.");
 				_currentBroadcastTask.Wait();
-				// return;
 			}
 		}
+	}
 
+	private void ExecutePlayerCommands()
+	{
+		lock(_commandQueueLock)
+		{
+			while(_commandQueue.Count > 0)
+			{
+				PlayerCommand command = _commandQueue.Dequeue();
+				command.Execute(_state);
+			}
+		}
+	}
+
+	private void UpdateWorldState()
+	{
 		_state.TickEntities();
+	}
 
-
+	private void BroadcastWorldState()
+	{
 		byte[] data = Serializer.ToBytes(_state);
 		byte[] compressedData = DataCompressor.CompressData(data);
-		_statByteSum += compressedData.Length * _server.ConnectionCount * 8;
+		_statByteSum += compressedData.Length * _server.ConnectionCount;
 		_currentBroadcastTask = _server.BroadcastData(compressedData);
+		_statPacketsSent += _server.ConnectionCount;
 	}
 
 	private void TickSubscriber(object? sender, ClockEventArgs e)
@@ -121,14 +165,19 @@ public class RtsEngine
 
 	private void OnDataReceived(object? sender, DataEventArgs args)
 	{
+		_statByteIncSum += args.Data.Length;
+		_statPacketsReceived++;
+
 		uint playerId = _playerIds[GetPlayerEndpoint(args.Ip, args.Port)];
 		try
 		{
 			PlayerCommand command = Serializer.FromBytes<PlayerCommand>(args.Data);
 			command._ownerId = playerId;
 
-			// TODO command queue
-			command.Execute(_state);
+			lock (_commandQueueLock)
+			{
+				_commandQueue.Enqueue(command);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -161,13 +210,33 @@ public class RtsEngine
 			float userThroughput = totalThroughput / (float)System.Math.Max(_server.ConnectionCount, 1);
 			float userThroughputKb = userThroughput / 1024.0f;
 
-			float avgPacketSize = (userThroughput * (float)_statInterval / 1000.0f) / 8.0f / _statTicks;
+			float incomingThroughput = (float)_statByteIncSum / ((float)_statInterval / 1000.0f);
+			float incomingThroughputKb = incomingThroughput / 1024.0f;
 
-			Console.Write($"[{elapsed:D8}] ");
-			Console.Write($"load: {loadAvg:F2}\t");
-			Console.Write($"tp/utp: {totalThroughputKb:F1}/{userThroughputKb:F1} KBs\t\t");
-			Console.Write($"pkt: {(int)avgPacketSize} B");
-			Console.WriteLine();
+			float userIncomingThroughput = incomingThroughput / (float)System.Math.Max(_server.ConnectionCount, 1);
+			float userIncomingThroughputKb = userIncomingThroughput / 1024.0f;
+
+			float avgPacketSize = _statByteSum / System.MathF.Max(_statPacketsSent, 1);
+			float avgIncPacketSize = (float)_statByteIncSum / System.MathF.Max(_statPacketsReceived, 1);
+
+			// Console.Write($"[{elapsed:D8}] ");
+			// Console.Write($"[{_totalTicks:D8}]  ");
+			TimeSpan ts = TimeSpan.FromMilliseconds(elapsed);
+
+			string stats = "";
+			stats += $"[{ts.Hours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}]   ";
+
+			stats += $"load: {loadAvg,6:F2}  | ";
+
+			stats += $"send: {totalThroughputKb,6:F1} KB/s  | ";
+			stats += $"recv: {incomingThroughputKb,6:F1} KB/s  | ";
+
+			stats += $"pkt out: {(int)avgPacketSize,6} B  | ";
+			stats += $"pkt in: {(int)avgIncPacketSize,6} B";
+
+			Console.WriteLine(stats);
+
+
 			if (loadAvg > 1.0f)
 			{
 				Console.WriteLine("Engine is overloaded!");
@@ -177,6 +246,9 @@ public class RtsEngine
 			_statLoadSum = 0.0f;
 			_statTicks = 0;
 			_statByteSum = 0;
+			_statByteIncSum = 0;
+			_statPacketsReceived = 0;
+			_statPacketsSent = 0;
 		}
 	}
 }

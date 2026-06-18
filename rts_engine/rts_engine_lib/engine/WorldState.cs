@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.IO;
 using System.Collections.Generic;
 using RtsEngine.EntityProperties;
+using System;
 
 namespace RtsEngine
 {
@@ -71,7 +72,14 @@ public class WorldState : ISerializable
 		int numEntities = _entities.Count;
 		for (int i = 0; i < numEntities; i++)
 		{
-			_entities[i].Tick();
+			try
+			{
+				_entities[i].Tick();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error when ticking entity {_entities[i].Id}: {ex.Message}");
+			}
 		}
 	}
 
