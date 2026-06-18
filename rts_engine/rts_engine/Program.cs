@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using RtsEngine.Math;
 using RtsEngine.Data;
+using RtsEngine.EntityProperties;
 
 namespace RtsEngine
 {
@@ -29,7 +30,8 @@ public static class Program
 		{
 			Vec2 pos = new Vec2(i, (i*2) % 10);
 			uint owner = (((i % 4) == 0) || (((i + 3) % 4) == 0)) ? 0u : 1u;
-			state.Entities.Add(i % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner));
+			Entity curr = i % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
+			state.AddEntity(curr);
 		}
 
 		// Save map

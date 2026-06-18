@@ -44,7 +44,7 @@ public class UnitManager : MonoBehaviour
 			_newConnection = false;
 		}
 
-		UpdateUnits(state.Units);
+		UpdateUnits(state.GetUnitView());
 	}
 
 	private void UpdateUnits(List<BaseUnit> units)

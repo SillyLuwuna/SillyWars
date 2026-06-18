@@ -93,6 +93,11 @@ public class WorldState : ISerializable
 		}
 	}
 
+	public List<BaseUnit> GetUnitView() // TODO make actual view
+	{
+		return _units;
+	}
+
 	public static WorldState Load(string file)
 	{
 		using FileStream fs = File.OpenRead(file);
