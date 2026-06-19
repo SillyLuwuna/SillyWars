@@ -85,6 +85,19 @@ namespace RtsEngine.Map
 		return ContainsPosFromWorldSpace(pos.x, pos.y);
 	}
 
+	public bool ContainsPos(Vec2Int pos)
+	{
+		if (pos.x < 0 || pos.y < 0) return false;
+		if (pos.x >= _width || pos.y >= _height) return false;
+		return true;
+	}
+
+	public T GetObjectAtWorldPos(Vec2 worldPos)
+	{
+		Vec2Int cellPos = CellPosFromWorldSpace(worldPos);
+		return this[cellPos.x, cellPos.y];
+	}
+
 	public float RightEdgeX(Vec2Int pos)
 	{
 		return WorldSpaceFromCellPos(pos).x + _strideHalfsCache;
@@ -135,6 +148,27 @@ namespace RtsEngine.Map
 	{
 		return _width * _height;
 	}
+
+	public float MaxWorldX
+	{
+		get => _start.x + _width;
+	}
+
+	public float MaxWorldY
+	{
+		get => _start.y + _height;
+	}
+
+	public float MinWorldX
+	{
+		get => _start.x;
+	}
+
+	public float MinWorldY
+	{
+		get => _start.y;
+	}
+
 }
 
 }

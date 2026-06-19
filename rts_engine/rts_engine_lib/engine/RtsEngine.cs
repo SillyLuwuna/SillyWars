@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RtsEngine.Data;
+using RtsEngine.EntityProperties;
 using RtsEngine.Networking;
 
 namespace RtsEngine
@@ -18,6 +19,7 @@ public class RtsEngine
 	private const int NUM_PLAYERS = 1;
 
 	public bool IsRunning { get; private set; }
+	private PhysicsEngine _physicsEngine;
 	private WorldState _state;
 	private Clock _clock;
 	private Server _server;
@@ -41,6 +43,7 @@ public class RtsEngine
 
 	public RtsEngine(WorldState state)
 	{
+		_physicsEngine = new PhysicsEngine();
 		_currentBroadcastTask = null;
 		_broadcastLock = new object();
 		_playerIds = new Dictionary<string, uint>();
@@ -103,6 +106,7 @@ public class RtsEngine
 		WaitForPreviousTickBroadcast();
 		ExecutePlayerCommands();
 		UpdateWorldState();
+		UpdatePhysics();
 		BroadcastWorldState();
 	}
 
@@ -133,6 +137,15 @@ public class RtsEngine
 	private void UpdateWorldState()
 	{
 		_state.TickEntities();
+	}
+
+	private void UpdatePhysics()
+	{
+		List<PhysicsObject> physicsObjects = _state.GetPhysicsObjects();
+
+		_physicsEngine.ProcessCollisions(physicsObjects);
+		_physicsEngine.PhysicsTick(physicsObjects);
+		_physicsEngine.LimitToMapBoundaries(physicsObjects, _state.Map);
 	}
 
 	private void BroadcastWorldState()

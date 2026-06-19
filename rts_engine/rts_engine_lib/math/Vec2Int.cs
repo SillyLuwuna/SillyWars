@@ -33,6 +33,32 @@ public struct Vec2Int : IEquatable<Vec2Int>, ISerializable
 		return !(left == right);
 	}
 
+	public static Vec2Int operator -(Vec2Int left, Vec2Int right)
+	{
+		return new Vec2Int(left.x - right.x, left.y - right.y);
+	}
+
+	public static Vec2Int operator -(Vec2Int right)
+	{
+		return new Vec2Int(-right.x, -right.y);
+	}
+
+	public static Vec2Int operator +(Vec2Int left, Vec2Int right)
+	{
+		return new Vec2Int(left.x + right.x, left.y + right.y);
+	}
+
+	public static Vec2Int operator /(Vec2Int left, int right)
+	{
+		return new Vec2Int(left.x / right, left.y / right);
+	}
+
+	public static Vec2Int operator *(Vec2Int left, int right)
+	{
+		return new Vec2Int(left.x * right, left.y * right);
+	}
+
+
 	public override bool Equals(object? obj)
 	{
 		// if (obj is not Vec2Int other) return false;

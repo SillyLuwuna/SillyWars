@@ -8,7 +8,7 @@ using System;
 namespace RtsEngine.Units
 {
 
-public abstract class BaseUnit : Entity, ISerializable, IMovable
+public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 {
 	public int HP { get; protected set; }
 	public float Range { get; protected set; }
@@ -25,13 +25,12 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 	public Map.Path? CurrPath { get; protected set; }
 	public int CurrPathCheckpoint { get; protected set; }
 
-	public float Size { get; protected set; } // for unit-unit collision
-
-	public BaseUnit(Vec2 pos, uint ownerId) : base(ownerId)
+	public BaseUnit(Vec2 pos, uint ownerId) : base(pos, ownerId, 1.0f, 0.1f, 0.2f)
 	{
-		Pos = pos;
+		Radius = 0.3f;
+		Mass = 1.0f;
+		Friction = 1.0f;
 
-		Size = 0.1f;
 		CurrPath = null;
 	}
 
@@ -53,8 +52,6 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 		writer.Write(TrainTime);
 		writer.Write((byte)Type);
 		Serializer.Serialize(writer, _state);
-		// State.SerializeFields(writer);
-		writer.Write(Size);
 	}
 
 	public override void DeserializeFields(BinaryReader reader)
@@ -70,7 +67,6 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 		TrainTime = reader.ReadSingle();
 		Type = (UnitType)reader.ReadByte();
 		_state = Serializer.Deserialize<UnitState>(reader);
-		Size = reader.ReadSingle();
 	}
 
 	public void Move(Grid<Cell> map, Vec2 goal)
@@ -111,11 +107,13 @@ public abstract class BaseUnit : Entity, ISerializable, IMovable
 		}
 
 		Vec2 direction = Pos.To(target).Unit;
-		Pos += direction * MoveSpeed;
+		this.ApplyForce(direction * MoveSpeed);
+		// Pos += direction * MoveSpeed;
 	}
 
 	public void Halt()
 	{
+		ClearVelocity();
 		_state.IsWalking = false;
 		CurrPath = null;
 	}

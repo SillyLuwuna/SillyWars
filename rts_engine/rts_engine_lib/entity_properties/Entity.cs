@@ -15,11 +15,12 @@ public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 	public uint OwnerId;
 	public Vec2 Pos;
 
-	public Entity(uint ownerId)
+	public Entity(Vec2 pos, uint ownerId)
 	{
 		Id = _CURR_ID;
 		_CURR_ID++;
 		OwnerId = ownerId;
+		Pos = pos;
 	}
 
 	public virtual void SerializeFields(BinaryWriter writer)
@@ -60,8 +61,6 @@ public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 	{
 		return (int)Id;
 	}
-
-	public abstract HashSet<CommandType> GetAllowedActions();
 }
 
 }

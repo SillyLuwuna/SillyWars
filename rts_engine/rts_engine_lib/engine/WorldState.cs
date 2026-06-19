@@ -17,20 +17,20 @@ public class WorldState : ISerializable
 	private Dictionary<uint, Entity> _entitiesId = null!;
 	private List<Entity> _entities = null!;
 	private List<BaseUnit> _units = null!;
+	private List<PhysicsObject> _physicsObjects = null!;
 
 	public WorldState(SerializableGrid<Cell> map)
 	{
-		// TODO fix warning on old compiler version
 		Init(map);
 	}
 
-	// [MemberNotNull(nameof(Map), nameof(Entities), nameof(Units))]
 	private void Init(SerializableGrid<Cell> map)
 	{
 		Map = map;
 		_entitiesId = new Dictionary<uint, Entity>();
 		_entities = new List<Entity>();
 		_units = new List<BaseUnit>();
+		_physicsObjects = new List<PhysicsObject>();
 	}
 
 	public void SerializeFields(BinaryWriter writer)
@@ -61,9 +61,15 @@ public class WorldState : ISerializable
 	{
 		_entities.Add(entity);
 		_entitiesId.Add(entity.Id, entity);
+
 		if (entity is BaseUnit currBase)
 		{
 			_units.Add(currBase);
+		}
+
+		if (entity is PhysicsObject currPhysics)
+		{
+			_physicsObjects.Add(currPhysics);
 		}
 	}
 
@@ -104,6 +110,11 @@ public class WorldState : ISerializable
 	public List<BaseUnit> GetUnitView() // TODO make actual view
 	{
 		return _units;
+	}
+
+	public List<PhysicsObject> GetPhysicsObjects()
+	{
+		return _physicsObjects;
 	}
 
 	public static WorldState Load(string file)

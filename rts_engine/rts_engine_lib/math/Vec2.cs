@@ -45,6 +45,11 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 		return new Vec2(left.x - right.x, left.y - right.y);
 	}
 
+	public static Vec2 operator -(Vec2 right)
+	{
+		return new Vec2(-right.x, -right.y);
+	}
+
 	public static Vec2 operator +(Vec2 left, Vec2 right)
 	{
 		return new Vec2(left.x + right.x, left.y + right.y);

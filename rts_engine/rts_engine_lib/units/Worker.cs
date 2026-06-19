@@ -9,18 +9,13 @@ namespace RtsEngine.Units
 
 public class Worker : BaseUnit
 {
-	private static readonly HashSet<CommandType> ALLOWED_ACTIONS = new HashSet<CommandType>
-	{
-		CommandType.Move
-	};
-
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
 		HP = 3;
 		Range = 0.5f;
 		AttackDamage = 1;
 		AttackSpeed = 1.0f;
-		MoveSpeed = 0.01f;
+		MoveSpeed = 0.15f;
 		Sight = 3;
 		TrainCost = 10;
 		TrainTime = 15.0f;
@@ -40,11 +35,6 @@ public class Worker : BaseUnit
 	public override void Tick()
 	{
 		base.Tick();
-	}
-
-	public override HashSet<CommandType> GetAllowedActions()
-	{
-		return ALLOWED_ACTIONS;
 	}
 }
 }

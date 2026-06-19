@@ -20,8 +20,9 @@ public static class Program
 
 		for (int i = 0; i < grid.Size(); i++)
 		{
-			if (i % 2 == 0 || i % 3 == 1) grid[i] = new Cell(CellType.Ground);
-			else grid[i] = new Cell(CellType.Empty);
+			grid[i] = new Cell(CellType.Ground);
+			// if (i % 2 == 0 || i % 3 == 1) grid[i] = new Cell(CellType.Ground);
+			// else grid[i] = new Cell(CellType.Empty);
 		}
 
 		WorldState? state = new WorldState(grid);
