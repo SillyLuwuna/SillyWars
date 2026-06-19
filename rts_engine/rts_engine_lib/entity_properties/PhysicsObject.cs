@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using RtsEngine.Data;
 using RtsEngine.Map;
@@ -64,7 +65,14 @@ public abstract class PhysicsObject : Entity
 
 		float distance = this.Pos.Distance(other.Pos);
 
-		Vec2 direction = this.Pos.To(other.Pos).Unit;
+		Vec2 direction = this.Pos.To(other.Pos);
+		if (direction.IsZero)
+		{
+			direction = new Vec2(0f, 1.0f);
+		}
+
+		direction = direction.Unit;
+
 		float magnitude = 1f / (1f + distance);
 		magnitude *= COLLISION_PUSHBACK_INTENSITY;
 

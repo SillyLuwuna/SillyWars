@@ -72,12 +72,14 @@ namespace RtsEngine.Map
 
 	public bool ContainsPosFromWorldSpace(float x, float y)
 	{
-		if (F.Gt(x, _start.x + (_strideWidth * _width))) return false;
-		if (F.Lt(x, _start.x)) return false;
-		if (F.Gt(y, _start.y + (_strideWidth * _height))) return false;
-		if (F.Lt(y, _start.y)) return false;
-
-		return true;
+		Vec2Int cellPos = CellPosFromWorldSpace(x, y);
+		return ContainsPos(cellPos);
+		// if (F.Gt(x, _start.x + (_strideWidth * _width))) return false;
+		// if (F.Lt(x, _start.x)) return false;
+		// if (F.Gt(y, _start.y + (_strideWidth * _height))) return false;
+		// if (F.Lt(y, _start.y)) return false;
+		//
+		// return true;
 	}
 
 	public bool ContainsPosFromWorldSpace(Vec2 pos)

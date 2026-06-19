@@ -7,6 +7,8 @@ namespace RtsEngine.Math
 
 public struct Vec2 : IEquatable<Vec2>, ISerializable
 {
+	private static readonly Vec2 ZERO = new Vec2(0f, 0f);
+
 	public float x;
 	public float y;
 
@@ -101,6 +103,11 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 	public Vec2 To(Vec2 other)
 	{
 		return other - this;
+	}
+
+	public bool IsZero
+	{
+		get => this == ZERO;
 	}
 
 	public float Magnitude

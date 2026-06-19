@@ -14,7 +14,6 @@ public class PhysicsEngine
 
 	public void ProcessCollisions(List<PhysicsObject> physicsObjects)
 	{
-		// List<PhysicsObject> physicsObjects = state.GetPhysicsObjects();
 		for (int i = 0; i < physicsObjects.Count; i++)
 		{
 			for (int j = i + 1; j < physicsObjects.Count; j++)
