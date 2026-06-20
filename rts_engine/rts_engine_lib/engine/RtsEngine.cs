@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Networking;
+using RtsEngine.Physics;
 
 namespace RtsEngine
 {
@@ -185,7 +186,7 @@ public class RtsEngine
 		try
 		{
 			PlayerCommand command = Serializer.FromBytes<PlayerCommand>(args.Data);
-			command._ownerId = playerId;
+			command._playerId = playerId;
 
 			lock (_commandQueueLock)
 			{

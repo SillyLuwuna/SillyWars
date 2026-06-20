@@ -7,6 +7,7 @@ using System.IO;
 using System.Collections.Generic;
 using RtsEngine.EntityProperties;
 using System;
+using RtsEngine.Physics;
 
 namespace RtsEngine
 {

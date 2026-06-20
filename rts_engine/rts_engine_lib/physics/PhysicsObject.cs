@@ -1,10 +1,11 @@
 using System;
 using System.IO;
 using RtsEngine.Data;
+using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 using RtsEngine.Math;
 
-namespace RtsEngine.EntityProperties
+namespace RtsEngine.Physics
 {
 
 public abstract class PhysicsObject : Entity
@@ -145,6 +146,7 @@ public abstract class PhysicsObject : Entity
 		base.SerializeFields(writer);
 		Serializer.Serialize(writer, Force);
 		Serializer.Serialize(writer, Velocity);
+		Serializer.Serialize(writer, DeltaPos);
 
 		writer.Write(Radius);
 		writer.Write(Friction);
@@ -158,6 +160,7 @@ public abstract class PhysicsObject : Entity
 		base.DeserializeFields(reader);
 		Force = Serializer.Deserialize<Vec2>(reader);
 		Velocity = Serializer.Deserialize<Vec2>(reader);
+		DeltaPos = Serializer.Deserialize<Vec2>(reader);
 
 		Radius = reader.ReadSingle();
 		Friction = reader.ReadSingle();

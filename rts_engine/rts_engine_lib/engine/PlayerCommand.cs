@@ -9,14 +9,14 @@ namespace RtsEngine
 
 public class PlayerCommand : ISerializable
 {
-	public uint _ownerId;
+	public uint _playerId;
 	private uint _entityId;
 	private CommandType _command;
 	private byte[] _args;
 
-	public PlayerCommand(uint ownerId, uint entityId, CommandType command, byte[] args)
+	public PlayerCommand(uint playerId, uint entityId, CommandType command, byte[] args)
 	{
-		_ownerId = ownerId;
+		_playerId = playerId;
 		_entityId = entityId;
 		_command = command;
 		_args = args;
@@ -24,7 +24,7 @@ public class PlayerCommand : ISerializable
 
 	public void SerializeFields(BinaryWriter writer)
 	{
-		writer.Write(_ownerId);
+		writer.Write(_playerId);
 		writer.Write(_entityId);
 		writer.Write((byte)_command);
 		writer.Write(_args.Length);
@@ -33,7 +33,7 @@ public class PlayerCommand : ISerializable
 
 	public void DeserializeFields(BinaryReader reader)
 	{
-		_ownerId = reader.ReadUInt32();
+		_playerId = reader.ReadUInt32();
 		_entityId = reader.ReadUInt32();
 		_command = (CommandType)reader.ReadByte();
 		int argLen = reader.ReadInt32();
@@ -44,7 +44,7 @@ public class PlayerCommand : ISerializable
 	{
 		Entity? entity = state.GetEntity(_entityId);
 		if (entity == null) return;
-		if (entity.OwnerId != _ownerId) return;
+		if (entity.OwnerId != _playerId) return;
 
 		switch (_command)
 		{

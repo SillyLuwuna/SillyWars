@@ -4,6 +4,7 @@ using RtsEngine.Math;
 using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 using System;
+using RtsEngine.Physics;
 
 namespace RtsEngine.Units
 {

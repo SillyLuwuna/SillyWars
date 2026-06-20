@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 
-namespace RtsEngine
+namespace RtsEngine.Physics
 {
 
 public class PhysicsEngine
