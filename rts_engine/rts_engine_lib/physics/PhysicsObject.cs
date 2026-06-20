@@ -141,12 +141,16 @@ public abstract class PhysicsObject : Entity
 		}
 	}
 
-	public override void SerializeFields(BinaryWriter writer)
+	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
-		Serializer.Serialize(writer, Force);
-		Serializer.Serialize(writer, Velocity);
-		Serializer.Serialize(writer, DeltaPos);
+		// Serializer.Serialize(writer, Force);
+		// Serializer.Serialize(writer, Velocity);
+		// Serializer.Serialize(writer, DeltaPos);
+
+		writer.Write(Force);
+		writer.Write(Velocity);
+		writer.Write(DeltaPos);
 
 		writer.Write(Radius);
 		writer.Write(Friction);
@@ -155,18 +159,27 @@ public abstract class PhysicsObject : Entity
 		writer.Write(_enabled);
 	}
 
-	public override void DeserializeFields(BinaryReader reader)
+	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
-		Force = Serializer.Deserialize<Vec2>(reader);
-		Velocity = Serializer.Deserialize<Vec2>(reader);
-		DeltaPos = Serializer.Deserialize<Vec2>(reader);
+		// Force = Serializer.Deserialize<Vec2>(reader);
+		// Velocity = Serializer.Deserialize<Vec2>(reader);
+		// DeltaPos = Serializer.Deserialize<Vec2>(reader);
+		Force = reader.Read<Vec2>();
+		Velocity = reader.Read<Vec2>();
+		DeltaPos = reader.Read<Vec2>();
 
-		Radius = reader.ReadSingle();
-		Friction = reader.ReadSingle();
-		Mass = reader.ReadSingle();
+		Radius = reader.Read<float>();
+		Friction = reader.Read<float>();
+		Mass = reader.Read<float>();
 
-		_enabled = reader.ReadBoolean();
+		_enabled = reader.Read<bool>();
+
+		// Radius = reader.ReadSingle();
+		// Friction = reader.ReadSingle();
+		// Mass = reader.ReadSingle();
+		//
+		// _enabled = reader.ReadBoolean();
 	}
 }
 

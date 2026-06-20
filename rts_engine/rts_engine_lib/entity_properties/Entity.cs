@@ -23,22 +23,23 @@ public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 		Pos = pos;
 	}
 
-	public virtual void SerializeFields(BinaryWriter writer)
+	public virtual void SerializeFields(SerializerWriter writer)
 	{
 		writer.Write(Id);
 		writer.Write(OwnerId);
-		Pos.SerializeFields(writer);
+		writer.Write(Pos);
 	}
 
-	public virtual void DeserializeFields(BinaryReader reader)
+	public virtual void DeserializeFields(SerializerReader reader)
 	{
-		Id = reader.ReadUInt32();
-		OwnerId = reader.ReadUInt32();
+		reader.Read(out Id);
+		reader.Read(out OwnerId);
+		reader.Read(out Pos);
+
 		if (_CURR_ID <= Id)
 		{
 			_CURR_ID = Id + 1;
 		}
-		Pos.DeserializeFields(reader);
 	}
 
 	public abstract void Tick();

@@ -6,7 +6,9 @@ namespace RtsEngine.Data
 // public interface ISerializable<T>
 public interface ISerializable
 {
-	public void SerializeFields(BinaryWriter writer);
-	public void DeserializeFields(BinaryReader reader);
+	// public void SerializeFields(BinaryWriter writer);
+	// public void DeserializeFields(BinaryReader reader);
+	public void SerializeFields(SerializerWriter writer);
+	public void DeserializeFields(SerializerReader reader);
 }
 }

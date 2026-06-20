@@ -34,26 +34,31 @@ public class WorldState : ISerializable
 		_physicsObjects = new List<PhysicsObject>();
 	}
 
-	public void SerializeFields(BinaryWriter writer)
+	public void SerializeFields(SerializerWriter writer)
 	{
-		Serializer.Serialize(writer, Map);
+		writer.Write(Map);
+		// Serializer.Serialize(writer, Map);
 
 		writer.Write(_entities.Count);
 		foreach (Entity entity in _entities)
 		{
-			Serializer.Serialize(writer, entity);
+			// Serializer.Serialize(writer, entity);
+			writer.Write(entity);
 		}
 	}
 
-	public void DeserializeFields(BinaryReader reader)
+	public void DeserializeFields(SerializerReader reader)
 	{
-		SerializableGrid<Cell> map = Serializer.Deserialize<SerializableGrid<Cell>>(reader);
+		// SerializableGrid<Cell> map = Serializer.Deserialize<SerializableGrid<Cell>>(reader);
+		SerializableGrid<Cell> map = reader.Read<SerializableGrid<Cell>>();
 		Init(map);
 
-		int entitiesNum = reader.ReadInt32();
+		// int entitiesNum = reader.ReadInt32();
+		int entitiesNum = reader.Read<int>();
 		for (int i = 0; i < entitiesNum; i++)
 		{
-			Entity curr = Serializer.Deserialize<Entity>(reader);
+			// Entity curr = Serializer.Deserialize<Entity>(reader);
+			Entity curr = reader.Read<Entity>();
 			AddEntity(curr);
 		}
 	}
@@ -121,19 +126,21 @@ public class WorldState : ISerializable
 	public static WorldState Load(string file)
 	{
 		using FileStream fs = File.OpenRead(file);
-		using GZipStream gzip = new GZipStream(fs, CompressionMode.Decompress);
-		using BinaryReader reader = new BinaryReader(gzip);
+		using BrotliStream zip = new BrotliStream(fs, CompressionMode.Decompress);
+		using SerializerReader reader = new SerializerReader(zip);
 
-		return Serializer.Deserialize<WorldState>(reader);
+		return reader.Read<WorldState>();
+		// return Serializer.Deserialize<WorldState>(reader);
 	}
 
 	public void Save(string file)
 	{
 		using FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write);
-		using GZipStream gzip = new GZipStream(fs, CompressionLevel.Fastest);
-		using BinaryWriter writer = new BinaryWriter(gzip);
+		using BrotliStream zip = new BrotliStream(fs, CompressionLevel.Optimal);
+		using SerializerWriter writer = new SerializerWriter(zip);
 
-		Serializer.Serialize(writer, this);
+		writer.Write(this);
+		// Serializer.Serialize(writer, this);
 	}
 }
 }

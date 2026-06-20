@@ -142,12 +142,12 @@ public class NetworkClient : MonoBehaviour
 	public void SendCommand(PlayerCommand command)
 	{
 		// TODO dangerous
-		_ = _client.SendAsync(Serializer.ToBytes(command));
+		byte[] data = Serializer.ToBytes(command);
+		_ = _client.SendAsync(data);
 	}
 
 	private void HandleData(object? sender, byte[] data)
 	{
-		// Debug.Log($"Received {data.Length} bytes");
 
 		byte[] decompressedData = DataCompressor.DecompressData(data);
 		WorldState state = Serializer.FromBytes<WorldState>(decompressedData);

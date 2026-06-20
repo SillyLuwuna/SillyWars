@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Math;
 
@@ -21,12 +22,12 @@ public class Knight : BaseUnit
 		Type = UnitType.Knight;
 	}
 
-	public override void SerializeFields(BinaryWriter writer)
+	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
 	}
 
-	public override void DeserializeFields(BinaryReader reader)
+	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
 	}

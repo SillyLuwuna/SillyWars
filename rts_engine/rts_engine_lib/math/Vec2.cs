@@ -5,7 +5,7 @@ using RtsEngine.Data;
 namespace RtsEngine.Math
 {
 
-public struct Vec2 : IEquatable<Vec2>, ISerializable
+public struct Vec2 : IEquatable<Vec2>
 {
 	private static readonly Vec2 ZERO = new Vec2(0f, 0f);
 
@@ -86,18 +86,6 @@ public struct Vec2 : IEquatable<Vec2>, ISerializable
 	public override string ToString()
 	{
 		return "(" + x + ", " + y + ")";
-	}
-
-	public void SerializeFields(BinaryWriter writer)
-	{
-		writer.Write(x);
-		writer.Write(y);
-	}
-
-	public void DeserializeFields(BinaryReader reader)
-	{
-		x = reader.ReadSingle();
-		y = reader.ReadSingle();
 	}
 
 	public Vec2 To(Vec2 other)

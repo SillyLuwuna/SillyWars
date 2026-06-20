@@ -153,8 +153,11 @@ public class RtsEngine
 	{
 		byte[] data = Serializer.ToBytes(_state);
 		byte[] compressedData = DataCompressor.CompressData(data);
-		_statByteSum += compressedData.Length * _server.ConnectionCount;
+
 		_currentBroadcastTask = _server.BroadcastData(compressedData);
+
+
+		_statByteSum += compressedData.Length * _server.ConnectionCount;
 		_statPacketsSent += _server.ConnectionCount;
 	}
 

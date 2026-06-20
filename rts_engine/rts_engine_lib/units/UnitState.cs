@@ -61,14 +61,15 @@ public struct UnitState : ISerializable
 		}
 	}
 
-	public void SerializeFields(BinaryWriter writer)
+	public void SerializeFields(SerializerWriter writer)
 	{
 		writer.Write(_stateFlags);
 	}
 
-	public void DeserializeFields(BinaryReader reader)
+	public void DeserializeFields(SerializerReader reader)
 	{
-		_stateFlags = reader.ReadByte();
+		reader.Read(out _stateFlags);
+		// _stateFlags = reader.ReadByte();
 	}
 }
 }

@@ -2,54 +2,42 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace RtsEngine.Data
 {
 
 public static class Serializer
 {
-	public static T Deserialize<T>(BinaryReader reader) where T : ISerializable
-	{
-		string typeName = reader.ReadString();
-		Type type = Type.GetType(typeName)
-			?? throw new InvalidDataException("Null type deserialization.");
-
-		T instance = (T)(RuntimeHelpers.GetUninitializedObject(type));
-		// T instance = (T)(Activator.CreateInstance(type, true) ?? throw new InvalidDataException("Null type deserialization."));
-
-		if (!(instance is ISerializable))
-		{
-			throw new InvalidDataException("Deserializing non-serializable class.");
-		}
-
-		instance.DeserializeFields(reader);
-
-		return instance;
-	}
-
-	public static void Serialize<T>(BinaryWriter writer, T obj) where T : ISerializable
-	{
-		writer.Write(obj.GetType().AssemblyQualifiedName ?? throw new InvalidDataException("Null type serialization."));
-
-		obj.SerializeFields(writer);
-	}
-
-	public static byte[] ToBytes<T>(T obj) where T : ISerializable
+	public static byte[] ToBytes<T>(T obj)
 	{
 		using MemoryStream ms = new MemoryStream();
-		using BinaryWriter writer = new BinaryWriter(ms);
+		using SerializerWriter writer = new SerializerWriter(ms);
 
-		Serialize(writer, obj);
+		// writer.Serialize(obj);
+		writer.Write(obj);
 
 		return ms.ToArray();
 	}
 
-	public static T FromBytes<T>(byte[] data) where T : ISerializable
+	public static T FromBytes<T>(byte[] data)
 	{
 		using MemoryStream ms = new MemoryStream(data);
-		using BinaryReader reader = new BinaryReader(ms);
+		using SerializerReader reader = new SerializerReader(ms);
 
-		return Deserialize<T>(reader);
+		// return reader.Deserialize<T>();
+		return reader.Read<T>();
 	}
+
+	// public static T FromBytes<T>(byte[] data, out byte[] remainder) where T : ISerializable
+	// {
+	// 	using MemoryStream ms = new MemoryStream(data);
+	// 	using SerializerReader reader = new SerializerReader(ms);
+	//
+	// 	T obj = Deserialize<T>(reader);
+	// 	long remainderLen = reader.BaseStream.Length - reader.BaseStream.Position;
+	// 	remainder = reader.ReadBytes((int)remainderLen);
+	// 	return obj;
+	// }
 }
 }

@@ -20,14 +20,16 @@ public class Cell : ISerializable
 		Type = type;
 	}
 
-	public void SerializeFields(BinaryWriter writer)
+	public void SerializeFields(SerializerWriter writer)
 	{
-		writer.Write((byte)Type);
+		// writer.Write((byte)Type);
+		writer.Write(Type);
 	}
 
-	public void DeserializeFields(BinaryReader reader)
+	public void DeserializeFields(SerializerReader reader)
 	{
-		Type = (CellType)reader.ReadByte();
+		// Type = (CellType)reader.ReadByte();
+		Type = reader.Read<CellType>();
 	}
 }
 }

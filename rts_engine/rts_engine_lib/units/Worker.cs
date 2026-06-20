@@ -22,12 +22,12 @@ public class Worker : BaseUnit
 		Type = UnitType.Worker;
 	}
 
-	public override void SerializeFields(BinaryWriter writer)
+	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
 	}
 
-	public override void DeserializeFields(BinaryReader reader)
+	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
 	}

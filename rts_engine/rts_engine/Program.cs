@@ -43,37 +43,55 @@ public static class Program
 		// WorldState? state = WorldState.Load("test.smap");
 		state = WorldState.Load("test.smap");
 
+		// grid = state.Map;
+		// for (int i = 0; i < grid.Size(); i++)
+		// {
+		// 	Console.Write(grid[i].IsWalkable + " ");
+		// }
+
 		// Start engine
+
+		byte[] stateBytes = Serializer.ToBytes(state);
+		byte[] compressed = DataCompressor.CompressData(stateBytes);
+		byte[] decompressed = DataCompressor.DecompressData(compressed);
+		WorldState retrieved = Serializer.FromBytes<WorldState>(decompressed);
+
+
+		// Console.WriteLine(retrieved);
 
 		RtsEngine engine = new RtsEngine(state);
 		_ = engine.Start();
+
+		// Client client = new Client(1000);
+		// client.MessageReceived += HandleMessage;
+		// await client.ConnectAsync("localhost", 13774);
 
 		Console.ReadKey();
 
 		engine.Stop();
 	}
 
-	// private static void HandleMessage(object? sender, byte[] data)
-	// {
-	// 	byte[] dd = DataCompressor.DecompressData(data);
-	// 	WorldState state = Serializer.FromBytes<WorldState>(dd);
-	// 	SerializableGrid<Cell> map = state.Map;
-	//
-	// 	Console.WriteLine();
-	// 	Console.WriteLine();
-	// 	for (int i = 0; i < map.Size(); i++)
-	// 	{
-	// 		Console.Write(map[i].IsWalkable + " ");
-	// 	}
-	// 	Console.WriteLine();
-	//
-	// 	for (int i = 0; i < 10; i++)
-	// 	{
-	// 		Console.Write(state.Entities[i].Pos + " ");
-	// 		Console.Write("Worker? " + (state.Entities[i] is Worker));
-	// 		Console.WriteLine();
-	// 	}
-	// }
+	private static void HandleMessage(object? sender, byte[] data)
+	{
+		byte[] dd = DataCompressor.DecompressData(data);
+		WorldState state = Serializer.FromBytes<WorldState>(dd);
+		// SerializableGrid<Cell> map = state.Map;
+
+		// Console.WriteLine();
+		// Console.WriteLine();
+		// for (int i = 0; i < state.Map.Size(); i++)
+		// {
+		// 	Console.Write(state.Map[i].IsWalkable + " ");
+		// }
+		// Console.WriteLine();
+		//
+		// for (uint i = 0; i < 10; i++)
+		// {
+		// 	Console.Write(state.GetEntity(i)!.Pos + " ");
+		// 	Console.Write(state.GetEntity(i) is Worker);
+		// 	Console.WriteLine();
+		// }
+	}
 
 	//
 	// private static async void HandleConnection(object? sender, TcpClient client)
