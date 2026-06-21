@@ -10,7 +10,8 @@ namespace RtsEngine.Physics
 
 public abstract class PhysicsObject : Entity
 {
-	private static float COLLISION_PUSHBACK_INTENSITY = 0.1f;
+	private static float COLLISION_PUSHBACK_INTENSITY = 0.20f;
+	private static float COLLISION_PUSHBACK_DAMPENING = 0.10f;
 
 	public Vec2 Force { get; private set; }
 	public Vec2 Velocity { get; private set; }
@@ -74,7 +75,7 @@ public abstract class PhysicsObject : Entity
 
 		direction = direction.Unit;
 
-		float magnitude = 1f / (1f + distance);
+		float magnitude = COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + distance);
 		magnitude *= COLLISION_PUSHBACK_INTENSITY;
 
 		Vec2 pushbackForce = direction * magnitude;

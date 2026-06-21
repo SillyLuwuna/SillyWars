@@ -111,7 +111,7 @@ public class SerializerReader : BinaryReader
 
 	private T DeserializeList<T>()
 	{
-		Type elementType = SerializerTypeInfo<T>.ArrayElementType;
+		Type elementType = SerializerTypeInfo<T>.ListElementType;
 		int length = this.Read<int>();
 
 		IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
@@ -119,7 +119,7 @@ public class SerializerReader : BinaryReader
 
 		for (int i = 0; i < length; i++)
 		{
-			list[i] = deserializer();
+			list.Add(deserializer());
 		}
 
 		return (T)list;

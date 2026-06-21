@@ -102,7 +102,7 @@ public class SerializerWriter : BinaryWriter
 	{
 		IList objList = (obj as IList)!;
 
-		Type elementType = SerializerTypeInfo<T>.ArrayElementType;
+		Type elementType = SerializerTypeInfo<T>.ListElementType;
 		Action<object> serializer = GetSerializer(elementType);
 
 		this.Write(objList.Count);

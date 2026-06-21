@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using RtsEngine.Data;
 using RtsEngine.Math;
 
@@ -8,7 +9,7 @@ public class MoveCommandArgs : EntityCommandArgs
 {
 	public Vec2 Goal;
 
-	public MoveCommandArgs(uint entityId, Vec2 goal) : base(entityId)
+	public MoveCommandArgs(List<uint> entityIds, Vec2 goal) : base(entityIds)
 	{
 		Goal = goal;
 	}

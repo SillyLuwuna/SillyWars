@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using RtsEngine.Data;
 
 namespace RtsEngine.Commands
@@ -5,21 +6,21 @@ namespace RtsEngine.Commands
 
 public class EntityCommandArgs : CommandArgs
 {
-	public uint EntityId;
+	public List<uint> EntityIds;
 
-	public EntityCommandArgs(uint entityId) : base()
+	public EntityCommandArgs(List<uint> entityIds) : base()
 	{
-		EntityId = entityId;
+		EntityIds = entityIds;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
 	{
-		writer.Write(EntityId);
+		writer.Write(EntityIds);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
-		reader.Read(out EntityId);
+		reader.Read(out EntityIds);
 	}
 }
 

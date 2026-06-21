@@ -58,13 +58,15 @@ public class UnitController : MonoBehaviour
 	{
 		if (UnitsSelected == null) return;
 
+		List<uint> unitIds = new List<uint>();
 		foreach (GameObject obj in UnitsSelected)
 		{
 			BaseUnit unit = unitManager.GetUnit(obj)!;
-			MoveCommandArgs args = new MoveCommandArgs(unit.Id, new Vec2(goal.x, goal.y));
-			ICommand command = new MoveCommand(0, args);
-			NetworkClient.Instance().SendCommand(command);
+			unitIds.Add(unit.Id);
 		}
+		MoveCommandArgs args = new MoveCommandArgs(unitIds, new Vec2(goal.x, goal.y));
+		ICommand command = new MoveCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
 	}
 
 	public void OnDrag(InputAction.CallbackContext context)

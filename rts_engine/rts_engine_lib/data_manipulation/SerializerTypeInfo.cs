@@ -1,10 +1,8 @@
 // using System.Runtime.Serialization
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace RtsEngine.Data
@@ -20,8 +18,6 @@ public static class SerializerTypeInfo<T>
 
 	public static readonly bool IsArray = TType.IsArray;
 	public static readonly Type ArrayElementType = IsArray ? TType.GetElementType()! : null!;
-	// public static readonly bool IsArrayOfSerializable = IsArray && GetIsSerializable(ArrayElementType);
-	// public static readonly bool IsArrayOfUnmanaged = IsArray && GetIsUnmanaged(ArrayElementType);
 
 	public static readonly bool IsList = GetIsList(TType);
 	public static readonly Type ListElementType = IsList ? TType.GetGenericArguments()[0] : null!;

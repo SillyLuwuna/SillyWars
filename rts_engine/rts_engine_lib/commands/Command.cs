@@ -35,7 +35,7 @@ public abstract class Command<TArgs> : ICommand where TArgs : CommandArgs
 		ExecuteSpecific(state);
 	}
 
-	public abstract void ExecuteSpecific(WorldState state);
+	protected abstract void ExecuteSpecific(WorldState state);
 }
 
 }

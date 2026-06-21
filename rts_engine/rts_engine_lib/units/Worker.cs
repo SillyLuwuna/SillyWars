@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.IO;
 using RtsEngine.Data;
-using RtsEngine.EntityProperties;
 using RtsEngine.Math;
 
 namespace RtsEngine.Units

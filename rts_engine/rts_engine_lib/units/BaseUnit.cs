@@ -28,7 +28,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 
 	public BaseUnit(Vec2 pos, uint ownerId) : base(pos, ownerId, 1.0f, 0.1f, 0.2f)
 	{
-		Radius = 0.3f;
+		Radius = 0.2f;
 		Mass = 1.0f;
 		Friction = 1.0f;
 
@@ -38,6 +38,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 	public override void Tick()
 	{
 		Move();
+	}
+
+	public float GetRadius()
+	{
+		return Radius;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)

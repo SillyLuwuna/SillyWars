@@ -20,16 +20,17 @@ public class HaltCommand : EntityCommand<EntityCommandArgs>
 		base.DeserializeFields(reader);
 	}
 
-	public override bool Validate(WorldState state)
+	protected override bool ValidateEntity(WorldState state, Entity? entity)
 	{
-		if (!base.Validate(state)) return false;
-		if (!(EntityRef is IMovable correctEntity)) return false;
+		if (!base.ValidateEntity(state, entity)) return false;
+
+		if (!(entity is IMovable)) return false;
 		return true;
 	}
 
-	public override void ExecuteSpecific(WorldState state)
+	protected override void ExecuteEntity(WorldState state, Entity entity)
 	{
-		((IMovable)EntityRef!).Halt();
+		((IMovable)entity).Halt();
 	}
 }
 
