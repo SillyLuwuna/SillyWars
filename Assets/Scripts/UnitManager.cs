@@ -84,7 +84,7 @@ public class UnitManager : MonoBehaviour
 				Reset();
 			}
 
-			UpdateUnits(state.GetUnitView());
+			UpdateUnits(state.Units);
 		}
 	}
 
@@ -155,14 +155,13 @@ public class UnitManager : MonoBehaviour
 
 	private GameObject GetCorrespondingObject(BaseUnit unit)
 	{
-		switch (unit.Type)
+		if (unit is Worker)
 		{
-			case UnitType.Worker:
-				return WorkerUnits[unit.OwnerId];
-			case UnitType.Knight:
-				return KnightUnits[unit.OwnerId];
-			default:
-				break;
+			return WorkerUnits[unit.OwnerId];
+		}
+		else if (unit is Knight)
+		{
+			return KnightUnits[unit.OwnerId];
 		}
 
 		Debug.LogError("Unknown unit");

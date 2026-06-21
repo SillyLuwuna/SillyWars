@@ -8,7 +8,7 @@ using RtsEngine.Math;
 namespace RtsEngine.Physics
 {
 
-public abstract class PhysicsObject : Entity
+public class PhysicsObject : Entity
 {
 	private static float COLLISION_PUSHBACK_INTENSITY = 20.00f;
 	private static float COLLISION_PUSHBACK_DAMPENING = 0.001f;
@@ -96,6 +96,10 @@ public abstract class PhysicsObject : Entity
 		other.ApplyForce(pushbackForce);
 	}
 
+	public override void Tick()
+	{
+	}
+
 	public void PhysicsTick()
 	{
 		if (!Enabled) return;
@@ -143,15 +147,16 @@ public abstract class PhysicsObject : Entity
 
 		float error = 0.0001f;
 
+		Vec2 clampPos = Pos;
 		if (!map.ContainsPosFromWorldSpace(dx) || !map.GetObjectAtWorldPos(dx).IsWalkable)
 		{
 			if (DeltaPos.x > 0)
 			{
-				Pos.x = map.RightEdgeX(oldCellPos) - error;
+				clampPos.x = map.RightEdgeX(oldCellPos) - error;
 			}
 			else
 			{
-				Pos.x = map.LeftEdgeX(oldCellPos) + error;
+				clampPos.x = map.LeftEdgeX(oldCellPos) + error;
 			}
 		}
 
@@ -159,13 +164,14 @@ public abstract class PhysicsObject : Entity
 		{
 			if (DeltaPos.y > 0)
 			{
-				Pos.y = map.UpEdgeY(oldCellPos) - error;
+				clampPos.y = map.UpEdgeY(oldCellPos) - error;
 			}
 			else
 			{
-				Pos.y = map.DownEdgeY(oldCellPos) + error;
+				clampPos.y = map.DownEdgeY(oldCellPos) + error;
 			}
 		}
+		Pos = clampPos;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)

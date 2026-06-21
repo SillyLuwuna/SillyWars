@@ -12,11 +12,14 @@ namespace RtsEngine
 
 public class RtsEngine
 {
+	private static RtsEngine? _instance;
+
 	public const int TPS = 20;
 	private const int INTERVAL_MS = 1000 / TPS;
 	private const int PORT = 13774;
 
 	private const int STAT_INTERVAL_MS = 1000;
+	private const bool SHOW_STATS = true;
 	
 	private const int NUM_PLAYERS = 2;
 
@@ -43,7 +46,18 @@ public class RtsEngine
 	private Task? _currentBroadcastTask;
 	private readonly object _broadcastLock;
 
-	public RtsEngine(WorldState state)
+	public static RtsEngine StartInstance(WorldState state)
+	{
+		_instance = new RtsEngine(state);
+		return _instance;
+	}
+
+	public static RtsEngine Instance
+	{
+		get => _instance!;
+	}
+
+	private RtsEngine(WorldState state)
 	{
 		_physicsEngine = new PhysicsEngine();
 		_currentBroadcastTask = null;
@@ -61,6 +75,8 @@ public class RtsEngine
 		_server.ConnectionEstablished += OnConnectionEstablished;
 		Reset();
 	}
+
+	public WorldState State { get => _state; }
 
 	private void Reset()
 	{
@@ -108,6 +124,7 @@ public class RtsEngine
 		WaitForPreviousTickBroadcast();
 		ExecutePlayerCommands();
 		UpdateWorldState();
+		CleanupDestroyedEntities();
 		UpdatePhysics();
 		BroadcastWorldState();
 	}
@@ -141,9 +158,14 @@ public class RtsEngine
 		_state.TickEntities();
 	}
 
+	private void CleanupDestroyedEntities()
+	{
+		_state.CleanupDestroyedEntities();
+	}
+
 	private void UpdatePhysics()
 	{
-		List<PhysicsObject> physicsObjects = _state.GetPhysicsObjects();
+		List<PhysicsObject> physicsObjects = _state.PhysicsObjects;
 
 		_physicsEngine.ProcessCollisions(physicsObjects);
 		_physicsEngine.PhysicsTick(physicsObjects);
@@ -215,6 +237,10 @@ public class RtsEngine
 
 	private void CalcStats(int deltaTime, float load, long elapsed)
 	{
+		#pragma warning disable CS0162
+		if (!SHOW_STATS) return;
+		#pragma warning restore CS0162
+
 		_statInterval += (int)deltaTime;
 		_statLoadSum += load;
 		_statTicks++;

@@ -5,78 +5,94 @@ using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 using System;
 using RtsEngine.Physics;
+using System.Collections.Generic;
 
 namespace RtsEngine.Units
 {
 
-public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
+public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable
 {
-	public int HP { get; protected set; }
-	public float Range { get; protected set; }
-	public int AttackDamage { get; protected set; }
-	public float AttackSpeed { get; protected set; }
-	public float MoveSpeed { get; protected set; }
-	public int Sight { get; protected set; }
-	public int TrainCost { get; protected set; }
-	public float TrainTime { get; protected set; }
-	public UnitType Type { get; protected set; }
-	protected UnitState _state;
-	public UnitState State { get => _state; }
+	public bool IsDestroyed { get; set; }
 
-	public Map.Path? CurrPath { get; protected set; }
-	public int CurrPathCheckpoint { get; protected set; }
+	public abstract int HitPoints { get; set; }
 
-	public BaseUnit(Vec2 pos, uint ownerId) : base(pos, ownerId, 1.0f, 0.1f, 0.2f)
+	public abstract int AttackDamage { get; set; }
+	public abstract int AttackSpeed { get; set; }
+	public abstract float AttackRange { get; set; }
+	public abstract float ChaseDistance { get; set; }
+
+	private BaseUnit? _target;
+	private bool _isDirectTarget;
+	private int _cooldown;
+	private Vec2 _pivot;
+	private bool _isGoingToPivot;
+	private Vec2? _walkGoal;
+	private bool _isChasingTarget;
+	private int _targetedByAmount;
+
+	public abstract float MoveSpeed { get; set; }
+	public Map.Path? CurrPath { get; set; }
+	public int CurrPathCheckpoint { get; set; }
+
+	private EntityState _state;
+	public EntityState State { get => _state; set => _state = value; }
+
+	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
 	{
-		Radius = 0.2f;
-		Mass = 1.0f;
-		Friction = 1.0f;
+		IsDestroyed = false;
+		_target = null;
+		_isDirectTarget = false;
+		_cooldown = 0;
+		_walkGoal = null;
+		_isGoingToPivot = false;
+		_isChasingTarget = false;
+		_targetedByAmount = 0;
 
 		CurrPath = null;
+		_state = new EntityState();
 	}
 
 	public override void Tick()
 	{
-		Move();
-	}
+		base.Tick();
 
-	public float GetRadius()
-	{
-		return Radius;
+		MoveTick();
+		AttackTick();
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
-		writer.Write(HP);
-		writer.Write(Range);
+		writer.Write(HitPoints);
 		writer.Write(AttackDamage);
 		writer.Write(AttackSpeed);
+		writer.Write(AttackRange);
+		writer.Write(ChaseDistance);
 		writer.Write(MoveSpeed);
-		writer.Write(Sight);
-		writer.Write(TrainCost);
-		writer.Write(TrainTime);
-		writer.Write(Type);
-		writer.Write(_state);
+		writer.Write(State);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
-		HP = reader.Read<int>();
-		Range = reader.Read<float>();
+		HitPoints = reader.Read<int>();
 		AttackDamage = reader.Read<int>();
-		AttackSpeed = reader.Read<float>();
+		AttackSpeed = reader.Read<int>();
+		AttackRange = reader.Read<float>();
+		ChaseDistance = reader.Read<float>();
 		MoveSpeed = reader.Read<float>();
-		Sight = reader.Read<int>();
-		TrainCost = reader.Read<int>();
-		TrainTime = reader.Read<float>();
-		Type = reader.Read<UnitType>();
-		_state = reader.Read<UnitState>();
+		State = reader.Read<EntityState>();
 	}
 
-	public void Move(Grid<Cell> map, Vec2 goal)
+	public void SetGoal(Grid<Cell> map, Vec2 goal)
 	{
+		_walkGoal = goal;
+		SetPathfinding(goal);
+	}
+
+	private void SetPathfinding(Vec2 goal)
+	{
+		Grid<Cell> map = RtsEngine.Instance.State.Map;
 		// can be easily optimized by caching, and seeing when map changes to update cache
 		PathFinding pathfinder = new PathFinding(map);
 		PathOptimizer optimizer = new PathOptimizer(map);
@@ -95,8 +111,39 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 		_state.IsWalking = true;
 	}
 
-	public void Move()
+	public void MoveTick()
 	{
+		if (_state.IsAggro)
+		{
+			if (!_isChasingTarget)
+			{
+				BaseUnit? potentialTarget = FindValidTarget();
+				if (potentialTarget != null)
+				{
+					_pivot = Pos;
+					_target = potentialTarget;
+					_isChasingTarget = true;
+					_isDirectTarget = false;
+				}
+			}
+			else if (_isChasingTarget && !_isDirectTarget)
+			{
+				if (_pivot.Distance(Pos) > ChaseDistance)
+				{
+					SetPathfinding(_pivot);
+					_isGoingToPivot = true;
+					_target = null;
+					_isChasingTarget = false;
+					_isDirectTarget = false;
+				}
+			}
+
+			if (_isChasingTarget)
+			{
+				SetPathfinding(_target!.Pos);
+			}
+		}
+
 		if (!_state.IsWalking) return;
 
 		Vec2 target = CurrPath![CurrPathCheckpoint];
@@ -107,6 +154,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 			CurrPathCheckpoint++;
 			if (CurrPathCheckpoint >= CurrPath.Count)
 			{
+				if (_isGoingToPivot)
+				{
+					_isGoingToPivot = false;
+					if (_walkGoal != null)
+					{
+						SetPathfinding(_walkGoal.Value);
+					}
+				}
 				Halt();
 			}
 			return;
@@ -114,7 +169,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 
 		Vec2 direction = Pos.To(target).Unit;
 		this.ApplyForce(direction * MoveSpeed);
-		// Pos += direction * MoveSpeed;
 	}
 
 	public void Halt()
@@ -122,6 +176,77 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 		ClearVelocity();
 		_state.IsWalking = false;
 		CurrPath = null;
+		_walkGoal = null;
+	}
+
+	public void SetAggro(bool aggro)
+	{
+		if (aggro == false)
+		{
+			if (_target != null)
+			{
+				_target._targetedByAmount--;
+			}
+			_target = null;
+			_isDirectTarget = false;
+			_isChasingTarget = false;
+		}
+		State.IsAggro = aggro;
+	}
+
+	public void Attack(IDestroyable target)
+	{
+		if (!(target is BaseUnit baseUnitTarget)) return;
+		SetAggro(true);
+		_target = baseUnitTarget;
+		_isDirectTarget = true;
+		_isChasingTarget = true;
+	}
+
+	public void AttackTick()
+	{
+		if (_cooldown > 0)
+		{
+			_cooldown--;
+		}
+
+		if (!State.IsAggro) return;
+		if (_target == null) return;
+		if (this.Pos.Distance(_target.Pos) - _target.Radius > AttackRange) return;
+
+		_cooldown = AttackSpeed;
+		((IDestroyable)_target).Damage(AttackDamage);
+
+		if (_target.IsDestroyed)
+		{
+			SetAggro(false);
+		}
+	}
+
+	private BaseUnit? FindValidTarget()
+	{
+		BaseUnit? target = null;
+		float targetDistance = float.PositiveInfinity;
+		int targetNumAttackers = int.MaxValue;
+
+		foreach (BaseUnit unit in RtsEngine.Instance.State.Units)
+		{
+			if (_pivot.Distance(this.Pos) < ChaseDistance)
+			{
+				float distance = this.Pos.Distance(unit.Pos);
+
+				if ((target == null) ||
+					(unit._targetedByAmount < targetNumAttackers) ||
+					(distance < targetDistance))
+				{
+					target = unit;
+					targetDistance = distance;
+					targetNumAttackers = unit._targetedByAmount;
+				}
+			}
+		}
+
+		return target;
 	}
 }
 }

@@ -19,6 +19,7 @@ public class WorldState : ISerializable
 	private List<Entity> _entities = null!;
 	private List<BaseUnit> _units = null!;
 	private List<PhysicsObject> _physicsObjects = null!;
+	private List<IDestroyable> _destroyables = null!;
 
 	public WorldState(Grid<Cell> map)
 	{
@@ -32,6 +33,7 @@ public class WorldState : ISerializable
 		_entities = new List<Entity>();
 		_units = new List<BaseUnit>();
 		_physicsObjects = new List<PhysicsObject>();
+		_destroyables = new List<IDestroyable>();
 	}
 
 	public void SerializeFields(SerializerWriter writer)
@@ -72,6 +74,11 @@ public class WorldState : ISerializable
 		{
 			_physicsObjects.Add(currPhysics);
 		}
+
+		if (entity is IDestroyable currDestroyable)
+		{
+			_destroyables.Add(currDestroyable);
+		}
 	}
 
 	public void TickEntities()
@@ -97,6 +104,39 @@ public class WorldState : ISerializable
 		return _entitiesId[id];
 	}
 
+	public void CleanupDestroyedEntities()
+	{
+		List<uint> destroyedEntities = GetDestroyedEntities();
+
+		foreach (uint entityId in destroyedEntities)
+		{
+			RemoveEntity(entityId);
+		}
+	}
+
+	public List<uint> GetDestroyedEntities()
+	{
+		List<uint> destroyedEntities = new List<uint>();
+
+		for (uint i = 0; i < _destroyables.Count; i++)
+		{
+			IDestroyable destroyable = _destroyables[(int)i];
+			if (destroyable.IsDestroyed)
+			{
+				destroyedEntities.Add(((Entity)destroyable).Id);
+			}
+		}
+
+		return destroyedEntities;
+	}
+
+	public void RemoveEntity(uint entityId)
+	{
+		Entity? entity = GetEntity(entityId);
+		if (entity == null) return;
+		RemoveEntity(entity);
+	}
+
 	public void RemoveEntity(Entity entity)
 	{
 		// can be optimized by lazy deleting from arrays
@@ -106,17 +146,21 @@ public class WorldState : ISerializable
 		{
 			_units.Remove(currBase);
 		}
+
+		if (entity is PhysicsObject currPhysics)
+		{
+			_physicsObjects.Remove(currPhysics);
+		}
+
+		if (entity is IDestroyable currDestroyable)
+		{
+			_destroyables.Remove(currDestroyable);
+		}
 	}
 
-	public List<BaseUnit> GetUnitView() // TODO make actual view
-	{
-		return _units;
-	}
+	public List<BaseUnit> Units { get => _units; }
 
-	public List<PhysicsObject> GetPhysicsObjects()
-	{
-		return _physicsObjects;
-	}
+	public List<PhysicsObject> PhysicsObjects { get => _physicsObjects; }
 
 	public static WorldState Load(string file)
 	{

@@ -1,10 +1,9 @@
-using System.IO;
 using RtsEngine.Data;
 
 namespace RtsEngine.Units
 {
 
-public struct UnitState : ISerializable
+public class EntityState : ISerializable
 {
 	private byte _stateFlags;
 	public const byte WALK_MASK = (1 << 0);
@@ -14,6 +13,11 @@ public struct UnitState : ISerializable
 	// 1 bit - idle/walking (movement)
 	// 2 bit - neutral/aggro (aggressiveness)
 	// 3-4 bit - none/build/mine/retrieve (goal)
+
+	public EntityState()
+	{
+		_stateFlags = 0;
+	}
 
 	public bool IsWalking
 	{
@@ -51,9 +55,9 @@ public struct UnitState : ISerializable
 		set => IsAggro = !value;
 	}
 
-	public UnitGoal Goal
+	public EntityGoal Goal
 	{
-		get => (UnitGoal)((_stateFlags & GOAL_MASK) >> 2);
+		get => (EntityGoal)((_stateFlags & GOAL_MASK) >> 2);
 		set
 		{
 			_stateFlags &= unchecked((byte)~GOAL_MASK);

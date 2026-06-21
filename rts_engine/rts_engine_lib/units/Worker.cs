@@ -6,17 +6,25 @@ namespace RtsEngine.Units
 
 public class Worker : BaseUnit
 {
+	public override int HitPoints { get; set; }
+	public override int AttackDamage { get; set; }
+	public override int AttackSpeed { get; set; }
+	public override float AttackRange { get; set; }
+	public override float ChaseDistance { get; set; }
+	public override float MoveSpeed { get; set; }
+
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
-		HP = 3;
-		Range = 0.5f;
+		HitPoints = 1;
 		AttackDamage = 1;
-		AttackSpeed = 1.0f;
-		MoveSpeed = 0.15f;
-		Sight = 3;
-		TrainCost = 10;
-		TrainTime = 15.0f;
-		Type = UnitType.Worker;
+		AttackSpeed = 15;
+		AttackRange = 0.25f;
+		ChaseDistance = 2.0f;
+		MoveSpeed = 0.18f;
+
+		Radius = 0.2f;
+		Mass = 1.0f;
+		Friction = 1.0f;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)

@@ -5,9 +5,11 @@ using RtsEngine.Math;
 namespace RtsEngine.Commands
 {
 
-public class MoveCommand : EntityCommand<MoveCommandArgs>
+public class AttackCommand : EntityCommand<AttackCommandArgs>
 {
-	public MoveCommand(uint playerId, MoveCommandArgs args) : base(playerId, args)
+	public Entity? victim;
+
+	public AttackCommand(uint playerId, AttackCommandArgs args) : base(playerId, args)
 	{
 	}
 
@@ -25,13 +27,18 @@ public class MoveCommand : EntityCommand<MoveCommandArgs>
 	{
 		if (!base.ValidateEntity(state, entity)) return false;
 
-		if (!(entity is IMovable)) return false;
+		if (!(entity is IAttacker)) return false;
+
+		victim = state.GetEntity(_args.VictimId);
+		if (victim == null) return false;
+		if (victim.OwnerId == PlayerId) return false;
+		if (!(victim is IDestroyable)) return false;
 		return true;
 	}
 
 	protected override void ExecuteEntity(WorldState state, Entity entity)
 	{
-		((IMovable)entity).SetGoal(state.Map, _args.Goal);
+		((IAttacker)entity).Attack((IDestroyable)entity);
 	}
 }
 

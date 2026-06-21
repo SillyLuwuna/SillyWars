@@ -34,7 +34,6 @@ public abstract class EntityCommand<TArgs> : Command<TArgs> where TArgs : Entity
 		foreach (uint entityId in _args.EntityIds)
 		{
 			Entity? entity = state.GetEntity(entityId);
-			// if (!ValidateEntity(state, entity)) return false;
 			if (!ValidateEntity(state, entity)) continue;
 			EntityRefs.Add(entity!);
 		}

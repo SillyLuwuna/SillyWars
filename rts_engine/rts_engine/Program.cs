@@ -86,7 +86,7 @@ public static class Program
 
 		// Console.WriteLine(retrieved);
 
-		RtsEngine engine = new RtsEngine(state);
+		RtsEngine engine = RtsEngine.StartInstance(state);
 		_ = engine.Start();
 
 		// Client client = new Client(1000);
