@@ -120,7 +120,7 @@ public class UnitManager : MonoBehaviour
 
 	private void UpdateUnit(BaseUnit unit)
 	{
-		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, 0);
+		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
 
 		if (IsNewUnit(unit))
 		{

@@ -98,6 +98,11 @@ public struct Vec2 : IEquatable<Vec2>
 		get => this == ZERO;
 	}
 
+	public static Vec2 Zero
+	{
+		get => new Vec2(0, 0);
+	}
+
 	public float Magnitude
 	{
 		get => System.MathF.Sqrt(x * x + y * y);

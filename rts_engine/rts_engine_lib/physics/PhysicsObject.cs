@@ -10,8 +10,11 @@ namespace RtsEngine.Physics
 
 public abstract class PhysicsObject : Entity
 {
-	private static float COLLISION_PUSHBACK_INTENSITY = 0.20f;
-	private static float COLLISION_PUSHBACK_DAMPENING = 0.10f;
+	private static float COLLISION_PUSHBACK_INTENSITY = 20.00f;
+	private static float COLLISION_PUSHBACK_DAMPENING = 0.001f;
+	private static float COLLISION_PUSHBACK_CLAMP = 0.20f;
+	private static float COLLISION_PUSHBACK_MIN = 0.10f;
+	private static float COLLISION_PUSHBACK_TOTAL_CLAMP = 1.0f;
 
 	public Vec2 Force { get; private set; }
 	public Vec2 Velocity { get; private set; }
@@ -21,6 +24,8 @@ public abstract class PhysicsObject : Entity
 	public float Mass { get; protected set; }
 
 	public Vec2 DeltaPos { get; private set; }
+
+	private Vec2 _totalPushbackForce;
 
 	private bool _enabled;
 	public bool Enabled
@@ -35,6 +40,7 @@ public abstract class PhysicsObject : Entity
 
 	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction) : base(pos, ownerId)
 	{
+		_totalPushbackForce = Vec2.Zero;
 		Radius = radius;
 		Friction = friction;
 		Mass = mass;
@@ -43,12 +49,13 @@ public abstract class PhysicsObject : Entity
 
 	public void ClearForces()
 	{
-		Force = new Vec2(0, 0);
+		_totalPushbackForce = Vec2.Zero;
+		Force = Vec2.Zero;
 	}
 
 	public void ClearVelocity()
 	{
-		Velocity = new Vec2(0, 0);
+		Velocity = Vec2.Zero;
 	}
 
 	public void ApplyForce(Vec2 force)
@@ -75,10 +82,16 @@ public abstract class PhysicsObject : Entity
 
 		direction = direction.Unit;
 
-		float magnitude = COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + distance);
-		magnitude *= COLLISION_PUSHBACK_INTENSITY;
+		float magnitude = COLLISION_PUSHBACK_INTENSITY * (COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + distance));
+		magnitude -= COLLISION_PUSHBACK_INTENSITY * (COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + Radius));
+		magnitude += COLLISION_PUSHBACK_MIN;
+		magnitude = MathF.Min(magnitude, COLLISION_PUSHBACK_CLAMP);
 
 		Vec2 pushbackForce = direction * magnitude;
+
+		this._totalPushbackForce -= pushbackForce;
+		other._totalPushbackForce += pushbackForce;
+
 		this.ApplyForce(-pushbackForce);
 		other.ApplyForce(pushbackForce);
 	}
@@ -89,6 +102,8 @@ public abstract class PhysicsObject : Entity
 
 		Vec2 oldPos = new Vec2(Pos.x, Pos.y);
 
+		ClampPushbackForce();
+
 		Vec2 acceleration = Force / Mass;
 		Velocity += acceleration;
 		Pos += Velocity;
@@ -98,6 +113,17 @@ public abstract class PhysicsObject : Entity
 		ClearForces();
 
 		DeltaPos = Pos - oldPos;
+	}
+
+	private void ClampPushbackForce()
+	{
+		Vec2 pushbackAdjust = Vec2.Zero;
+		if (_totalPushbackForce.Magnitude > COLLISION_PUSHBACK_TOTAL_CLAMP)
+		{
+			Vec2 clampedPushbackForce = _totalPushbackForce.Unit * COLLISION_PUSHBACK_TOTAL_CLAMP;
+			pushbackAdjust = _totalPushbackForce - clampedPushbackForce;
+		}
+		Force -= pushbackAdjust;
 	}
 
 

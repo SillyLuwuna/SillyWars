@@ -87,5 +87,10 @@ public struct Vec2Int : IEquatable<Vec2Int>
 	{
 		get => this == ZERO;
 	}
+
+	public static Vec2Int Zero
+	{
+		get => new Vec2Int(0, 0);
+	}
 }
 }

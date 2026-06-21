@@ -18,21 +18,54 @@ public static class Program
 		// Create map
 		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 20, 10);
 
-		for (int i = 0; i < grid.Size(); i++)
+		int thirdGridWidth = (int)grid.Width / 3;
+		for (int x = 0; x < grid.Width; x++)
 		{
-			grid[i] = new Cell(CellType.Ground);
-			// if (i % 2 == 0 || i % 3 == 1) grid[i] = new Cell(CellType.Ground);
-			// else grid[i] = new Cell(CellType.Empty);
+			for (int y = 0; y < grid.Height; y++)
+			{
+				if (x < thirdGridWidth || x > thirdGridWidth * 2)
+				{
+					grid[x, y] = new Cell(CellType.Ground);
+				}
+				else
+				{
+					if (y == grid.Height / 2)
+					{
+						grid[x, y] = new Cell(CellType.Ground);
+					}
+					else
+					{
+						grid[x, y] = new Cell(CellType.Empty);
+					}
+				}
+			}
 		}
 
 		WorldState? state = new WorldState(grid);
 
-		for (int i = 0; i < 10; i++)
+		for (int x = 0; x < grid.Width; x++)
 		{
-			Vec2 pos = new Vec2(i + 0.5f, (i*2) % 10 + 0.5f);
-			uint owner = (((i % 4) == 0) || (((i + 3) % 4) == 0)) ? 0u : 1u;
-			Entity curr = i % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
-			state.AddEntity(curr);
+			for (int y = 0; y < grid.Height; y++)
+			{
+				int offset = 3;
+				Vec2 pos = new Vec2(x + 0.5f, y + 0.4f);
+				if ((x + y) % 2 == 0)
+				{
+					continue;
+				}
+				if (x < thirdGridWidth - offset)
+				{
+					uint owner = 1;
+					Entity curr = (x + y) % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
+					state.AddEntity(curr);
+				}
+				else if (x > thirdGridWidth * 2 + offset)
+				{
+					uint owner = 0;
+					Entity curr = (x + y) % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
+					state.AddEntity(curr);
+				}
+			}
 		}
 
 		// Save map

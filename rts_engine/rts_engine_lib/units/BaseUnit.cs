@@ -103,7 +103,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 
 		if (target.Distance(Pos) <= MoveSpeed)
 		{
-			Pos = target;
+			// Pos = target;
 			CurrPathCheckpoint++;
 			if (CurrPathCheckpoint >= CurrPath.Count)
 			{
