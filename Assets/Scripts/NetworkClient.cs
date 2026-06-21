@@ -10,6 +10,7 @@ using System;
 using System.Text;
 using System.IO;
 using RtsEngine.Data;
+using RtsEngine.Commands;
 
 public class NetworkClient : MonoBehaviour
 {
@@ -133,17 +134,14 @@ public class NetworkClient : MonoBehaviour
 			_update = false;
 			OnSimulationTick(_currState);
 		}
-		// while (_dataQueue.TryDequeue(out WorldState state))
-		// {
-		// 	OnSimulationTick(state);
-		// }
     }
 
-	public void SendCommand(PlayerCommand command)
+	public void SendCommand(ICommand command)
 	{
-		// TODO dangerous
 		byte[] data = Serializer.ToBytes(command);
-		_ = _client.SendAsync(data);
+		byte[] compressedData = DataCompressor.CompressData(data);
+		// TODO dangerous
+		_ = _client.SendAsync(compressedData);
 	}
 
 	private void HandleData(object? sender, byte[] data)
@@ -159,7 +157,6 @@ public class NetworkClient : MonoBehaviour
 
 			_update = true;
 		}
-		// _dataQueue.Enqueue(state);
 	}
 
 	void OnDestroy()

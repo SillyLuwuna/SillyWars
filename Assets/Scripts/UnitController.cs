@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using RtsEngine;
+using RtsEngine.Commands;
 using RtsEngine.Math;
 using RtsEngine.Units;
 using UnityEngine;
@@ -60,7 +61,8 @@ public class UnitController : MonoBehaviour
 		foreach (GameObject obj in UnitsSelected)
 		{
 			BaseUnit unit = unitManager.GetUnit(obj)!;
-			PlayerCommand command = PlayerCommand.MoveCommand(unit, new Vec2(goal.x, goal.y));
+			MoveCommandArgs args = new MoveCommandArgs(unit.Id, new Vec2(goal.x, goal.y));
+			ICommand command = new MoveCommand(0, args);
 			NetworkClient.Instance().SendCommand(command);
 		}
 	}

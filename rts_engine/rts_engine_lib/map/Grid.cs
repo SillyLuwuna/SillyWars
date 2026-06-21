@@ -1,11 +1,11 @@
+using RtsEngine.Data;
 using RtsEngine.Math;
 using System;
 
 namespace RtsEngine.Map
 {
 
-    // public class Grid<T> : ISerializable<Grid<T>> where T : new()
-    public class Grid<T>
+public class Grid<T> : ISerializable
 {
 	public uint Width => _width;
 	public uint Height => _height;
@@ -171,6 +171,48 @@ namespace RtsEngine.Map
 		get => _start.y;
 	}
 
+	public void SerializeFields(SerializerWriter writer)
+	{
+		writer.Write(_start);
+		writer.Write(_strideWidth);
+		writer.Write(_width);
+		writer.Write(_height);
+
+		uint gridSize = _width * _height;
+
+		for (int i = 0; i < gridSize; i++)
+		{
+			bool hasValue = _grid[i] != null;
+			writer.Write(hasValue);
+
+			if (!hasValue)
+			{
+				continue;
+			}
+
+			writer.Write(_grid[i]);
+		}
+	}
+
+	public void DeserializeFields(SerializerReader reader)
+	{
+		Vec2 start = reader.Read<Vec2>();
+		float strideWidth = reader.Read<float>();
+		uint width = reader.Read<uint>();
+		uint height = reader.Read<uint>();
+
+		uint gridSize = width * height;
+
+		Construct(start, strideWidth, width, height);
+
+		for (int i = 0; i < gridSize; i++)
+		{
+			bool hasValue = reader.Read<bool>();
+			if (!hasValue) continue;
+
+			reader.Read(out _grid[i]);
+		}
+	}
 }
 
 }

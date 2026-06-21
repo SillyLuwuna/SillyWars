@@ -22,13 +22,11 @@ public class Cell : ISerializable
 
 	public void SerializeFields(SerializerWriter writer)
 	{
-		// writer.Write((byte)Type);
 		writer.Write(Type);
 	}
 
 	public void DeserializeFields(SerializerReader reader)
 	{
-		// Type = (CellType)reader.ReadByte();
 		Type = reader.Read<CellType>();
 	}
 }

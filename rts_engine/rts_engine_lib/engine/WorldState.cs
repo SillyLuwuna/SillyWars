@@ -14,18 +14,18 @@ namespace RtsEngine
 
 public class WorldState : ISerializable
 {
-	public SerializableGrid<Cell> Map = null!;
+	public Grid<Cell> Map = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
 	private List<Entity> _entities = null!;
 	private List<BaseUnit> _units = null!;
 	private List<PhysicsObject> _physicsObjects = null!;
 
-	public WorldState(SerializableGrid<Cell> map)
+	public WorldState(Grid<Cell> map)
 	{
 		Init(map);
 	}
 
-	private void Init(SerializableGrid<Cell> map)
+	private void Init(Grid<Cell> map)
 	{
 		Map = map;
 		_entitiesId = new Dictionary<uint, Entity>();
@@ -37,27 +37,22 @@ public class WorldState : ISerializable
 	public void SerializeFields(SerializerWriter writer)
 	{
 		writer.Write(Map);
-		// Serializer.Serialize(writer, Map);
 
 		writer.Write(_entities.Count);
 		foreach (Entity entity in _entities)
 		{
-			// Serializer.Serialize(writer, entity);
 			writer.Write(entity);
 		}
 	}
 
 	public void DeserializeFields(SerializerReader reader)
 	{
-		// SerializableGrid<Cell> map = Serializer.Deserialize<SerializableGrid<Cell>>(reader);
-		SerializableGrid<Cell> map = reader.Read<SerializableGrid<Cell>>();
+		Grid<Cell> map = reader.Read<Grid<Cell>>();
 		Init(map);
 
-		// int entitiesNum = reader.ReadInt32();
 		int entitiesNum = reader.Read<int>();
 		for (int i = 0; i < entitiesNum; i++)
 		{
-			// Entity curr = Serializer.Deserialize<Entity>(reader);
 			Entity curr = reader.Read<Entity>();
 			AddEntity(curr);
 		}
@@ -130,7 +125,6 @@ public class WorldState : ISerializable
 		using SerializerReader reader = new SerializerReader(zip);
 
 		return reader.Read<WorldState>();
-		// return Serializer.Deserialize<WorldState>(reader);
 	}
 
 	public void Save(string file)
@@ -140,7 +134,6 @@ public class WorldState : ISerializable
 		using SerializerWriter writer = new SerializerWriter(zip);
 
 		writer.Write(this);
-		// Serializer.Serialize(writer, this);
 	}
 }
 }

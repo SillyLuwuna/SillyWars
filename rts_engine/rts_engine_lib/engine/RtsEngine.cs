@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RtsEngine.Commands;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Networking;
@@ -17,7 +18,7 @@ public class RtsEngine
 
 	private const int STAT_INTERVAL_MS = 1000;
 	
-	private const int NUM_PLAYERS = 1;
+	private const int NUM_PLAYERS = 2;
 
 	public bool IsRunning { get; private set; }
 	private PhysicsEngine _physicsEngine;
@@ -28,7 +29,7 @@ public class RtsEngine
 	private Dictionary<uint, string> _playerEndpoints;
 
 	private object _commandQueueLock;
-	private Queue<PlayerCommand> _commandQueue;
+	private Queue<ICommand> _commandQueue;
 
 	private ulong _totalTicks;
 	private int _statInterval;
@@ -49,7 +50,7 @@ public class RtsEngine
 		_broadcastLock = new object();
 		_playerIds = new Dictionary<string, uint>();
 		_playerEndpoints = new Dictionary<uint, string>();
-		_commandQueue = new Queue<PlayerCommand>();
+		_commandQueue = new Queue<ICommand>();
 		_commandQueueLock = new object();
 		IsRunning = false;
 		_state = state;
@@ -129,7 +130,7 @@ public class RtsEngine
 		{
 			while(_commandQueue.Count > 0)
 			{
-				PlayerCommand command = _commandQueue.Dequeue();
+				ICommand command = _commandQueue.Dequeue();
 				command.Execute(_state);
 			}
 		}
@@ -188,8 +189,9 @@ public class RtsEngine
 		uint playerId = _playerIds[GetPlayerEndpoint(args.Ip, args.Port)];
 		try
 		{
-			PlayerCommand command = Serializer.FromBytes<PlayerCommand>(args.Data);
-			command._playerId = playerId;
+			byte[] decompressedData = DataCompressor.DecompressData(args.Data);
+			ICommand command = Serializer.FromBytes<ICommand>(decompressedData);
+			command.PlayerId = playerId;
 
 			lock (_commandQueueLock)
 			{

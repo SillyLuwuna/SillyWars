@@ -16,7 +16,7 @@ public static class Program
 	public static async Task Main()
 	{
 		// Create map
-		SerializableGrid<Cell> grid = new SerializableGrid<Cell>(new Vec2(0, 0), 1, 20, 10);
+		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 20, 10);
 
 		for (int i = 0; i < grid.Size(); i++)
 		{
@@ -50,12 +50,6 @@ public static class Program
 		// }
 
 		// Start engine
-
-		byte[] stateBytes = Serializer.ToBytes(state);
-		byte[] compressed = DataCompressor.CompressData(stateBytes);
-		byte[] decompressed = DataCompressor.DecompressData(compressed);
-		WorldState retrieved = Serializer.FromBytes<WorldState>(decompressed);
-
 
 		// Console.WriteLine(retrieved);
 

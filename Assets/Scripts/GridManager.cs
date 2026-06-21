@@ -33,7 +33,7 @@ public class GridManager : MonoBehaviour
 		}
 	}
 
-	private void UpdateTiles(SerializableGrid<Cell> map)
+	private void UpdateTiles(Grid<Cell> map)
 	{
 		Debug.Log("Updating tiles");
 		tilemap.ClearAllTiles();

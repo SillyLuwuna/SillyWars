@@ -51,9 +51,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 		writer.Write(Sight);
 		writer.Write(TrainCost);
 		writer.Write(TrainTime);
-		// writer.Write((byte)Type);
 		writer.Write(Type);
-		// Serializer.Serialize(writer, _state);
 		writer.Write(_state);
 	}
 
@@ -70,17 +68,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable
 		TrainTime = reader.Read<float>();
 		Type = reader.Read<UnitType>();
 		_state = reader.Read<UnitState>();
-
-		// HP = reader.ReadInt32();
-		// Range = reader.ReadSingle();
-		// AttackDamage = reader.ReadInt32();
-		// AttackSpeed = reader.ReadSingle();
-		// MoveSpeed = reader.ReadSingle();
-		// Sight = reader.ReadInt32();
-		// TrainCost = reader.ReadInt32();
-		// TrainTime = reader.ReadSingle();
-		// Type = (UnitType)reader.ReadByte();
-		// _state = Serializer.Deserialize<UnitState>(reader);
 	}
 
 	public void Move(Grid<Cell> map, Vec2 goal)
