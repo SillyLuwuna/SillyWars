@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using RtsEngine.EntityProperties;
 using System;
 using RtsEngine.Physics;
+using RtsEngine.Math;
 
 namespace RtsEngine
 {
@@ -23,6 +24,8 @@ public class WorldState : ISerializable
 	private List<PhysicsObject> _physicsObjects = null!;
 	private List<IDestroyable> _destroyables = null!;
 
+	private PathFinder _pathFinder = null!;
+
 	public WorldState(Grid<Cell> map)
 	{
 		Init(map);
@@ -36,6 +39,8 @@ public class WorldState : ISerializable
 		_units = new List<BaseUnit>();
 		_physicsObjects = new List<PhysicsObject>();
 		_destroyables = new List<IDestroyable>();
+
+		_pathFinder = new PathFinder(Map);
 	}
 
 	public void SerializeFields(SerializerWriter writer)
@@ -169,6 +174,13 @@ public class WorldState : ISerializable
 	public List<BaseUnit> Units { get => _units; }
 
 	public List<PhysicsObject> PhysicsObjects { get => _physicsObjects; }
+
+	public PathFinder PathFinder { get => _pathFinder; }
+
+	public bool IsTileOccupied(Vec2Int tile)
+	{
+		if (Map[tile].Type == CellType.Structure) return false;
+	}
 
 	public static WorldState Load(string file)
 	{

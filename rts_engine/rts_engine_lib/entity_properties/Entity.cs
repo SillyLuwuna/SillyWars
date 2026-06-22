@@ -1,41 +1,34 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using RtsEngine.Data;
 using RtsEngine.Math;
 
 namespace RtsEngine.EntityProperties
 {
 
-public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>, IPositionable
+public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 {
 	private static uint _CURR_ID = 0;
 
 	public uint Id;
 	public uint OwnerId;
-	protected Vec2 _pos;
-	public Vec2 Pos { get => _pos; set => _pos = value; }
 
-	public Entity(Vec2 pos, uint ownerId)
+	public Entity(uint ownerId)
 	{
 		Id = _CURR_ID;
 		_CURR_ID++;
 		OwnerId = ownerId;
-		Pos = pos;
 	}
 
 	public virtual void SerializeFields(SerializerWriter writer)
 	{
 		writer.Write(Id);
 		writer.Write(OwnerId);
-		writer.Write(Pos);
 	}
 
 	public virtual void DeserializeFields(SerializerReader reader)
 	{
 		Id = reader.Read<uint>();
 		OwnerId = reader.Read<uint>();
-		Pos = reader.Read<Vec2>();
 
 		if (_CURR_ID <= Id)
 		{

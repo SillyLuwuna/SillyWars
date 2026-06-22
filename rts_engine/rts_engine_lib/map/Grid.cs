@@ -132,6 +132,12 @@ public class Grid<T> : ISerializable
 		set => _grid[y * _width + x] = value;
 	}
 
+	public T this[Vec2Int vec]
+	{
+		get => this[vec.x, vec.y];
+		set => this[vec.x, vec.y] = value;
+	}
+
 	public T this[int i]
 	{
 		get => _grid[i];

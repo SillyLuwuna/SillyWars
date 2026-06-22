@@ -1,5 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using RtsEngine.Data;
+using RtsEngine.EntityProperties;
+using RtsEngine.Map;
 using RtsEngine.Math;
+using RtsEngine.Structures;
 
 namespace RtsEngine.Units
 {
@@ -14,6 +19,14 @@ public class Worker : BaseUnit
 	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
 
+	public int BuildSpeed;
+
+	private BaseStructure? _structure;
+	Vec2Int? _closestReachableTile;
+	private bool _goingTowardsStructure;
+
+	private int _buildCooldown;
+
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
 		HitPoints = 1;
@@ -27,6 +40,14 @@ public class Worker : BaseUnit
 		Radius = 0.2f;
 		Mass = 1.0f;
 		Friction = 1.0f;
+
+		BuildSpeed = 20;
+		_buildCooldown = 0;
+		_structure = null;
+		_closestReachableTile = null;
+		_goingTowardsStructure = false;
+		
+		State.Changed += OnStateChange;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
@@ -39,9 +60,146 @@ public class Worker : BaseUnit
 		base.DeserializeFields(reader);
 	}
 
+	private void OnStateChange(object? sender, StateEventArgs args)
+	{
+		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
+		{
+			StopBuilding();
+		}
+	}
+
+	public void Build(BaseStructure structure)
+	{
+		_structure = structure;
+		State.Goal = Goal.Build;
+		_closestReachableTile = null;
+		_goingTowardsStructure = false;
+	}
+
 	public override void Tick()
 	{
 		base.Tick();
+
+		DecreaseCooldowns();
+
+		if (State.Goal == Goal.None) return;
+
+		if (State.Goal == Goal.Build)
+		{
+			TickBuild();
+			return;
+		}
+	}
+
+	private void DecreaseCooldowns()
+	{
+		if (_buildCooldown > 0)
+		{
+			_buildCooldown--;
+		}
+	}
+
+	private void TickBuild()
+	{
+		if (_structure!.IsDestroyed)
+		{
+			StopBuilding();
+			return;
+		}
+
+		if (_goingTowardsStructure) return;
+		if (_buildCooldown > 0) return;
+
+		if (!IsInRangeToBuild)
+		{
+			if (!GoToStructureRange())
+			{
+				StopBuilding();
+			}
+
+			return;
+		}
+
+		if (IsBuildingNewStructure)
+		{
+			if (_structure.IsStructureAreaObstructed)
+			{
+				StopBuilding();
+			}
+			else
+			{
+				_structure.StartBuilding();
+				_buildCooldown = BuildSpeed;
+			}
+
+			return;
+		}
+
+		if (!_structure.IsFullyBuilt)
+		{
+			StopBuilding();
+			return;
+		}
+
+		_structure.DoBuildWork();
+		_buildCooldown = BuildSpeed;
+	}
+	
+	private bool IsBuildingNewStructure { get => _structure!.HasBuildingStarted; }
+
+	private bool HasClosestReachableTile { get => _closestReachableTile != null; }
+
+	private bool IsInRangeToBuild
+	{
+		get
+		{
+			if (!HasClosestReachableTile) return false;
+
+			return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(this.Pos) == _closestReachableTile;
+		}
+	}
+
+	private bool GoToStructureRange()
+	{
+		List<Vec2Int> surroundingTiles = _structure!.GetSurroundingTiles();
+		_closestReachableTile = GetClosestReachableTile(surroundingTiles);
+
+		bool hasTile = _closestReachableTile != null;
+
+		_goingTowardsStructure = hasTile;
+		return hasTile;
+	}
+
+	private Vec2Int? GetClosestReachableTile(List<Vec2Int> tiles)
+	{
+		Grid<Cell> map = RtsEngine.Instance.State.Map;
+		PathFinder pathFinder = RtsEngine.Instance.State.PathFinder;
+
+		List<Vec2Int> candidateTiles = tiles
+			.Where(tile => map.ContainsPos(tile))
+			.Where(tile => map[tile].IsWalkable)
+			.OrderBy(tile => map.WorldSpaceFromCellPos(tile).Distance(this.Pos))
+			.ToList();
+
+		foreach (Vec2Int tile in candidateTiles)
+		{
+			if (pathFinder.HasPath(this.Pos, map.WorldSpaceFromCellPos(tile))) return tile;
+		}
+
+		return null;
+	}
+
+	private void StopBuilding()
+	{
+		if (State.Goal == Goal.Build)
+		{
+			State.Goal = Goal.None;
+			return;
+		}
+
+		_structure = null;
+		_closestReachableTile = null;
+		_goingTowardsStructure = false;
 	}
 }
 }

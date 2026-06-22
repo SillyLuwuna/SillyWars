@@ -8,13 +8,15 @@ using RtsEngine.Math;
 namespace RtsEngine.Physics
 {
 
-public class PhysicsObject : Entity
+public class PhysicsObject : Entity, IPositionable
 {
 	private static float COLLISION_PUSHBACK_INTENSITY = 20.00f;
 	private static float COLLISION_PUSHBACK_DAMPENING = 0.001f;
 	private static float COLLISION_PUSHBACK_CLAMP = 0.20f;
 	private static float COLLISION_PUSHBACK_MIN = 0.10f;
 	private static float COLLISION_PUSHBACK_TOTAL_CLAMP = 1.0f;
+
+	public Vec2 Pos { get; set; }
 
 	public Vec2 Force { get; private set; }
 	public Vec2 Velocity { get; private set; }
@@ -38,8 +40,9 @@ public class PhysicsObject : Entity
 		}
 	}
 
-	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction) : base(pos, ownerId)
+	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction) : base(ownerId)
 	{
+		Pos = pos;
 		_totalPushbackForce = Vec2.Zero;
 		Radius = radius;
 		Friction = friction;
@@ -178,6 +181,7 @@ public class PhysicsObject : Entity
 	{
 		base.SerializeFields(writer);
 
+		writer.Write(Pos);
 		writer.Write(Force);
 		writer.Write(Velocity);
 		writer.Write(DeltaPos);
@@ -193,6 +197,7 @@ public class PhysicsObject : Entity
 	{
 		base.DeserializeFields(reader);
 
+		Pos = reader.Read<Vec2>();
 		Force = reader.Read<Vec2>();
 		Velocity = reader.Read<Vec2>();
 		DeltaPos = reader.Read<Vec2>();

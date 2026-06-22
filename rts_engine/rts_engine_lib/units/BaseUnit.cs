@@ -23,7 +23,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract float AggroRange { get; set; }
 
 	private BaseUnit? _target;
-	private bool _isDirectTarget;
 	private int _cooldown;
 	private Vec2? _pivot;
 	private bool _isGoingToPivot;
@@ -32,24 +31,24 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private int _targetedByAmount;
 
 	public abstract float MoveSpeed { get; set; }
-	public Map.Path? CurrPath { get; set; }
-	public int CurrPathCheckpoint { get; set; }
 
-	private EntityState _state;
-	public EntityState State { get => _state; set => _state = value; }
+	public Map.Path? CurrWalkPath { get; set; }
+	public int CurrWalkPathCheckpoint { get; set; }
+
+	private Units.State _state;
+	public Units.State State { get => _state; set => _state = value; }
 
 	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
 	{
 		IsDestroyed = false;
 		_target = null;
-		_isDirectTarget = false;
 		_cooldown = 0;
 		_walkGoal = null;
 		_isGoingToPivot = false;
 		_targetedByAmount = 0;
 
-		CurrPath = null;
-		_state = new EntityState();
+		CurrWalkPath = null;
+		_state = new State();
 	}
 
 	public override void Tick()
@@ -85,52 +84,60 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		ChaseDistance = reader.Read<float>();
 		AggroRange = reader.Read<float>();
 		MoveSpeed = reader.Read<float>();
-		State = reader.Read<EntityState>();
+		State = reader.Read<State>();
 	}
 
-	public void SetGoal(Grid<Cell> map, Vec2 goal)
+	public virtual void SetGoal(Vec2 goal)
+	{
+		if (!SetWalkingGoal(goal)) return;
+		State.Goal = Goal.Walk;
+	}
+
+	// to make the unit move towards long term goal
+	protected bool SetWalkingGoal(Vec2 goal)
 	{
 		_walkGoal = goal;
-		SetPathfinding(goal);
-	}
-
-	private bool HasWalkGoal
-	{
-		get => _walkGoal != null;
-	}
-
-	private void SetPathfinding(Vec2 goal)
-	{
-		Grid<Cell> map = RtsEngine.Instance.State.Map;
-
-		// can be easily optimized by caching, and seeing when map changes to update cache
-		PathFinding pathfinder = new PathFinding(map);
-		PathOptimizer optimizer = new PathOptimizer(map);
-
-
-		CurrPath = pathfinder.GetPath(Pos, goal);
-		if (CurrPath.Count <= 1)
+		if (!SetPathfinding(goal))
 		{
-			Halt();
-			return;
+			State.Goal = Goal.None;
+			_walkGoal = null;
+			return false;
+		}
+		return true;
+	}
+
+	// to make the unit move towards an immediate goal
+	private bool SetPathfinding(Vec2 goal)
+	{
+		CurrWalkPath = RtsEngine.Instance.State.PathFinder.GetPath(Pos, goal);
+		if (CurrWalkPath.Count <= 1)
+		{
+			CurrWalkPath = null;
+			_state.IsWalking = false;
+			return false;
 		}
 
-		CurrPath = optimizer.OptimizePath(pathfinder.GetPath(Pos, goal));
-		CurrPathCheckpoint = 1;
+		CurrWalkPathCheckpoint = 1;
 
 		_state.IsWalking = true;
+		return true;
 	}
 
-	public void MoveTick()
+	protected void MoveTick()
 	{
 		if (_state.IsAggro)
 		{
 			UpdateMoveAggro();
 		}
 
+		if (HasTarget)
+		{
+			UpdateAttackMovement();
+		}
+
 		if (!_state.IsWalking) return;
 
-		Vec2 target = CurrPath![CurrPathCheckpoint];
+		Vec2 target = CurrWalkPath![CurrWalkPathCheckpoint];
 
 		if (target.Distance(Pos) <= MoveSpeed)
 		{
@@ -144,14 +151,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void Checkpoint()
 	{
-		CurrPathCheckpoint++;
+		CurrWalkPathCheckpoint++;
 
 		if (HasTarget)
 		{
 			UpdateTargetPathfinding();
 		}
 
-		if (CurrPathCheckpoint >= CurrPath!.Count)
+		if (CurrWalkPathCheckpoint >= CurrWalkPath!.Count)
 		{
 			HandlePathArrival();
 		}
@@ -159,12 +166,23 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void UpdateTargetPathfinding()
 	{
-		SetPathfinding(_target!.Pos);
-		if (CurrPath![1].Distance(Pos) <= MoveSpeed)
+		if (!SetPathfinding(_target!.Pos))
 		{
-			CurrPathCheckpoint++;
+			if (State.Goal == Goal.Attack)
+			{
+				State.Goal = Goal.None;
+			}
+			_target = null;
+			return;
+		}
+
+		if (CurrWalkPath![1].Distance(Pos) <= MoveSpeed)
+		{
+			CurrWalkPathCheckpoint++;
 		}
 	}
+
+	private bool HasWalkGoal { get => _walkGoal != null; }
 
 	private void HandlePathArrival()
 	{
@@ -174,7 +192,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			return;
 		}
 
-		Halt();
+		if (HasTarget)
+		{
+			PauseWalking();
+			return;
+		}
+
+		if (HasWalkGoal)
+		{
+			Halt();
+			return;
+		}
 	}
 
 	private void HandleArrivalAtPivot()
@@ -188,7 +216,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			return;
 		}
 
-		Halt();
+		PauseWalking();
 	}
 
 	private void ContinueWalkingToGoal()
@@ -200,52 +228,49 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void RestoreWalkGoal()
 	{
-		CurrPathCheckpoint = _walkGoalCheckpoint;
+		CurrWalkPathCheckpoint = _walkGoalCheckpoint;
 		SetPathfinding(_walkGoal!.Value);
 	}
 
 	private void ContinueTowardsCurrentGoal()
 	{
-		if (HasWalkGoal)
-		{
-			ContinueWalkingToGoal();
-		}
-		else
+		if (State.Goal == Goal.None)
 		{
 			ReturnToPivot();
 		}
+		else
+		{
+			ContinueWalkingToGoal();
+		}
 	}
 
-	private bool IsDirectTarget { get => _isDirectTarget; }
 	private bool IsGoingToPivot { get => _isGoingToPivot; }
 	private bool HasPivot { get => _pivot != null; }
 
 	private void UpdateMoveAggro()
 	{
-		// if (HasWalkGoal) return; // to only aggro when arriving, still makes them go back and forth due to unit pushing
-
 		if (!HasTarget)
 		{
-			BaseUnit? validTarget = FindValidTarget();
-			if (validTarget != null)
-			{
-				UpdateIndirectTarget(validTarget);
-			}
-			else if (!IsGoingToPivot && HasPivot)
-			{
-				ContinueTowardsCurrentGoal();
-				// ReturnToPivot();
-			}
+			TryFindTarget();
 		}
-		else if (!IsDirectTarget && !IsTargetInChaseDistance)
+		else if (!IsTargetInChaseDistance)
 		{
 			ContinueTowardsCurrentGoal();
 			// ReturnToPivot();
 		}
+	}
 
-		if (HasTarget)
+	private void TryFindTarget()
+	{
+		BaseUnit? validTarget = FindValidTarget();
+		if (validTarget != null)
 		{
-			UpdateAttackMovement();
+			UpdateIndirectTarget(validTarget);
+		}
+		else if (!IsGoingToPivot && HasPivot)
+		{
+			ContinueTowardsCurrentGoal();
+			// ReturnToPivot();
 		}
 	}
 
@@ -258,27 +283,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 
 		ContinueWalking();
-
-		if (!HasPath)
-		{
-			SetPathfinding(_target!.Pos);
-		}
-		else if (CurrPath!.Count == 2)
-		{
-			CurrPath[1] = _target!.Pos;
-		}
 	}
 
 	private void UpdateIndirectTarget(BaseUnit target)
 	{
 		if (_pivot == null)
 		{
-			_walkGoalCheckpoint = CurrPathCheckpoint;
+			_walkGoalCheckpoint = CurrWalkPathCheckpoint;
 			_pivot = Pos;
 		}
 		_isGoingToPivot = false;
 		_target = target;
-		_isDirectTarget = false;
 	}
 
 	private void ReturnToPivot()
@@ -286,7 +301,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		SetPathfinding(_pivot!.Value);
 		_isGoingToPivot = true;
 		_target = null;
-		_isDirectTarget = false;
 	}
 
 	private bool IsTargetInChaseDistance
@@ -314,15 +328,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		get => this.Pos.Distance(_target!.Pos) - _target.Radius <= AttackRange;
 	}
 
-	private bool HasTarget
-	{
-		get => _target != null;
-	}
+	private bool HasTarget { get => _target != null; }
 
-	private bool HasPath
-	{
-		get => !(CurrPath == null);
-	}
+	private bool HasPath { get => !(CurrWalkPath == null); }
 
 	private void PauseWalking()
 	{
@@ -335,12 +343,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		_state.IsWalking = true;
 	}
 
-	public void Halt()
+	public virtual void Halt()
 	{
 		ClearVelocity();
 		_state.IsWalking = false;
-		CurrPath = null;
+		CurrWalkPath = null;
 		_walkGoal = null;
+
+		if (State.Goal == Goal.Walk)
+		{
+			_state.Goal = Goal.None;
+		}
 	}
 
 	public void SetAggro(bool aggro)
@@ -353,22 +366,25 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			}
 			_pivot = null;
 			_target = null;
-			_isDirectTarget = false;
 			_isGoingToPivot = false;
 		}
 		State.IsAggro = aggro;
 	}
 
-	public void Attack(IDestroyable target)
+	public virtual void Attack(IDestroyable target)
 	{
 		if (!(target is BaseUnit baseUnitTarget)) return;
-		SetAggro(true);
 		_target = baseUnitTarget;
-		_isDirectTarget = true;
-		SetPathfinding(_target.Pos);
+		if (!SetPathfinding(_target.Pos))
+		{
+			_target = null;
+			State.Goal = Goal.None;
+			return;
+		}
+		State.Goal = Goal.Attack;
 	}
 
-	public void AttackTick()
+	protected void AttackTick()
 	{
 		if (_cooldown > 0)
 		{
@@ -376,9 +392,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			return;
 		}
 
-		if (!State.IsAggro) return;
+		if (!State.IsAggro && State.Goal != Goal.Attack) return;
 		if (!HasTarget) return;
-		if (HandleEnemyDeath()) return;
+		if (_target!.IsDestroyed)
+		{
+			HandleEnemyDeath();
+			return;
+		}
 		if (!IsInAttackRange) return;
 
 		_cooldown = AttackSpeed;
@@ -387,21 +407,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		HandleEnemyDeath();
 	}
 
-	private bool HandleEnemyDeath()
+	private void HandleEnemyDeath()
 	{
-		bool isTargetDestroyed = _target!.IsDestroyed;
-		if (isTargetDestroyed)
+		if (State.Goal == Goal.Attack)
 		{
-			if (_isDirectTarget)
-			{
-				SetAggro(false);
-			}
-			else
-			{
-				_target = null;
-			}
+			State.Goal = Goal.None;
 		}
-		return isTargetDestroyed;
+
+		_target = null;
 	}
 
 	private BaseUnit? FindValidTarget()

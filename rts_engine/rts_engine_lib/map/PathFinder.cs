@@ -1,34 +1,41 @@
 #nullable enable
 
-using RtsEngine.Map;
 using RtsEngine.Math;
-using System;
 using System.Collections.Generic;
 
 namespace RtsEngine.Map
 {
 
-public class PathFinding
+public class PathFinder
 {
 	private Vec2 _start;
 	private Vec2 _goal;
 	private Grid<Cell> _grid;
-	// private Vec2Int _startGrid;
-	// private Vec2Int _goalGrid;
+	private PathOptimizer _optimizer;
+	private bool _pathOptimization;
 
-	public PathFinding(Grid<Cell> grid)
+	public PathFinder(Grid<Cell> grid, bool pathOptimization = true)
 	{
 		_grid = grid;
+		_optimizer = new PathOptimizer(grid);
+		_pathOptimization = pathOptimization;
 	}
 
-	public bool HasPath(Vec2 start, Vec2 goal)
+	public bool IsPathInGrid(Vec2 start, Vec2 goal)
 	{
 		return _grid.ContainsPosFromWorldSpace(start) && _grid.ContainsPosFromWorldSpace(goal);
 	}
 
+	public bool HasPath(Vec2 start, Vec2 goal)
+	{
+		Path path = GetPath(start, goal);
+		return (path.Count > 0);
+	}
+
 	public Path GetPath(Vec2 start, Vec2 goal)
 	{
-		if (!HasPath(start, goal)) return new Path();
+		// should cache stuff
+		if (!IsPathInGrid(start, goal)) return new Path();
 
 		_start = start;
 		_goal = goal;
@@ -112,6 +119,11 @@ public class PathFinding
 			curr = curr.parent;
 		}
 		path.Reverse();
+
+		if (_pathOptimization)
+		{
+			path = _optimizer.OptimizePath(path);
+		}
 
 		return path;
 	}

@@ -65,6 +65,7 @@ public class UnitController : MonoBehaviour
 			}
 			else
 			{
+				SetAggroAction(false);
 				AttackAction(enemyUnit);
 			}
 		}
