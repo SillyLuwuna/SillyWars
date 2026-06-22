@@ -5,6 +5,11 @@ namespace RtsEngine.Structures
 
 public class Barracks : BaseStructure
 {
+	public const int HEIGHT = 2;
+	public const int WIDTH = 2;
+	public const int MAX_HITPOINTS = 20;
+	public const int BUILD_EFFORT = 10;
+
 	public override int Height { get; set; }
 	public override int Width { get; set; }
 
@@ -12,14 +17,11 @@ public class Barracks : BaseStructure
 
 	public override int BuildEffort { get; set; }
 
-	public Barracks(uint ownerId, Vec2Int start) : base(ownerId, start)
+	public Barracks(uint ownerId, Vec2Int start) : base(ownerId, start, HEIGHT, WIDTH)
 	{
-		Height = 2;
-		Width = 2;
+		MaxHitPoints = MAX_HITPOINTS;
 
-		MaxHitPoints = 20;
-
-		BuildEffort = 10;
+		BuildEffort = BUILD_EFFORT;
 	}
 
 	public override void Tick()

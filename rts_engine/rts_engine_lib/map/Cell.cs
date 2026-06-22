@@ -6,7 +6,7 @@ namespace RtsEngine.Map
 
 public class Cell : ISerializable
 {
-	public CellType Type { get; private set; }
+	public CellType Type { get; set; }
 	public bool IsWalkable
 	{
 		get => !(Type == CellType.Empty || Type == CellType.Structure);

@@ -3192,7 +3192,19 @@ MonoBehaviour:
     m_ActionId: 1872329c-116f-44fc-96f9-1f0823cccc63
     m_ActionName: 'UI/Point[/Mouse/position]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1428621003}
+        m_TargetAssemblyTypeName: UnitController, Assembly-CSharp
+        m_MethodName: OnLeftClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 0ce7c60f-ea67-4fc9-bec8-19ad6e57dbfe
     m_ActionName: 'UI/Click[/Mouse/leftButton]'
   - m_PersistentCalls:
@@ -3263,6 +3275,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: e1eb315d-1775-4232-b566-c97af1141968
     m_ActionName: 'UI/Attack[/Keyboard/a]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1428621003}
+        m_TargetAssemblyTypeName: UnitController, Assembly-CSharp
+        m_MethodName: OnBuildBarracksInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 97fdd774-9b7f-439d-8714-9dd64a19d09b
+    m_ActionName: 'UI/BuildBarracks[/Keyboard/b]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: UI

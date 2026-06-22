@@ -6,11 +6,14 @@ using RtsEngine;
 using RtsEngine.Commands;
 using RtsEngine.Math;
 using RtsEngine.Units;
+using RtsEngine.Structures;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class UnitController : MonoBehaviour
 {
+	private const float DRAG_AMOUNT_FOR_DETECTION = 10;
+
 	private static UnitController? _instance = null;
 	private static bool _awoken = false;
 
@@ -21,16 +24,33 @@ public class UnitController : MonoBehaviour
 	private Vector2 _dragEnd;
 	// private Rect _selectionRect;
 	private bool _isDragging = false;
+	private bool _isMouseClick = true;
 	private bool _isWalkAttack = false;
+	private bool _buildBarracks = false;
+
+	private bool _newConnection = true;
+
+	private object _stateLock = new object();
+	private WorldState? _state;
 
 	public List<GameObject>? UnitsSelected;
 
-	private UnitController() { }
+	private UnitController()
+	{
+	}
 
 	public static UnitController Instance()
 	{
 		if (!_awoken || _instance == null) throw new MethodAccessException("Instance was not initialized yet");
 		return _instance;
+	}
+
+	private void Tick(object? sender, WorldState state)
+	{
+		lock(_stateLock)
+		{
+			_state = state;
+		}
 	}
 
 	void Awake()
@@ -48,27 +68,52 @@ public class UnitController : MonoBehaviour
 
 	public void OnRightClick(InputAction.CallbackContext context)
 	{
-		if (context.phase == InputActionPhase.Started)
+		if (context.phase != InputActionPhase.Started) return;
+
+		Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+		GameObject? enemyUnit = GetEnemyUnitOnPos(mousePos);
+		if (_isWalkAttack)
 		{
-			Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-			GameObject? enemyUnit = GetEnemyUnitOnPos(mousePos);
-			if (_isWalkAttack)
-			{
-				_isWalkAttack = false;
-				SetAggroAction(true);
-				MoveAction(mousePos);
-			}
-			else if (enemyUnit == null)
-			{
-				SetAggroAction(false);
-				MoveAction(mousePos);
-			}
-			else
-			{
-				SetAggroAction(false);
-				AttackAction(enemyUnit);
-			}
+			_isWalkAttack = false;
+			SetAggroAction(true);
+			MoveAction(mousePos);
 		}
+		else if (enemyUnit != null)
+		{
+			SetAggroAction(false);
+			AttackAction(enemyUnit);
+		}
+		else
+		{
+			SetAggroAction(false);
+			MoveAction(mousePos);
+		}
+	}
+
+	public void OnLeftClick(Vector2 screenMousePos)
+	{
+		Vector2 mousePos = Camera.main.ScreenToWorldPoint(screenMousePos);
+		if (_buildBarracks)
+		{
+			RtsEngine.Structures.Type type = RtsEngine.Structures.Type.Barracks;
+			BuildNewAction(mousePos, type);
+		}
+	}
+
+	public void OnBuildBarracksInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_buildBarracks = !_buildBarracks;
+		Debug.Log($"build barracks: {_buildBarracks}");
+	}
+
+	public void OnWalkAttackInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_isWalkAttack = !_isWalkAttack;
+		Debug.Log($"walk attack: {_isWalkAttack}");
 	}
 
 	public GameObject? GetEnemyUnitOnPos(Vector2 pos)
@@ -77,6 +122,35 @@ public class UnitController : MonoBehaviour
 
 		return hits?.gameObject;
 	}
+
+	private void BuildNewAction(Vector2 pos, RtsEngine.Structures.Type type)
+	{
+		if (UnitsSelected == null) return;
+
+		List<uint> unitIds = GetSelectedUnitIds();
+
+		Vec2Int start;
+		Vec2 posVec = new Vec2(pos.x, pos.y);
+		lock(_stateLock)
+		{
+			if (_state == null) return;
+			start = _state.Map.CellPosFromWorldSpace(posVec);
+		}
+
+		BuildNewCommandArgs args = new BuildNewCommandArgs(unitIds, start, type);
+		ICommand command = new BuildNewCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	// private void BuildAction(Vector2 pos)
+	// {
+	// 	if (UnitsSelected == null) return;
+	//
+	// 	List<uint> unitIds = GetSelectedUnitIds();
+	// 	BuildCommandArgs args = new BuildCommandArgs(unitIds, );
+	// 	ICommand command = new BuildCommand(0, args);
+	// 	NetworkClient.Instance().SendCommand(command);
+	// }
 
 	private void MoveAction(Vector2 goal)
 	{
@@ -142,6 +216,7 @@ public class UnitController : MonoBehaviour
 
 	private void OnDragStart(InputAction.CallbackContext context)
 	{
+		_isMouseClick = true;
 		_isDragging = true;
 		_dragStart = Mouse.current.position.ReadValue();
 		_dragEnd = _dragStart;
@@ -154,14 +229,26 @@ public class UnitController : MonoBehaviour
 	private void OnDragEnd(InputAction.CallbackContext context)
 	{
 		_isDragging = false;
+		selectionBoxUI.HideBox();
+
 		_dragEnd = Mouse.current.position.ReadValue();
+		_isMouseClick = _isMouseClick && (Vector2.Distance(_dragStart, _dragEnd) < DRAG_AMOUNT_FOR_DETECTION);
+
+
+		if (_isMouseClick)
+		{
+			OnLeftClick(_dragEnd);
+			return;
+		}
+
+		_isMouseClick = true;
+
 		Rect selectionRect = new Rect(
 			Mathf.Min(_dragStart.x, _dragEnd.x),
             Mathf.Min(_dragStart.y, _dragEnd.y),
             Mathf.Abs(_dragStart.x - _dragEnd.x),
             Mathf.Abs(_dragStart.y - _dragEnd.y)
 		);
-		selectionBoxUI.HideBox();
 		UnitsSelected = GetUnitsInRect(selectionRect);
 	}
 
@@ -192,20 +279,45 @@ public class UnitController : MonoBehaviour
 		return results;
 	}
 
-	public void OnWalkAttackInput(InputAction.CallbackContext context)
+	void Start()
 	{
-		if (context.phase == InputActionPhase.Started)
-		{
-			_isWalkAttack = !_isWalkAttack;
-		}
+		NetworkClient.Instance().Tick += Tick;
+		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
+	}
+
+	private void OnConnectionEstablished()
+	{
+		_newConnection = true;
 	}
 
 	void Update()
 	{
+		if (_newConnection)
+		{
+			_newConnection = false;
+
+			_isDragging = false;
+			_isMouseClick = true;
+			_isWalkAttack = false;
+			_buildBarracks = false;
+
+			UnitsSelected = null;
+
+			lock (_stateLock)
+			{
+				_state = null;
+			}
+		}
+
 		if (_isDragging)
 		{
 			_dragEnd = Mouse.current.position.ReadValue();
-			selectionBoxUI.UpdateBox(_dragStart, _dragEnd);
+			_isMouseClick = _isMouseClick && (Vector2.Distance(_dragStart, _dragEnd) < DRAG_AMOUNT_FOR_DETECTION);
+
+			if (!_isMouseClick)
+			{
+				selectionBoxUI.UpdateBox(_dragStart, _dragEnd);
+			}
 		}
 	}
 }

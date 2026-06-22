@@ -1,13 +1,17 @@
+using System;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Math;
+using RtsEngine.Structures;
 
 namespace RtsEngine.Commands
 {
 
-public class MoveCommand : EntityCommand<MoveCommandArgs>
+public class BuildNewCommand : EntityCommand<BuildNewCommandArgs>
 {
-	public MoveCommand(uint playerId, MoveCommandArgs args) : base(playerId, args)
+	public BaseStructure? structure;
+
+	public BuildNewCommand(uint playerId, BuildNewCommandArgs args) : base(playerId, args)
 	{
 	}
 
@@ -25,13 +29,17 @@ public class MoveCommand : EntityCommand<MoveCommandArgs>
 	{
 		if (!base.ValidateEntity(state, entity)) return false;
 
-		if (!(entity is IMovable)) return false;
+		if (!(entity is IBuilder)) return false;
+
+		structure = BaseStructure.FromType(_args.StructureType, PlayerId, _args.Start);
+
 		return true;
 	}
 
 	protected override void ExecuteEntity(WorldState state, Entity entity)
 	{
-		((IMovable)entity).SetGoal(_args.Goal);
+		Console.WriteLine("Build new command");
+		((IBuilder)entity).Build(structure!);
 	}
 }
 

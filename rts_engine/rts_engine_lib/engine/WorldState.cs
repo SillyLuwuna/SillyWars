@@ -9,6 +9,7 @@ using RtsEngine.EntityProperties;
 using System;
 using RtsEngine.Physics;
 using RtsEngine.Math;
+using RtsEngine.Structures;
 
 namespace RtsEngine
 {
@@ -23,6 +24,10 @@ public class WorldState : ISerializable
 	private List<BaseUnit> _units = null!;
 	private List<PhysicsObject> _physicsObjects = null!;
 	private List<IDestroyable> _destroyables = null!;
+	private List<BaseStructure> _structures = null!;
+
+	private Queue<Entity> _addQueue = null!;
+	private bool _isTickingEntities;
 
 	private PathFinder _pathFinder = null!;
 
@@ -39,6 +44,10 @@ public class WorldState : ISerializable
 		_units = new List<BaseUnit>();
 		_physicsObjects = new List<PhysicsObject>();
 		_destroyables = new List<IDestroyable>();
+		_structures = new List<BaseStructure>();
+
+		_addQueue = new Queue<Entity>();
+		_isTickingEntities = false;
 
 		_pathFinder = new PathFinder(Map);
 	}
@@ -69,12 +78,18 @@ public class WorldState : ISerializable
 
 	public void AddEntity(Entity entity)
 	{
+		if (_isTickingEntities)
+		{
+			_addQueue.Enqueue(entity);
+			return;
+		}
+
 		_entities.Add(entity);
 		_entitiesId.Add(entity.Id, entity);
 
-		if (entity is BaseUnit currBase)
+		if (entity is BaseUnit currUnit)
 		{
-			_units.Add(currBase);
+			_units.Add(currUnit);
 		}
 
 		if (entity is PhysicsObject currPhysics)
@@ -86,10 +101,37 @@ public class WorldState : ISerializable
 		{
 			_destroyables.Add(currDestroyable);
 		}
+
+		if (entity is BaseStructure currStructure)
+		{
+			_structures.Add(currStructure);
+			Console.WriteLine("Added");
+			UpdateMapStructure(currStructure);
+		}
 	}
 
-	public void TickEntities()
+	private void UpdateMapStructure(BaseStructure structure)
 	{
+		CellType cellType = structure.IsDestroyed ? CellType.Ground : CellType.Structure;
+
+		Console.WriteLine(structure.Tiles.Count);
+		foreach (Vec2Int tile in structure.Tiles)
+		{
+			Console.WriteLine($"Added {cellType} at {tile}");
+			Map[tile].Type = cellType;
+		}
+	}
+
+	public void Tick()
+	{
+		TickEntities();
+		AddQueuedEntities();
+	}
+
+	private void TickEntities()
+	{
+		_isTickingEntities = true;
+
 		int numEntities = _entities.Count;
 		for (int i = 0; i < numEntities; i++)
 		{
@@ -107,6 +149,16 @@ public class WorldState : ISerializable
 					#pragma warning restore CS0162
 				}
 			}
+		}
+
+		_isTickingEntities = false;
+	}
+
+	private void AddQueuedEntities()
+	{
+		while (_addQueue.Count > 0)
+		{
+			AddEntity(_addQueue.Dequeue());
 		}
 	}
 
@@ -155,9 +207,9 @@ public class WorldState : ISerializable
 		// can be optimized by lazy deleting from arrays
 		_entities.Remove(entity);
 		_entitiesId.Remove(entity.Id);
-		if (entity is BaseUnit currBase)
+		if (entity is BaseUnit currUnit)
 		{
-			_units.Remove(currBase);
+			_units.Remove(currUnit);
 		}
 
 		if (entity is PhysicsObject currPhysics)
@@ -169,6 +221,12 @@ public class WorldState : ISerializable
 		{
 			_destroyables.Remove(currDestroyable);
 		}
+
+		if (entity is BaseStructure currStructure)
+		{
+			_structures.Remove(currStructure);
+			UpdateMapStructure(currStructure);
+		}
 	}
 
 	public List<BaseUnit> Units { get => _units; }
@@ -179,7 +237,7 @@ public class WorldState : ISerializable
 
 	public bool IsTileOccupied(Vec2Int tile)
 	{
-		if (Map[tile].Type == CellType.Structure) return true;
+		if (!Map[tile].IsWalkable) return true;
 
 		foreach (BaseUnit unit in _units)
 		{

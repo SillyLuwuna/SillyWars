@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
@@ -9,7 +10,7 @@ namespace RtsEngine.Structures
 
 public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 {
-	public List<Vec2Int> StructureTiles;
+	public List<Vec2Int> Tiles;
 
 	public bool IsDestroyed { get; set; }
 
@@ -26,26 +27,31 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	public Vec2Int Start;
 
-	public BaseStructure(uint ownerId, Vec2Int start) : base(ownerId)
+	public BaseStructure(uint ownerId, Vec2Int start, int height, int width) : base(ownerId)
 	{
-		StructureTiles = new List<Vec2Int>();
+		Tiles = new List<Vec2Int>();
 		Start = start;
 		IsDestroyed = false;
 		IsBuilt = false;
 		HitPoints = CONSTRUCTION_MAX_HITPOINTS;
 
-		InitializeStructureCells();
+		Height = height;
+		Width = width;
+
+		InitializeStructureTiles();
 	}
 
-	private void InitializeStructureCells()
+	private void InitializeStructureTiles()
 	{
 		for (int x = 0; x < Width; x++)
 		{
 			for (int y = 0; y < Height; y++)
 			{
-				StructureTiles.Add(new Vec2Int(Start.x + x, Start.y + y));
+				Tiles.Add(new Vec2Int(Start.x + x, Start.y + y));
 			}
 		}
+
+		Console.WriteLine($"Added {Tiles.Count} tiles");
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
@@ -60,7 +66,11 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	public void StartBuilding()
 	{
+		if (IsAreaObstructed) return;
+
 		HasBuildingStarted = true;
+		Console.WriteLine("Building instantiated");
+		RtsEngine.Instance.State.AddEntity(this);
 	}
 
 	public void DoBuildWork()
@@ -71,9 +81,11 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 			return;
 		}
 
-		if (HasBuildingStarted) return;
+		if (!HasBuildingStarted) return;
 
 		BuildEffort--;
+
+		Console.WriteLine($"Build effort left: {BuildEffort}");
 
 		if (BuildEffort <= 0)
 		{
@@ -82,16 +94,16 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		}
 	}
 
-	public bool IsStructureAreaObstructed
+	public bool IsAreaObstructed
 	{
 		get
 		{
 			WorldState state = RtsEngine.Instance.State;
-			foreach (Vec2Int tile in StructureTiles)
+			foreach (Vec2Int tile in Tiles)
 			{
-				if (state.IsTileOccupied(tile)) return false;
+				if (state.IsTileOccupied(tile)) return true;
 			}
-			return true;
+			return false;
 		}
 	}
 
@@ -116,6 +128,19 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		}
 
 		return surroundingTiles;
+	}
+
+	public static BaseStructure FromType(Type type, uint ownerId, Vec2Int start)
+	{
+		switch (type)
+		{
+			case (Type.Castle):
+				return new Castle(ownerId, start);
+			case (Type.Barracks):
+				return new Barracks(ownerId, start);
+			default:
+				throw new ArgumentException($"Unknown structure type {type}");
+		}
 	}
 }
 

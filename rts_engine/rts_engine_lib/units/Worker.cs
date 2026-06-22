@@ -49,6 +49,7 @@ public class Worker : BaseUnit, IBuilder
 		_goingTowardsStructure = false;
 		
 		State.Changed += OnStateChange;
+		WalkGoalReached += OnWalkGoalReached;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
@@ -60,20 +61,37 @@ public class Worker : BaseUnit, IBuilder
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
+
+		State.Changed += OnStateChange;
+		WalkGoalReached += OnWalkGoalReached;
 		BuildSpeed = reader.Read<int>();
 	}
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
+		if (args.OldState.Goal != args.NewState.Goal)
+		{
+			Console.WriteLine($"goal: {args.OldState.Goal} -> {args.NewState.Goal}");
+		}
+		if (args.OldState.IsWalking != args.NewState.IsWalking)
+		{
+			Console.WriteLine($"walking: {args.OldState.IsWalking} -> {args.NewState.IsWalking}");
+		}
+		if (args.OldState.IsAggro != args.NewState.IsAggro)
+		{
+			Console.WriteLine($"aggro: {args.OldState.IsAggro} -> {args.NewState.IsAggro}");
+		}
+
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
-			Console.WriteLine("Building interrupted");
+			Console.WriteLine("Building stopped");
 			StopBuilding();
 		}
 	}
 
 	public void Build(BaseStructure structure)
 	{
+		Console.WriteLine("Starting build");
 		_structure = structure;
 		State.Goal = Goal.Build;
 		_closestReachableTile = null;
@@ -107,7 +125,6 @@ public class Worker : BaseUnit, IBuilder
 	{
 		if (_structure!.IsDestroyed)
 		{
-			Console.WriteLine("Can't build: structure was destroyed");
 			StopBuilding();
 			return;
 		}
@@ -119,7 +136,6 @@ public class Worker : BaseUnit, IBuilder
 		{
 			if (!GoToStructureRange())
 			{
-				Console.WriteLine("Can't build: structure unreachable");
 				StopBuilding();
 			}
 
@@ -128,14 +144,15 @@ public class Worker : BaseUnit, IBuilder
 
 		if (IsBuildingNewStructure)
 		{
-			if (_structure.IsStructureAreaObstructed)
+			Console.WriteLine("New structure");
+			if (_structure.IsAreaObstructed)
 			{
-				Console.WriteLine("Can't build: structure area obstructed");
+				Console.WriteLine("Area obstructed");
 				StopBuilding();
 			}
 			else
 			{
-				Console.WriteLine("Starting build");
+				Console.WriteLine("Is instantiating structure");
 				_structure.StartBuilding();
 				_buildCooldown = BuildSpeed;
 			}
@@ -145,17 +162,15 @@ public class Worker : BaseUnit, IBuilder
 
 		if (_structure.IsFullyBuilt)
 		{
-			Console.WriteLine("Structure fully built!");
 			StopBuilding();
 			return;
 		}
 
-		Console.WriteLine("Starting build");
 		_structure.DoBuildWork();
 		_buildCooldown = BuildSpeed;
 	}
 	
-	private bool IsBuildingNewStructure { get => _structure!.HasBuildingStarted; }
+	private bool IsBuildingNewStructure { get => !_structure!.HasBuildingStarted; }
 
 	private bool HasClosestReachableTile { get => _closestReachableTile != null; }
 
@@ -175,6 +190,11 @@ public class Worker : BaseUnit, IBuilder
 		_closestReachableTile = GetClosestReachableTile(surroundingTiles);
 
 		bool hasTile = _closestReachableTile != null;
+
+		if (hasTile)
+		{
+			SetWalkingGoal(RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(_closestReachableTile!.Value));
+		}
 
 		_goingTowardsStructure = hasTile;
 		return hasTile;
@@ -210,6 +230,14 @@ public class Worker : BaseUnit, IBuilder
 		_structure = null;
 		_closestReachableTile = null;
 		_goingTowardsStructure = false;
+	}
+
+	private void OnWalkGoalReached()
+	{
+		if (State.Goal == Goal.Build)
+		{
+			_goingTowardsStructure = false;
+		}
 	}
 }
 }

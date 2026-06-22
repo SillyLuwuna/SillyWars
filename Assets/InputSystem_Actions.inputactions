@@ -596,6 +596,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "BuildBarracks",
+                    "type": "Button",
+                    "id": "97fdd774-9b7f-439d-8714-9dd64a19d09b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1047,6 +1056,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "230d435c-cfff-4b90-a825-18c4de753fa0",
+                    "path": "<Keyboard>/#(B)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BuildBarracks",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

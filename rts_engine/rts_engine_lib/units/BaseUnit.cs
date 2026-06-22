@@ -38,6 +38,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private Units.State _state;
 	public Units.State State { get => _state; set => _state = value; }
 
+	protected event Action? WalkGoalReached;
+
 	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
 	{
 		IsDestroyed = false;
@@ -201,6 +203,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (HasWalkGoal)
 		{
 			Halt();
+			OnWalkGoalReached();
 			return;
 		}
 	}
@@ -442,6 +445,24 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 
 		return target;
+	}
+
+	public static BaseUnit FromType(Type type, uint ownerId, Vec2 pos)
+	{
+		switch (type)
+		{
+			case (Type.Worker):
+				return new Worker(pos, ownerId);
+			case (Type.Knight):
+				return new Knight(pos, ownerId);
+			default:
+				throw new ArgumentException($"Unknown unit type {type}");
+		}
+	}
+
+	private void OnWalkGoalReached()
+	{
+		WalkGoalReached?.Invoke();
 	}
 }
 }

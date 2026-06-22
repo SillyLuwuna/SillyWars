@@ -5,6 +5,10 @@ namespace RtsEngine.Structures
 
 public class Castle : BaseStructure
 {
+	public const int HEIGHT = 2;
+	public const int WIDTH = 3;
+	public const int MAX_HITPOINTS = 40;
+	public const int BUILD_EFFORT = 20;
 	public override int Height { get; set; }
 	public override int Width { get; set; }
 
@@ -12,14 +16,11 @@ public class Castle : BaseStructure
 
 	public override int BuildEffort { get; set; }
 
-	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start)
+	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, HEIGHT, WIDTH)
 	{
-		Height = 2;
-		Width = 3;
+		MaxHitPoints = MAX_HITPOINTS;
 
-		MaxHitPoints = 40;
-
-		BuildEffort = 20;
+		BuildEffort = BUILD_EFFORT;
 	}
 
 	public override void Tick()

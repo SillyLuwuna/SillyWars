@@ -155,7 +155,7 @@ public class RtsEngine
 
 	private void UpdateWorldState()
 	{
-		_state.TickEntities();
+		_state.Tick();
 	}
 
 	private void CleanupDestroyedEntities()

@@ -56,13 +56,13 @@ public static class Program
 				if (x < thirdGridWidth - offset)
 				{
 					uint owner = 1;
-					Entity curr = (x + y) % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
+					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
 					state.AddEntity(curr);
 				}
 				else if (x > thirdGridWidth * 2 + offset)
 				{
 					uint owner = 0;
-					Entity curr = (x + y) % 2 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
+					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
 					state.AddEntity(curr);
 				}
 			}
