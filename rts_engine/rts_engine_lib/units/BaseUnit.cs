@@ -94,6 +94,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		SetPathfinding(goal);
 	}
 
+	private bool HasWalkGoal
+	{
+		get => _walkGoal != null;
+	}
+
 	private void SetPathfinding(Vec2 goal)
 	{
 		Grid<Cell> map = RtsEngine.Instance.State.Map;
@@ -163,13 +168,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void HandlePathArrival()
 	{
-		if (!_isGoingToPivot)
+		if (_isGoingToPivot)
 		{
-			Halt();
+			HandleArrivalAtPivot();
 			return;
 		}
 
-		HandleArrivalAtPivot();
+		Halt();
 	}
 
 	private void HandleArrivalAtPivot()
@@ -177,12 +182,19 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		_pivot = null;
 		_isGoingToPivot = false;
 
-		if (_walkGoal == null)
+		if (HasWalkGoal)
 		{
-			Halt();
+			RestoreWalkGoal();
 			return;
 		}
 
+		Halt();
+	}
+
+	private void ContinueWalkingToGoal()
+	{
+		_pivot = null;
+		_isGoingToPivot = false;
 		RestoreWalkGoal();
 	}
 
@@ -192,12 +204,26 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		SetPathfinding(_walkGoal!.Value);
 	}
 
+	private void ContinueTowardsCurrentGoal()
+	{
+		if (HasWalkGoal)
+		{
+			ContinueWalkingToGoal();
+		}
+		else
+		{
+			ReturnToPivot();
+		}
+	}
+
 	private bool IsDirectTarget { get => _isDirectTarget; }
 	private bool IsGoingToPivot { get => _isGoingToPivot; }
 	private bool HasPivot { get => _pivot != null; }
 
 	private void UpdateMoveAggro()
 	{
+		// if (HasWalkGoal) return; // to only aggro when arriving, still makes them go back and forth due to unit pushing
+
 		if (!HasTarget)
 		{
 			BaseUnit? validTarget = FindValidTarget();
@@ -207,12 +233,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			}
 			else if (!IsGoingToPivot && HasPivot)
 			{
-				ReturnToPivot();
+				ContinueTowardsCurrentGoal();
+				// ReturnToPivot();
 			}
 		}
 		else if (!IsDirectTarget && !IsTargetInChaseDistance)
 		{
-			ReturnToPivot();
+			ContinueTowardsCurrentGoal();
+			// ReturnToPivot();
 		}
 
 		if (HasTarget)

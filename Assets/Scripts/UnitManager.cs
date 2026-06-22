@@ -44,16 +44,16 @@ public class UnitManager : MonoBehaviour
 		lock(_updateLock)
 		{
 			InterpolateUnitsTowardsGoal();
-			if (_latestState != null)
-			{
-				if (_newConnection)
-				{
-					Reset();
-				}
 
-				UpdateUnits(_latestState.Units);
-				_latestState = null;
+			if (_latestState == null) return;
+
+			if (_newConnection)
+			{
+				Reset();
 			}
+
+			UpdateUnits(_latestState.Units);
+			_latestState = null;
 		}
     }
 
@@ -173,6 +173,7 @@ public class UnitManager : MonoBehaviour
 		GameObject obj = _unitInstances[unit];
 		_unitInstances.Remove(unit);
 		_objectUnits.Remove(obj.GetInstanceID());
+		_movingUnitsGoal.Remove(unit);
 		Destroy(obj);
 	}
 
