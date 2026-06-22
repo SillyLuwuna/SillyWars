@@ -1,3 +1,4 @@
+using System;
 using RtsEngine.Math;
 
 namespace RtsEngine.EntityProperties

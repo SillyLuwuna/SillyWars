@@ -14,6 +14,8 @@ namespace RtsEngine
 
 public class WorldState : ISerializable
 {
+	private const bool DEBUG = false;
+
 	public Grid<Cell> Map = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
 	private List<Entity> _entities = null!;
@@ -93,6 +95,12 @@ public class WorldState : ISerializable
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Error when ticking entity {_entities[i].Id}: {ex.Message}");
+				if (DEBUG)
+				{
+					#pragma warning disable CS0162
+					Console.WriteLine(ex.StackTrace);
+					#pragma warning restore CS0162
+				}
 			}
 		}
 	}

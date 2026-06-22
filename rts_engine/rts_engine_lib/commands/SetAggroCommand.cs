@@ -5,11 +5,9 @@ using RtsEngine.Math;
 namespace RtsEngine.Commands
 {
 
-public class AttackCommand : EntityCommand<AttackCommandArgs>
+public class SetAggroCommand : EntityCommand<SetAggroCommandArgs>
 {
-	public Entity? target;
-
-	public AttackCommand(uint playerId, AttackCommandArgs args) : base(playerId, args)
+	public SetAggroCommand(uint playerId, SetAggroCommandArgs args) : base(playerId, args)
 	{
 	}
 
@@ -29,16 +27,12 @@ public class AttackCommand : EntityCommand<AttackCommandArgs>
 
 		if (!(entity is IAttacker)) return false;
 
-		target = state.GetEntity(_args.TargetId);
-		if (target == null) return false;
-		if (target.OwnerId == PlayerId) return false;
-		if (!(target is IDestroyable)) return false;
 		return true;
 	}
 
 	protected override void ExecuteEntity(WorldState state, Entity entity)
 	{
-		((IAttacker)entity).Attack((IDestroyable)target!);
+		((IAttacker)entity).SetAggro(_args.Aggro);
 	}
 }
 

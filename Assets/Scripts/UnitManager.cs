@@ -21,6 +21,7 @@ public class UnitManager : MonoBehaviour
 	private Dictionary<BaseUnit, Vector3> _movingUnitsGoal = null!;
 
 	private object _updateLock = new object();
+	private WorldState? _latestState;
 
 	private bool _newConnection;
 
@@ -32,6 +33,8 @@ public class UnitManager : MonoBehaviour
 
 		_movingUnitsGoal = new Dictionary<BaseUnit, Vector3>();
 
+		_latestState = null;
+
 		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
 		NetworkClient.Instance().Tick += Tick;
     }
@@ -41,6 +44,16 @@ public class UnitManager : MonoBehaviour
 		lock(_updateLock)
 		{
 			InterpolateUnitsTowardsGoal();
+			if (_latestState != null)
+			{
+				if (_newConnection)
+				{
+					Reset();
+				}
+
+				UpdateUnits(_latestState.Units);
+				_latestState = null;
+			}
 		}
     }
 
@@ -79,12 +92,7 @@ public class UnitManager : MonoBehaviour
 	{
 		lock(_updateLock)
 		{
-			if (_newConnection)
-			{
-				Reset();
-			}
-
-			UpdateUnits(state.Units);
+			_latestState = state;
 		}
 	}
 
@@ -120,6 +128,12 @@ public class UnitManager : MonoBehaviour
 
 	private void UpdateUnit(BaseUnit unit)
 	{
+		if (unit.IsDestroyed)
+		{
+			DestroyUnit(unit);
+			return;
+		}
+
 		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
 
 		if (IsNewUnit(unit))
@@ -151,6 +165,15 @@ public class UnitManager : MonoBehaviour
 		GameObject instance = Instantiate(GetCorrespondingObject(unit), pos, spawnRotation);
 		_unitInstances.Add(unit, instance);
 		_objectUnits.Add(instance.GetInstanceID(), unit);
+	}
+
+	private void DestroyUnit(BaseUnit unit)
+	{
+		Debug.Log("Removing unit");
+		GameObject obj = _unitInstances[unit];
+		_unitInstances.Remove(unit);
+		_objectUnits.Remove(obj.GetInstanceID());
+		Destroy(obj);
 	}
 
 	private GameObject GetCorrespondingObject(BaseUnit unit)

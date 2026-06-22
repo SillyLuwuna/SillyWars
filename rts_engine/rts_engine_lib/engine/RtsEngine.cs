@@ -122,9 +122,9 @@ public class RtsEngine
 		_totalTicks++;
 
 		WaitForPreviousTickBroadcast();
+		CleanupDestroyedEntities();
 		ExecutePlayerCommands();
 		UpdateWorldState();
-		CleanupDestroyedEntities();
 		UpdatePhysics();
 		BroadcastWorldState();
 	}
@@ -271,13 +271,13 @@ public class RtsEngine
 			string stats = "";
 			stats += $"[{ts.Hours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}]   ";
 
-			stats += $"load: {loadAvg,6:F2}  | ";
+			stats += $"load: {loadAvg,5:F2}  | ";
 
-			stats += $"send: {totalThroughputKb,6:F1} KB/s  | ";
-			stats += $"recv: {incomingThroughputKb,6:F1} KB/s  | ";
+			stats += $"send: {totalThroughputKb,5:F1} KB/s  | ";
+			stats += $"recv: {incomingThroughputKb,5:F1} KB/s  | ";
 
-			stats += $"pkt out: {(int)avgPacketSize,6} B  | ";
-			stats += $"pkt in: {(int)avgIncPacketSize,6} B";
+			stats += $"pkt out: {(int)avgPacketSize,5} B  | ";
+			stats += $"pkt in: {(int)avgIncPacketSize,5} B";
 
 			Console.WriteLine(stats);
 

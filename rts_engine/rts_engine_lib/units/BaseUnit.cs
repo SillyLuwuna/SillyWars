@@ -20,14 +20,15 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract int AttackSpeed { get; set; }
 	public abstract float AttackRange { get; set; }
 	public abstract float ChaseDistance { get; set; }
+	public abstract float AggroRange { get; set; }
 
 	private BaseUnit? _target;
 	private bool _isDirectTarget;
 	private int _cooldown;
-	private Vec2 _pivot;
+	private Vec2? _pivot;
 	private bool _isGoingToPivot;
 	private Vec2? _walkGoal;
-	private bool _isChasingTarget;
+	private int _walkGoalCheckpoint;
 	private int _targetedByAmount;
 
 	public abstract float MoveSpeed { get; set; }
@@ -45,7 +46,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		_cooldown = 0;
 		_walkGoal = null;
 		_isGoingToPivot = false;
-		_isChasingTarget = false;
 		_targetedByAmount = 0;
 
 		CurrPath = null;
@@ -63,11 +63,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
+		writer.Write(IsDestroyed);
 		writer.Write(HitPoints);
 		writer.Write(AttackDamage);
 		writer.Write(AttackSpeed);
 		writer.Write(AttackRange);
 		writer.Write(ChaseDistance);
+		writer.Write(AggroRange);
 		writer.Write(MoveSpeed);
 		writer.Write(State);
 	}
@@ -75,11 +77,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
+		IsDestroyed = reader.Read<bool>();
 		HitPoints = reader.Read<int>();
 		AttackDamage = reader.Read<int>();
 		AttackSpeed = reader.Read<int>();
 		AttackRange = reader.Read<float>();
 		ChaseDistance = reader.Read<float>();
+		AggroRange = reader.Read<float>();
 		MoveSpeed = reader.Read<float>();
 		State = reader.Read<EntityState>();
 	}
@@ -93,6 +97,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private void SetPathfinding(Vec2 goal)
 	{
 		Grid<Cell> map = RtsEngine.Instance.State.Map;
+
 		// can be easily optimized by caching, and seeing when map changes to update cache
 		PathFinding pathfinder = new PathFinding(map);
 		PathOptimizer optimizer = new PathOptimizer(map);
@@ -115,33 +120,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (_state.IsAggro)
 		{
-			if (!_isChasingTarget)
-			{
-				BaseUnit? potentialTarget = FindValidTarget();
-				if (potentialTarget != null)
-				{
-					_pivot = Pos;
-					_target = potentialTarget;
-					_isChasingTarget = true;
-					_isDirectTarget = false;
-				}
-			}
-			else if (_isChasingTarget && !_isDirectTarget)
-			{
-				if (_pivot.Distance(Pos) > ChaseDistance)
-				{
-					SetPathfinding(_pivot);
-					_isGoingToPivot = true;
-					_target = null;
-					_isChasingTarget = false;
-					_isDirectTarget = false;
-				}
-			}
-
-			if (_isChasingTarget)
-			{
-				SetPathfinding(_target!.Pos);
-			}
+			UpdateMoveAggro();
 		}
 
 		if (!_state.IsWalking) return;
@@ -150,25 +129,182 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 		if (target.Distance(Pos) <= MoveSpeed)
 		{
-			// Pos = target;
-			CurrPathCheckpoint++;
-			if (CurrPathCheckpoint >= CurrPath.Count)
-			{
-				if (_isGoingToPivot)
-				{
-					_isGoingToPivot = false;
-					if (_walkGoal != null)
-					{
-						SetPathfinding(_walkGoal.Value);
-					}
-				}
-				Halt();
-			}
+			Checkpoint();
 			return;
 		}
 
 		Vec2 direction = Pos.To(target).Unit;
 		this.ApplyForce(direction * MoveSpeed);
+	}
+
+	private void Checkpoint()
+	{
+		CurrPathCheckpoint++;
+
+		if (HasTarget)
+		{
+			UpdateTargetPathfinding();
+		}
+
+		if (CurrPathCheckpoint >= CurrPath!.Count)
+		{
+			HandlePathArrival();
+		}
+	}
+
+	private void UpdateTargetPathfinding()
+	{
+		SetPathfinding(_target!.Pos);
+		if (CurrPath![1].Distance(Pos) <= MoveSpeed)
+		{
+			CurrPathCheckpoint++;
+		}
+	}
+
+	private void HandlePathArrival()
+	{
+		if (!_isGoingToPivot)
+		{
+			Halt();
+			return;
+		}
+
+		HandleArrivalAtPivot();
+	}
+
+	private void HandleArrivalAtPivot()
+	{
+		_pivot = null;
+		_isGoingToPivot = false;
+
+		if (_walkGoal == null)
+		{
+			Halt();
+			return;
+		}
+
+		RestoreWalkGoal();
+	}
+
+	private void RestoreWalkGoal()
+	{
+		CurrPathCheckpoint = _walkGoalCheckpoint;
+		SetPathfinding(_walkGoal!.Value);
+	}
+
+	private bool IsDirectTarget { get => _isDirectTarget; }
+	private bool IsGoingToPivot { get => _isGoingToPivot; }
+	private bool HasPivot { get => _pivot != null; }
+
+	private void UpdateMoveAggro()
+	{
+		if (!HasTarget)
+		{
+			BaseUnit? validTarget = FindValidTarget();
+			if (validTarget != null)
+			{
+				UpdateIndirectTarget(validTarget);
+			}
+			else if (!IsGoingToPivot && HasPivot)
+			{
+				ReturnToPivot();
+			}
+		}
+		else if (!IsDirectTarget && !IsTargetInChaseDistance)
+		{
+			ReturnToPivot();
+		}
+
+		if (HasTarget)
+		{
+			UpdateAttackMovement();
+		}
+	}
+
+	private void UpdateAttackMovement()
+	{
+		if (IsInAttackRange)
+		{
+			PauseWalking();
+			return;
+		}
+
+		ContinueWalking();
+
+		if (!HasPath)
+		{
+			SetPathfinding(_target!.Pos);
+		}
+		else if (CurrPath!.Count == 2)
+		{
+			CurrPath[1] = _target!.Pos;
+		}
+	}
+
+	private void UpdateIndirectTarget(BaseUnit target)
+	{
+		if (_pivot == null)
+		{
+			_walkGoalCheckpoint = CurrPathCheckpoint;
+			_pivot = Pos;
+		}
+		_isGoingToPivot = false;
+		_target = target;
+		_isDirectTarget = false;
+	}
+
+	private void ReturnToPivot()
+	{
+		SetPathfinding(_pivot!.Value);
+		_isGoingToPivot = true;
+		_target = null;
+		_isDirectTarget = false;
+	}
+
+	private bool IsTargetInChaseDistance
+	{
+		get => _pivot?.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
+	}
+
+	private bool IsTargetInAggroRange
+	{
+		get => IsUnitInAggroRange(_target!);
+	}
+
+	private bool IsUnitInAggroRange(BaseUnit unit)
+	{
+		if (_pivot == null)
+		{
+			return this.Pos.Distance(unit.Pos) <= AggroRange;
+		}
+
+		return _pivot.Value.Distance(unit.Pos) <= AggroRange;
+	}
+
+	private bool IsInAttackRange
+	{
+		get => this.Pos.Distance(_target!.Pos) - _target.Radius <= AttackRange;
+	}
+
+	private bool HasTarget
+	{
+		get => _target != null;
+	}
+
+	private bool HasPath
+	{
+		get => !(CurrPath == null);
+	}
+
+	private void PauseWalking()
+	{
+		ClearVelocity();
+		_state.IsWalking = false;
+	}
+
+	private void ContinueWalking()
+	{
+		_state.IsWalking = true;
 	}
 
 	public void Halt()
@@ -187,9 +323,10 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			{
 				_target._targetedByAmount--;
 			}
+			_pivot = null;
 			_target = null;
 			_isDirectTarget = false;
-			_isChasingTarget = false;
+			_isGoingToPivot = false;
 		}
 		State.IsAggro = aggro;
 	}
@@ -200,7 +337,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		SetAggro(true);
 		_target = baseUnitTarget;
 		_isDirectTarget = true;
-		_isChasingTarget = true;
+		SetPathfinding(_target.Pos);
 	}
 
 	public void AttackTick()
@@ -208,19 +345,35 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (_cooldown > 0)
 		{
 			_cooldown--;
+			return;
 		}
 
 		if (!State.IsAggro) return;
-		if (_target == null) return;
-		if (this.Pos.Distance(_target.Pos) - _target.Radius > AttackRange) return;
+		if (!HasTarget) return;
+		if (HandleEnemyDeath()) return;
+		if (!IsInAttackRange) return;
 
 		_cooldown = AttackSpeed;
-		((IDestroyable)_target).Damage(AttackDamage);
+		((IDestroyable)_target!).Damage(AttackDamage);
 
-		if (_target.IsDestroyed)
+		HandleEnemyDeath();
+	}
+
+	private bool HandleEnemyDeath()
+	{
+		bool isTargetDestroyed = _target!.IsDestroyed;
+		if (isTargetDestroyed)
 		{
-			SetAggro(false);
+			if (_isDirectTarget)
+			{
+				SetAggro(false);
+			}
+			else
+			{
+				_target = null;
+			}
 		}
+		return isTargetDestroyed;
 	}
 
 	private BaseUnit? FindValidTarget()
@@ -231,18 +384,19 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 		foreach (BaseUnit unit in RtsEngine.Instance.State.Units)
 		{
-			if (_pivot.Distance(this.Pos) < ChaseDistance)
-			{
-				float distance = this.Pos.Distance(unit.Pos);
+			if (unit.OwnerId == this.OwnerId) continue;
+			if (unit.Id == this.Id) continue;
+			if (!IsUnitInAggroRange(unit)) continue;
+			if (unit._targetedByAmount > targetNumAttackers) continue;
 
-				if ((target == null) ||
-					(unit._targetedByAmount < targetNumAttackers) ||
-					(distance < targetDistance))
-				{
-					target = unit;
-					targetDistance = distance;
-					targetNumAttackers = unit._targetedByAmount;
-				}
+			float distance = this.Pos.Distance(unit.Pos);
+
+			if ((unit._targetedByAmount < targetNumAttackers) ||
+				(unit._targetedByAmount == targetNumAttackers && distance < targetDistance))
+			{
+				target = unit;
+				targetDistance = distance;
+				targetNumAttackers = unit._targetedByAmount;
 			}
 		}
 

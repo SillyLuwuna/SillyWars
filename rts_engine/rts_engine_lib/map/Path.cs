@@ -39,7 +39,7 @@ public class Path : IEquatable<Path>
 	public Vec2 this[int i]
 	{
 		get => _path[i];
-		private set => _path[i] = value;
+		set => _path[i] = value;
 	}
 
 	public float Length

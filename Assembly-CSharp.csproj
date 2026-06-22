@@ -48,24 +48,12 @@
     <Analyzer Include="/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Scripts/Old/PathOptimizer.cs" />
     <Compile Include="Assets/Scripts/GridManager.cs" />
     <Compile Include="Assets/Scripts/UnitManager.cs" />
     <Compile Include="Assets/Scripts/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/SelectionBoxUI.cs" />
-    <Compile Include="Assets/Scripts/Old/Path.cs" />
-    <Compile Include="Assets/Scripts/Old/GridManager.cs" />
-    <Compile Include="Assets/Scripts/Old/PriorityQueue.cs" />
-    <Compile Include="Assets/Scripts/Old/Grid.cs" />
-    <Compile Include="Assets/Scripts/Old/GameMath.cs" />
-    <Compile Include="Assets/Scripts/Old/PathNode.cs" />
-    <Compile Include="Assets/Scripts/Old/Line.cs" />
-    <Compile Include="Assets/Scripts/Old/GoalChaser.cs" />
-    <Compile Include="Assets/Scripts/Old/Cell.cs" />
     <Compile Include="Assets/Scripts/UnitController.cs" />
     <Compile Include="Assets/Scripts/ConnectButton.cs" />
-    <Compile Include="Assets/Scripts/Old/GridRaycast.cs" />
-    <Compile Include="Assets/Scripts/Old/Pathfinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />

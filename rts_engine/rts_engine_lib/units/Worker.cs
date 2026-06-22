@@ -11,6 +11,7 @@ public class Worker : BaseUnit
 	public override int AttackSpeed { get; set; }
 	public override float AttackRange { get; set; }
 	public override float ChaseDistance { get; set; }
+	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
 
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
@@ -20,6 +21,7 @@ public class Worker : BaseUnit
 		AttackSpeed = 15;
 		AttackRange = 0.25f;
 		ChaseDistance = 2.0f;
+		AggroRange = 2.0f;
 		MoveSpeed = 0.18f;
 
 		Radius = 0.2f;

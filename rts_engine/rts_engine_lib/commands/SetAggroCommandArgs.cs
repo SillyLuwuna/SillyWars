@@ -5,25 +5,25 @@ using RtsEngine.Math;
 namespace RtsEngine.Commands
 {
 
-public class AttackCommandArgs : EntityCommandArgs
+public class SetAggroCommandArgs : EntityCommandArgs
 {
-	public uint TargetId;
+	public bool Aggro;
 
-	public AttackCommandArgs(List<uint> entityIds, uint victimId) : base(entityIds)
+	public SetAggroCommandArgs(List<uint> entityIds, bool aggro) : base(entityIds)
 	{
-		TargetId = victimId;
+		Aggro = aggro;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
-		writer.Write(TargetId);
+		writer.Write(Aggro);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
-		reader.Read(out TargetId);
+		reader.Read(out Aggro);
 	}
 }
 

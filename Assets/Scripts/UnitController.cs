@@ -21,6 +21,7 @@ public class UnitController : MonoBehaviour
 	private Vector2 _dragEnd;
 	// private Rect _selectionRect;
 	private bool _isDragging = false;
+	private bool _isWalkAttack = false;
 
 	public List<GameObject>? UnitsSelected;
 
@@ -49,24 +50,74 @@ public class UnitController : MonoBehaviour
 	{
 		if (context.phase == InputActionPhase.Started)
 		{
-			Vector2 goal = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-			MoveAction(goal);
+			Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+			GameObject? enemyUnit = GetEnemyUnitOnPos(mousePos);
+			if (_isWalkAttack)
+			{
+				_isWalkAttack = false;
+				SetAggroAction(true);
+				MoveAction(mousePos);
+			}
+			else if (enemyUnit == null)
+			{
+				SetAggroAction(false);
+				MoveAction(mousePos);
+			}
+			else
+			{
+				AttackAction(enemyUnit);
+			}
 		}
+	}
+
+	public GameObject? GetEnemyUnitOnPos(Vector2 pos)
+	{
+		Collider2D hits = Physics2D.OverlapPoint(pos);
+
+		return hits?.gameObject;
 	}
 
 	private void MoveAction(Vector2 goal)
 	{
 		if (UnitsSelected == null) return;
 
+		List<uint> unitIds = GetSelectedUnitIds();
+		MoveCommandArgs args = new MoveCommandArgs(unitIds, new Vec2(goal.x, goal.y));
+		ICommand command = new MoveCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	private void AttackAction(GameObject enemyUnit)
+	{
+		if (UnitsSelected == null) return;
+
+		List<uint> unitIds = GetSelectedUnitIds();
+		AttackCommandArgs args = new AttackCommandArgs(unitIds, unitManager.GetUnit(enemyUnit)!.Id);
+		ICommand command = new AttackCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	private void SetAggroAction(bool aggro)
+	{
+		if (UnitsSelected == null) return;
+
+		List<uint> unitIds = GetSelectedUnitIds();
+		SetAggroCommandArgs args = new SetAggroCommandArgs(unitIds, aggro);
+		ICommand command = new SetAggroCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	public List<uint> GetSelectedUnitIds()
+	{
 		List<uint> unitIds = new List<uint>();
-		foreach (GameObject obj in UnitsSelected)
+
+		foreach (GameObject obj in UnitsSelected!)
 		{
 			BaseUnit unit = unitManager.GetUnit(obj)!;
 			unitIds.Add(unit.Id);
 		}
-		MoveCommandArgs args = new MoveCommandArgs(unitIds, new Vec2(goal.x, goal.y));
-		ICommand command = new MoveCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+
+		return unitIds;
 	}
 
 	public void OnDrag(InputAction.CallbackContext context)
@@ -138,6 +189,14 @@ public class UnitController : MonoBehaviour
 		}
 
 		return results;
+	}
+
+	public void OnWalkAttackInput(InputAction.CallbackContext context)
+	{
+		if (context.phase == InputActionPhase.Started)
+		{
+			_isWalkAttack = !_isWalkAttack;
+		}
 	}
 
 	void Update()

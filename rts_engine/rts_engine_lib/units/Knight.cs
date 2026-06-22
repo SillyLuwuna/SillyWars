@@ -1,3 +1,4 @@
+using System;
 using RtsEngine.Data;
 using RtsEngine.Math;
 
@@ -11,6 +12,7 @@ public class Knight : BaseUnit
 	public override int AttackSpeed { get; set; }
 	public override float AttackRange { get; set; }
 	public override float ChaseDistance { get; set; }
+	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
 
 	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId)
@@ -23,7 +25,8 @@ public class Knight : BaseUnit
 		AttackDamage = 2;
 		AttackSpeed = 25;
 		AttackRange = Radius + 0.1f;
-		ChaseDistance = 2.0f;
+		ChaseDistance = 3.0f;
+		AggroRange = 3.0f;
 		MoveSpeed = 0.15f;
 	}
 
