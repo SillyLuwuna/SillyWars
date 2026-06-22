@@ -179,7 +179,14 @@ public class WorldState : ISerializable
 
 	public bool IsTileOccupied(Vec2Int tile)
 	{
-		if (Map[tile].Type == CellType.Structure) return false;
+		if (Map[tile].Type == CellType.Structure) return true;
+
+		foreach (BaseUnit unit in _units)
+		{
+			if (Map.CellPosFromWorldSpace(unit.Pos) == tile) return true;
+		}
+
+		return false;
 	}
 
 	public static WorldState Load(string file)

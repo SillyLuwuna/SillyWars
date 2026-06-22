@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RtsEngine.Data;
@@ -9,7 +10,7 @@ using RtsEngine.Structures;
 namespace RtsEngine.Units
 {
 
-public class Worker : BaseUnit
+public class Worker : BaseUnit, IBuilder
 {
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
@@ -19,7 +20,7 @@ public class Worker : BaseUnit
 	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
 
-	public int BuildSpeed;
+	public int BuildSpeed { get; set; }
 
 	private BaseStructure? _structure;
 	Vec2Int? _closestReachableTile;
@@ -53,17 +54,20 @@ public class Worker : BaseUnit
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
+		writer.Write(BuildSpeed);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
+		BuildSpeed = reader.Read<int>();
 	}
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
+			Console.WriteLine("Building interrupted");
 			StopBuilding();
 		}
 	}
@@ -103,6 +107,7 @@ public class Worker : BaseUnit
 	{
 		if (_structure!.IsDestroyed)
 		{
+			Console.WriteLine("Can't build: structure was destroyed");
 			StopBuilding();
 			return;
 		}
@@ -114,6 +119,7 @@ public class Worker : BaseUnit
 		{
 			if (!GoToStructureRange())
 			{
+				Console.WriteLine("Can't build: structure unreachable");
 				StopBuilding();
 			}
 
@@ -124,10 +130,12 @@ public class Worker : BaseUnit
 		{
 			if (_structure.IsStructureAreaObstructed)
 			{
+				Console.WriteLine("Can't build: structure area obstructed");
 				StopBuilding();
 			}
 			else
 			{
+				Console.WriteLine("Starting build");
 				_structure.StartBuilding();
 				_buildCooldown = BuildSpeed;
 			}
@@ -135,12 +143,14 @@ public class Worker : BaseUnit
 			return;
 		}
 
-		if (!_structure.IsFullyBuilt)
+		if (_structure.IsFullyBuilt)
 		{
+			Console.WriteLine("Structure fully built!");
 			StopBuilding();
 			return;
 		}
 
+		Console.WriteLine("Starting build");
 		_structure.DoBuildWork();
 		_buildCooldown = BuildSpeed;
 	}
