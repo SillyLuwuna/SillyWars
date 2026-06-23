@@ -146,17 +146,24 @@ public class NetworkClient : MonoBehaviour
 
 	private void HandleData(object? sender, byte[] data)
 	{
-
-		byte[] decompressedData = DataCompressor.DecompressData(data);
-		WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
-
-		lock (_stateLock)
+		try
 		{
-			_oldState = _currState;
-			_currState = state;
+			byte[] decompressedData = DataCompressor.DecompressData(data);
+			WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
 
-			_update = true;
+			lock (_stateLock)
+			{
+				_oldState = _currState;
+				_currState = state;
+
+				_update = true;
+			}
 		}
+		catch (Exception ex)
+		{
+			Debug.Log($"error reading data: {ex.Message}\n{ex.StackTrace}");
+		}
+
 	}
 
 	void OnDestroy()

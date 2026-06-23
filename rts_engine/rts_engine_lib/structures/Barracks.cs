@@ -5,8 +5,8 @@ namespace RtsEngine.Structures
 
 public class Barracks : BaseStructure
 {
-	public const int HEIGHT = 2;
-	public const int WIDTH = 2;
+	public const int HEIGHT = 3;
+	public const int WIDTH = 3;
 	public const int MAX_HITPOINTS = 20;
 	public const int BUILD_EFFORT = 10;
 

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Assets/Scripts/GridManager.cs" />
     <Compile Include="Assets/Scripts/UnitManager.cs" />
+    <Compile Include="Assets/Scripts/StructureManager.cs" />
     <Compile Include="Assets/Scripts/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/SelectionBoxUI.cs" />
     <Compile Include="Assets/Scripts/UnitController.cs" />

@@ -16,7 +16,7 @@ namespace RtsEngine
 
 public class WorldState : ISerializable
 {
-	private const bool DEBUG = false;
+	private const bool DEBUG = true;
 
 	public Grid<Cell> Map = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
@@ -105,7 +105,6 @@ public class WorldState : ISerializable
 		if (entity is BaseStructure currStructure)
 		{
 			_structures.Add(currStructure);
-			Console.WriteLine("Added");
 			UpdateMapStructure(currStructure);
 		}
 	}
@@ -114,10 +113,8 @@ public class WorldState : ISerializable
 	{
 		CellType cellType = structure.IsDestroyed ? CellType.Ground : CellType.Structure;
 
-		Console.WriteLine(structure.Tiles.Count);
 		foreach (Vec2Int tile in structure.Tiles)
 		{
-			Console.WriteLine($"Added {cellType} at {tile}");
 			Map[tile].Type = cellType;
 		}
 	}
@@ -231,12 +228,15 @@ public class WorldState : ISerializable
 
 	public List<BaseUnit> Units { get => _units; }
 
+	public List<BaseStructure> Structures { get => _structures; }
+
 	public List<PhysicsObject> PhysicsObjects { get => _physicsObjects; }
 
 	public PathFinder PathFinder { get => _pathFinder; }
 
 	public bool IsTileOccupied(Vec2Int tile)
 	{
+		if (!Map.ContainsPos(tile)) return true;
 		if (!Map[tile].IsWalkable) return true;
 
 		foreach (BaseUnit unit in _units)

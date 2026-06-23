@@ -10,7 +10,7 @@ namespace RtsEngine.Structures
 
 public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 {
-	public List<Vec2Int> Tiles;
+	public List<Vec2Int> Tiles = null!;
 
 	public bool IsDestroyed { get; set; }
 
@@ -28,6 +28,11 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 	public Vec2Int Start;
 
 	public BaseStructure(uint ownerId, Vec2Int start, int height, int width) : base(ownerId)
+	{
+		Init(start, height, width);
+	}
+
+	private void Init(Vec2Int start, int height, int width)
 	{
 		Tiles = new List<Vec2Int>();
 		Start = start;
@@ -50,18 +55,43 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 				Tiles.Add(new Vec2Int(Start.x + x, Start.y + y));
 			}
 		}
-
-		Console.WriteLine($"Added {Tiles.Count} tiles");
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
+
+		writer.Write(Start);
+		writer.Write(Height);
+		writer.Write(Width);
+
+		writer.Write(IsDestroyed);
+
+		writer.Write(MaxHitPoints);
+		writer.Write(HitPoints);
+
+		writer.Write(BuildEffort);
+		writer.Write(HasBuildingStarted);
+		writer.Write(IsBuilt);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
+
+		Start = reader.Read<Vec2Int>();
+		Height = reader.Read<int>();
+		Width = reader.Read<int>();
+		Init(Start, Height, Width);
+
+		IsDestroyed = reader.Read<bool>();
+
+		MaxHitPoints = reader.Read<int>();
+		HitPoints = reader.Read<int>();
+
+		BuildEffort = reader.Read<int>();
+		HasBuildingStarted = reader.Read<bool>();
+		IsBuilt = reader.Read<bool>();
 	}
 
 	public void StartBuilding()
@@ -69,7 +99,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		if (IsAreaObstructed) return;
 
 		HasBuildingStarted = true;
-		Console.WriteLine("Building instantiated");
 		RtsEngine.Instance.State.AddEntity(this);
 	}
 
@@ -84,8 +113,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		if (!HasBuildingStarted) return;
 
 		BuildEffort--;
-
-		Console.WriteLine($"Build effort left: {BuildEffort}");
 
 		if (BuildEffort <= 0)
 		{

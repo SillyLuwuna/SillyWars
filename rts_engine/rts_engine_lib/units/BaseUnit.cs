@@ -23,7 +23,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract float AggroRange { get; set; }
 
 	private BaseUnit? _target;
-	private int _cooldown;
+	private int _attackCooldown;
 	private Vec2? _pivot;
 	private bool _isGoingToPivot;
 	private Vec2? _walkGoal;
@@ -44,7 +44,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		IsDestroyed = false;
 		_target = null;
-		_cooldown = 0;
+		_attackCooldown = 0;
 		_walkGoal = null;
 		_isGoingToPivot = false;
 		_targetedByAmount = 0;
@@ -57,8 +57,36 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		base.Tick();
 
-		MoveTick();
-		AttackTick();
+		DecreaseCooldowns();
+
+		if (_state.IsAggro)
+		{
+			UpdateMoveAggro();
+		}
+
+		if (HasTarget)
+		{
+			UpdateAttackMovement();
+		}
+
+		if (_state.IsWalking)
+		{
+			MoveTick();
+		}
+
+		if (State.IsAggro || State.Goal == Goal.Attack)
+		{
+			AttackTick();
+		}
+	}
+
+	private void DecreaseCooldowns()
+	{
+		if (_attackCooldown > 0)
+		{
+			_attackCooldown--;
+			return;
+		}
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
@@ -127,22 +155,20 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected void MoveTick()
 	{
-		if (_state.IsAggro)
-		{
-			UpdateMoveAggro();
-		}
-
-		if (HasTarget)
-		{
-			UpdateAttackMovement();
-		}
-
-		if (!_state.IsWalking) return;
-
+		// Console.WriteLine("============= MoveTick =============");
+		// Console.WriteLine($"Id: {Id}");
+		// Console.WriteLine($"Goal: {State.Goal}");
+		// Console.WriteLine($"Aggro: {State.IsAggro}");
+		// Console.WriteLine($"HasTarget: {HasTarget}");
+		// Console.WriteLine($"IsWalking: {State.IsWalking}");
+		// Console.WriteLine($"HasWalkGoal: {HasWalkGoal}");
+		// Console.WriteLine($"IsGoingToPivot: {IsGoingToPivot}");
+		// Console.WriteLine("============= MoveTick =============");
 		Vec2 target = CurrWalkPath![CurrWalkPathCheckpoint];
 
 		if (target.Distance(Pos) <= MoveSpeed)
 		{
+			// Console.WriteLine($"{Id}: Checkpoint ({CurrWalkPathCheckpoint})");
 			Checkpoint();
 			return;
 		}
@@ -170,6 +196,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (!SetPathfinding(_target!.Pos))
 		{
+			// Console.WriteLine($"{Id}: no path to target");
 			if (State.Goal == Goal.Attack)
 			{
 				State.Goal = Goal.None;
@@ -181,6 +208,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (CurrWalkPath![1].Distance(Pos) <= MoveSpeed)
 		{
 			CurrWalkPathCheckpoint++;
+			// Console.WriteLine($"{Id}: (extra) Checkpoint ({CurrWalkPathCheckpoint})");
 		}
 	}
 
@@ -190,18 +218,21 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (_isGoingToPivot)
 		{
+			// Console.WriteLine($"{Id}: Arrived at pivot");
 			HandleArrivalAtPivot();
 			return;
 		}
 
 		if (HasTarget)
 		{
+			// Console.WriteLine($"{Id}: Arrived at target");
 			PauseWalking();
 			return;
 		}
 
 		if (HasWalkGoal)
 		{
+			// Console.WriteLine($"{Id}: Arrived at walk goal");
 			Halt();
 			OnWalkGoalReached();
 			return;
@@ -224,6 +255,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void ContinueWalkingToGoal()
 	{
+		// Console.WriteLine($"{Id}: Continuing walking to goal");
 		_pivot = null;
 		_isGoingToPivot = false;
 		RestoreWalkGoal();
@@ -231,9 +263,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void RestoreWalkGoal()
 	{
-		CurrWalkPathCheckpoint = _walkGoalCheckpoint;
+		// CurrWalkPathCheckpoint = _walkGoalCheckpoint;
 		SetPathfinding(_walkGoal!.Value);
 	}
+
+	// private void SaveWalkGoal()
+	// {
+	// 	_walkGoalCheckpoint = CurrWalkPathCheckpoint;
+	// }
 
 	private void ContinueTowardsCurrentGoal()
 	{
@@ -268,10 +305,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		BaseUnit? validTarget = FindValidTarget();
 		if (validTarget != null)
 		{
+			// Console.WriteLine($"{Id}: Found target");
 			UpdateIndirectTarget(validTarget);
 		}
 		else if (!IsGoingToPivot && HasPivot)
 		{
+			// Console.WriteLine($"{Id}: No targets");
 			ContinueTowardsCurrentGoal();
 			// ReturnToPivot();
 		}
@@ -281,6 +320,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (IsInAttackRange)
 		{
+			// Console.WriteLine($"{Id}: In attack range");
 			PauseWalking();
 			return;
 		}
@@ -292,15 +332,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (_pivot == null)
 		{
-			_walkGoalCheckpoint = CurrWalkPathCheckpoint;
+			// _walkGoalCheckpoint = CurrWalkPathCheckpoint;
 			_pivot = Pos;
 		}
 		_isGoingToPivot = false;
 		_target = target;
+		SetPathfinding(_target.Pos);
 	}
 
 	private void ReturnToPivot()
 	{
+		// Console.WriteLine($"{Id}: returning to pivot");
 		SetPathfinding(_pivot!.Value);
 		_isGoingToPivot = true;
 		_target = null;
@@ -308,7 +350,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private bool IsTargetInChaseDistance
 	{
-		get => _pivot?.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
+		// get => _pivot?.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
+		get => Pos.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
 	}
 
 	private bool IsTargetInAggroRange
@@ -318,12 +361,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private bool IsUnitInAggroRange(BaseUnit unit)
 	{
-		if (_pivot == null)
-		{
-			return this.Pos.Distance(unit.Pos) <= AggroRange;
-		}
-
-		return _pivot.Value.Distance(unit.Pos) <= AggroRange;
+		// if (_pivot == null)
+		// {
+		return this.Pos.Distance(unit.Pos) <= AggroRange;
+		// }
+		//
+		// return _pivot.Value.Distance(unit.Pos) <= AggroRange;
 	}
 
 	private bool IsInAttackRange
@@ -367,6 +410,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			{
 				_target._targetedByAmount--;
 			}
+			// Console.WriteLine($"{Id}: Dropping aggro");
 			_pivot = null;
 			_target = null;
 			_isGoingToPivot = false;
@@ -389,13 +433,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected void AttackTick()
 	{
-		if (_cooldown > 0)
-		{
-			_cooldown--;
-			return;
-		}
-
-		if (!State.IsAggro && State.Goal != Goal.Attack) return;
 		if (!HasTarget) return;
 		if (_target!.IsDestroyed)
 		{
@@ -404,10 +441,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 		if (!IsInAttackRange) return;
 
-		_cooldown = AttackSpeed;
+		_attackCooldown = AttackSpeed;
 		((IDestroyable)_target!).Damage(AttackDamage);
 
-		HandleEnemyDeath();
+		if (_target!.IsDestroyed)
+		{
+			HandleEnemyDeath();
+			return;
+		}
 	}
 
 	private void HandleEnemyDeath()
@@ -417,6 +458,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			State.Goal = Goal.None;
 		}
 
+		// Console.WriteLine($"{Id}: Target died");
 		_target = null;
 	}
 

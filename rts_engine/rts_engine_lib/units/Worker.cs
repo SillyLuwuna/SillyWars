@@ -69,29 +69,27 @@ public class Worker : BaseUnit, IBuilder
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
-		if (args.OldState.Goal != args.NewState.Goal)
-		{
-			Console.WriteLine($"goal: {args.OldState.Goal} -> {args.NewState.Goal}");
-		}
-		if (args.OldState.IsWalking != args.NewState.IsWalking)
-		{
-			Console.WriteLine($"walking: {args.OldState.IsWalking} -> {args.NewState.IsWalking}");
-		}
-		if (args.OldState.IsAggro != args.NewState.IsAggro)
-		{
-			Console.WriteLine($"aggro: {args.OldState.IsAggro} -> {args.NewState.IsAggro}");
-		}
+		// if (args.OldState.Goal != args.NewState.Goal)
+		// {
+		// 	Console.WriteLine($"goal: {args.OldState.Goal} -> {args.NewState.Goal}");
+		// }
+		// if (args.OldState.IsWalking != args.NewState.IsWalking)
+		// {
+		// 	Console.WriteLine($"walking: {args.OldState.IsWalking} -> {args.NewState.IsWalking}");
+		// }
+		// if (args.OldState.IsAggro != args.NewState.IsAggro)
+		// {
+		// 	Console.WriteLine($"aggro: {args.OldState.IsAggro} -> {args.NewState.IsAggro}");
+		// }
 
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
-			Console.WriteLine("Building stopped");
 			StopBuilding();
 		}
 	}
 
 	public void Build(BaseStructure structure)
 	{
-		Console.WriteLine("Starting build");
 		_structure = structure;
 		State.Goal = Goal.Build;
 		_closestReachableTile = null;
@@ -144,15 +142,12 @@ public class Worker : BaseUnit, IBuilder
 
 		if (IsBuildingNewStructure)
 		{
-			Console.WriteLine("New structure");
 			if (_structure.IsAreaObstructed)
 			{
-				Console.WriteLine("Area obstructed");
 				StopBuilding();
 			}
 			else
 			{
-				Console.WriteLine("Is instantiating structure");
 				_structure.StartBuilding();
 				_buildCooldown = BuildSpeed;
 			}

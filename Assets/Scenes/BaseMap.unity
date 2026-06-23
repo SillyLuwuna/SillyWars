@@ -2495,6 +2495,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1787291891}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1117320219
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1117320221}
+  - component: {fileID: 1117320220}
+  m_Layer: 0
+  m_Name: StructureManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1117320220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117320219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7bd7b0d8208525398d78d46e51cbee0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StructureManager
+  CastleStructures:
+  - {fileID: 5588601534899918480, guid: c16ec23133cad1b03bda8161e04491c7, type: 3}
+  - {fileID: 5588601534899918480, guid: d3be90020418de70ea6370f69c7f7a8a, type: 3}
+  BarracksStructures:
+  - {fileID: 5588601534899918480, guid: ee5e3e41a12537797af8822adedf9807, type: 3}
+  - {fileID: 5588601534899918480, guid: 50ccfe0534a9a3ea6a24cb1355aa24d1, type: 3}
+  MissingTexture: {fileID: 1735476546060530504, guid: a7edcab2ff1f35206a33cae77905ef8a, type: 3}
+  spawnRotation: {x: 0, y: 0, z: 0, w: 1}
+--- !u!4 &1117320221
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117320219}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.65083, y: 6.16881, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1154549216
 GameObject:
   m_ObjectHideFlags: 0
@@ -6914,3 +6966,4 @@ SceneRoots:
   - {fileID: 1436162568}
   - {fileID: 1428621001}
   - {fileID: 1301551127}
+  - {fileID: 1117320221}

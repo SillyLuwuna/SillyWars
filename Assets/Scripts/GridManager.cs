@@ -41,7 +41,8 @@ public class GridManager : MonoBehaviour
 		{
 			for (int y = 0; y < map.Height; y++)
 			{
-				if (map[x, y].Type == CellType.Ground)
+				CellType currType = map[x, y].Type;
+				if (currType == CellType.Ground || currType == CellType.Structure)
 				{
 					tilemap.SetTile(new Vector3Int(x, y, 0), groundTile);
 				}

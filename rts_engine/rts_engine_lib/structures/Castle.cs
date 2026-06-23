@@ -5,8 +5,8 @@ namespace RtsEngine.Structures
 
 public class Castle : BaseStructure
 {
-	public const int HEIGHT = 2;
-	public const int WIDTH = 3;
+	public const int HEIGHT = 3;
+	public const int WIDTH = 5;
 	public const int MAX_HITPOINTS = 40;
 	public const int BUILD_EFFORT = 20;
 	public override int Height { get; set; }

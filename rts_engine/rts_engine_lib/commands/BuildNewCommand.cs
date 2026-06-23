@@ -38,7 +38,6 @@ public class BuildNewCommand : EntityCommand<BuildNewCommandArgs>
 
 	protected override void ExecuteEntity(WorldState state, Entity entity)
 	{
-		Console.WriteLine("Build new command");
 		((IBuilder)entity).Build(structure!);
 	}
 }
