@@ -96,7 +96,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private void DecreaseCooldowns()
+	protected virtual void DecreaseCooldowns()
 	{
 		if (_attackCooldown > 0)
 		{
@@ -533,6 +533,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected void AttackTick()
 	{
+		if (_attackCooldown > 0) return;
 		if (!HasTarget) return;
 		if (_targ!.IsDestroyed)
 		{

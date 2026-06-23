@@ -21,9 +21,9 @@ public class Knight : BaseUnit
 		Mass = 1.0f;
 		Friction = 1.0f;
 
-		HitPoints = 5;
-		AttackDamage = 2;
-		AttackSpeed = 25;
+		HitPoints = 10;
+		AttackDamage = 3;
+		AttackSpeed = 35;
 		AttackRange = Radius + 0.1f;
 		ChaseDistance = 3.0f;
 		AggroRange = 3.0f;

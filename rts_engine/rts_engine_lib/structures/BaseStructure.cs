@@ -116,8 +116,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 		BuildEffort--;
 
-		Console.WriteLine($"Build effort remaining: {BuildEffort}");
-
 		if (BuildEffort <= 0)
 		{
 			IsBuilt = true;

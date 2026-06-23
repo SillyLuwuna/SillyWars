@@ -30,9 +30,9 @@ public class Worker : BaseUnit, IBuilder
 
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
 	{
-		HitPoints = 1;
+		HitPoints = 5;
 		AttackDamage = 1;
-		AttackSpeed = 15;
+		AttackSpeed = 20;
 		AttackRange = 0.25f;
 		ChaseDistance = 2.0f;
 		AggroRange = 2.0f;
@@ -111,8 +111,10 @@ public class Worker : BaseUnit, IBuilder
 		}
 	}
 
-	private void DecreaseCooldowns()
+	protected override void DecreaseCooldowns()
 	{
+		base.DecreaseCooldowns();
+
 		if (_buildCooldown > 0)
 		{
 			_buildCooldown--;
