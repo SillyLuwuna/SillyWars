@@ -3,7 +3,7 @@ using RtsEngine.Math;
 namespace RtsEngine.EntityProperties
 {
 
-public interface IMovable : IPositionable
+public interface IMovable : IEntity, IPositionable
 {
 	public float MoveSpeed { get; set; }
 

@@ -13,6 +13,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 	public List<Vec2Int> Tiles = null!;
 
 	public bool IsDestroyed { get; set; }
+	public int TargetedByNum { get; set; }
 
 	public abstract int Height { get; set; }
 	public abstract int Width { get; set; }
@@ -37,6 +38,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		Tiles = new List<Vec2Int>();
 		Start = start;
 		IsDestroyed = false;
+		TargetedByNum = 0;
 		IsBuilt = false;
 		HitPoints = CONSTRUCTION_MAX_HITPOINTS;
 
@@ -144,7 +146,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 	{
 		List<Vec2Int> surroundingTiles = new List<Vec2Int>();
 
-		for (int x = -1; x < Width + 1; x++)
+		for (int x = 0; x < Width ; x++)
 		{
 			surroundingTiles.Add(new Vec2Int(Start.x + x, Start.y - 1));
 			surroundingTiles.Add(new Vec2Int(Start.x + x, Start.y + Height));

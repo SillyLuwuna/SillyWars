@@ -1,16 +1,14 @@
-using System;
 using RtsEngine.Data;
-using RtsEngine.Math;
 
 namespace RtsEngine.EntityProperties
 {
 
-public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
+public abstract class Entity : IEntity
 {
 	private static uint _CURR_ID = 0;
 
-	public uint Id;
-	public uint OwnerId;
+	public uint Id { get; private set; }
+	public uint OwnerId { get; set; }
 
 	public Entity(uint ownerId)
 	{
@@ -47,9 +45,20 @@ public abstract class Entity : ITickable, ISerializable, IEquatable<Entity>
 
 	public bool Equals(Entity other)
 	{
-		if (other == null) return false;
-
 		return (this.Id == other.Id);
+	}
+
+	public static bool operator ==(Entity? left, Entity? right)
+	{
+		if (left is null && right is null) return true;
+		if (left is null || right is null) return false;
+
+		return left.Equals(right);
+	}
+
+	public static bool operator !=(Entity? left, Entity? right)
+	{
+		return !(left == right);
 	}
 
 	public override int GetHashCode()

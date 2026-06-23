@@ -18,7 +18,6 @@ public class UnitController : MonoBehaviour
 	private static bool _awoken = false;
 
 	[SerializeField] private SelectionBoxUI _selectionBoxUI = null!;
-	// TODO UnitManager should be singleton
 	[SerializeField] private UnitManager _unitManager = null!;
 	[SerializeField] private StructureManager _structureManager = null!;
 	private Vector2 _dragStart;

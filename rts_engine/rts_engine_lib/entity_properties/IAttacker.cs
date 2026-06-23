@@ -1,7 +1,7 @@
 namespace RtsEngine.EntityProperties
 {
 
-public interface IAttacker
+public interface IAttacker : IEntity
 {
 	public float AttackRange { get; }
 	public int AttackDamage { get; }

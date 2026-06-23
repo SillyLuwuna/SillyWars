@@ -32,7 +32,7 @@ public class PathOptimizer
 
 		while (trySkip < path.Count)
 		{
-			List<Vec2Int> collisions = _gridRaycast.CastRay(path[curr], path[trySkip]);
+			List<Vec2Int> collisions = _gridRaycast.CastRay(path[curr], path[trySkip], true);
 
 			bool isSkippable = true;
 			for (int j = 0; j < collisions.Count; j++)

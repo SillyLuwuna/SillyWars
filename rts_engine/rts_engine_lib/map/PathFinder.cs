@@ -36,6 +36,7 @@ public class PathFinder
 	{
 		// should cache stuff
 		if (!IsPathInGrid(start, goal)) return new Path();
+		if (!IsGoalAttainable(goal)) return new Path();
 
 		_start = start;
 		_goal = goal;
@@ -126,6 +127,11 @@ public class PathFinder
 		}
 
 		return path;
+	}
+
+	private bool IsGoalAttainable(Vec2 goal)
+	{
+		return _grid.GetObjectAtWorldPos(goal).IsWalkable;
 	}
 }
 }

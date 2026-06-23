@@ -1,7 +1,7 @@
 namespace RtsEngine.EntityProperties
 {
 
-public interface IMiner
+public interface IMiner : IEntity
 {
 }
 

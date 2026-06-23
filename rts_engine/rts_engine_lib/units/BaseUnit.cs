@@ -6,12 +6,18 @@ using RtsEngine.Map;
 using System;
 using RtsEngine.Physics;
 using System.Collections.Generic;
+using RtsEngine.Structures;
 
 namespace RtsEngine.Units
 {
 
 public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable
 {
+	private const float STRUCTURE_BASE_PRIORITY = 1.0f;
+	private const float UNIT_BASE_PRIORITY = 10.0f;
+	private const float DISTANCE_PRIORITY_WEIGHT = 1.0f;
+	private const float ATTACKERS_PRIORITY_WEIGHT = 2.0f;
+
 	public bool IsDestroyed { get; set; }
 
 	public abstract int HitPoints { get; set; }
@@ -22,14 +28,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract float ChaseDistance { get; set; }
 	public abstract float AggroRange { get; set; }
 
-	private BaseUnit? _target;
-	private int _attackCooldown;
-	private Vec2? _pivot;
-	private bool _isGoingToPivot;
-	private Vec2? _walkGoal;
-	private int _targetedByAmount;
-
 	public abstract float MoveSpeed { get; set; }
+
+	public int TargetedByNum { get; set; }
 
 	public Map.Path? CurrWalkPath { get; set; }
 	public int CurrWalkPathCheckpoint { get; set; }
@@ -37,16 +38,32 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private Units.State _state;
 	public Units.State State { get => _state; set => _state = value; }
 
+	private Vec2? _walkGoal;
 	protected event Action? WalkGoalReached;
+
+	private IDestroyable? _targetGoal;
+
+	private int _attackCooldown;
+	private IDestroyable? _targ;
+	private BaseUnit? _targetUnit;
+	private BaseStructure? _targetStructure;
+	private Vec2Int? _targetStructureAttackTile;
+	private Vec2? _targetStructureAttackPos;
+	private Vec2? _pivot;
+	private bool _isGoingToPivot;
 
 	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
 	{
 		IsDestroyed = false;
-		_target = null;
+		TargetedByNum = 0;
+
+		_targ = null;
+		_targetUnit = null;
+		_targetStructure = null;
 		_attackCooldown = 0;
+		_targetGoal = null;
 		_walkGoal = null;
 		_isGoingToPivot = false;
-		_targetedByAmount = 0;
 
 		CurrWalkPath = null;
 		_state = new State();
@@ -176,13 +193,16 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		this.ApplyForce(direction * MoveSpeed);
 	}
 
+	private bool TargetIsUnit { get => _targetUnit != null; }
+	private bool TargetIsStructure { get => _targetStructure != null; }
+
 	private void Checkpoint()
 	{
 		CurrWalkPathCheckpoint++;
 
-		if (HasTarget)
+		if (HasTarget && TargetIsUnit)
 		{
-			UpdateTargetPathfinding();
+			UpdateTargetUnitPathfinding();
 		}
 
 		if (CurrWalkPathCheckpoint >= CurrWalkPath!.Count)
@@ -191,16 +211,40 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private void UpdateTargetPathfinding()
+	private void ClearTarget()
 	{
-		if (!SetPathfinding(_target!.Pos))
+		if (_targ != null)
+		{
+			_targ!.TargetedByNum--;
+		}
+
+		_targ = null;
+		_targetUnit = null;
+		_targetStructure = null;
+		_targetStructureAttackTile = null;
+		_targetStructureAttackPos = null;
+	}
+
+	private void RestoreAttackGoal()
+	{
+		SetTarget(_targetGoal!);
+
+		if (!HasTarget)
+		{
+			StopAttackGoal();
+		}
+	}
+
+	private void UpdateTargetUnitPathfinding()
+	{
+		if (!SetPathfinding(_targetUnit!.Pos))
 		{
 			// Console.WriteLine($"{Id}: no path to target");
-			if (State.Goal == Goal.Attack)
+			if (State.Goal == Goal.Attack && IsTargettingGoalTarget)
 			{
-				State.Goal = Goal.None;
+				StopAttackGoal();
 			}
-			_target = null;
+			ClearTarget();
 			return;
 		}
 
@@ -232,7 +276,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (HasWalkGoal)
 		{
 			// Console.WriteLine($"{Id}: Arrived at walk goal");
-			Halt();
 			OnWalkGoalReached();
 			return;
 		}
@@ -289,29 +332,27 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		else if (!IsTargetInChaseDistance)
 		{
 			ContinueTowardsCurrentGoal();
-			// ReturnToPivot();
 		}
 	}
 
 	private void TryFindTarget()
 	{
-		BaseUnit? validTarget = FindValidTarget();
-		if (validTarget != null)
+		IDestroyable? targetFound = FindTarget();
+		if (targetFound != null)
 		{
 			// Console.WriteLine($"{Id}: Found target");
-			UpdateIndirectTarget(validTarget);
+			SetTarget(targetFound);
 		}
 		else if (!IsGoingToPivot && HasPivot)
 		{
 			// Console.WriteLine($"{Id}: No targets");
 			ContinueTowardsCurrentGoal();
-			// ReturnToPivot();
 		}
 	}
 
 	private void UpdateAttackMovement()
 	{
-		if (IsInAttackRange)
+		if (IsTargetInAttackRange)
 		{
 			// Console.WriteLine($"{Id}: In attack range");
 			PauseWalking();
@@ -321,52 +362,65 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		ContinueWalking();
 	}
 
-	private void UpdateIndirectTarget(BaseUnit target)
-	{
-		if (_pivot == null)
-		{
-			_pivot = Pos;
-		}
-		_isGoingToPivot = false;
-		_target = target;
-		SetPathfinding(_target.Pos);
-	}
-
 	private void ReturnToPivot()
 	{
 		// Console.WriteLine($"{Id}: returning to pivot");
 		SetPathfinding(_pivot!.Value);
 		_isGoingToPivot = true;
-		_target = null;
+		ClearTarget();
 	}
 
 	private bool IsTargetInChaseDistance
 	{
-		// get => _pivot?.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
-		get => Pos.Distance(_target!.Pos) - AttackRange <= ChaseDistance;
-	}
+		get
+		{
+			if (TargetIsUnit) return Pos.Distance(_targetUnit!.Pos) - AttackRange <= ChaseDistance;
+			if (TargetIsStructure) return true;
 
-	private bool IsTargetInAggroRange
-	{
-		get => IsUnitInAggroRange(_target!);
+			return false;
+		}
 	}
 
 	private bool IsUnitInAggroRange(BaseUnit unit)
 	{
-		// if (_pivot == null)
-		// {
-		return this.Pos.Distance(unit.Pos) <= AggroRange;
-		// }
-		//
-		// return _pivot.Value.Distance(unit.Pos) <= AggroRange;
+		return IsInAggroRange(unit.Pos);
 	}
 
-	private bool IsInAttackRange
+	private bool IsStructureInAggroRange(BaseStructure structure)
 	{
-		get => this.Pos.Distance(_target!.Pos) - _target.Radius <= AttackRange;
+		// could be cached if done smart
+		Vec2Int? structureTile = GetClosestReachableTileToStructure(structure);
+		if (structureTile == null) return false;
+
+		Vec2 structurePos = RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(structureTile.Value);
+
+		return IsInAggroRange(structurePos);
 	}
 
-	private bool HasTarget { get => _target != null; }
+	private bool IsInAggroRange(Vec2 targetPos)
+	{
+		return this.Pos.Distance(targetPos) <= AggroRange;
+	}
+
+	private bool IsTargetInAttackRange
+	{
+		get
+		{
+			if (TargetIsUnit)
+			{
+				return this.Pos.Distance(_targetUnit!.Pos) - _targetUnit.Radius <= AttackRange;
+			}
+			if (TargetIsStructure)
+			{
+				return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(this.Pos) == _targetStructureAttackTile;
+			}
+
+			return false;
+		}
+	}
+
+	// private bool HasTarget { get => _target != null; }
+	private bool HasTarget { get => _targ != null; }
 
 	private bool HasPath { get => !(CurrWalkPath == null); }
 
@@ -398,13 +452,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (aggro == false)
 		{
-			if (_target != null)
-			{
-				_target._targetedByAmount--;
-			}
-			// Console.WriteLine($"{Id}: Dropping aggro");
+			ClearTarget();
 			_pivot = null;
-			_target = null;
 			_isGoingToPivot = false;
 		}
 		State.IsAggro = aggro;
@@ -412,73 +461,170 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	public virtual void Attack(IDestroyable target)
 	{
-		if (!(target is BaseUnit baseUnitTarget)) return;
-		_target = baseUnitTarget;
-		if (!SetPathfinding(_target.Pos))
+		_targetGoal = target;
+		SetTarget(target);
+		State.Goal = Goal.Attack;
+
+		if (!HasTarget)
 		{
-			_target = null;
-			State.Goal = Goal.None;
+			StopAttackGoal();
+		}
+	}
+
+	private void SetTarget(IDestroyable target)
+	{
+		ClearTarget();
+
+		_targ = target;
+		_targ.TargetedByNum++;
+
+		if (_pivot == null)
+		{
+			_pivot = Pos;
+		}
+		_isGoingToPivot = false;
+
+		if (target is BaseUnit unitTarget)
+		{
+			SetUnitTarget(unitTarget);
+		}
+		else if (target is BaseStructure structureTarget)
+		{
+			SetStructureTarget(structureTarget);
+		}
+		else
+		{
+			ClearTarget();
+		}
+	}
+
+	private void SetUnitTarget(BaseUnit target)
+	{
+		_targetUnit = target;
+		_targetStructure = null;
+
+		if (!SetPathfinding(target.Pos))
+		{
+			ClearTarget();
+		}
+	}
+
+	private void SetStructureTarget(BaseStructure structure)
+	{
+		_targetUnit = null;
+		_targetStructure = structure;
+
+		_targetStructureAttackTile = GetClosestReachableTileToStructure(structure);
+		if (_targetStructureAttackTile == null)
+		{
+			ClearTarget();
 			return;
 		}
-		State.Goal = Goal.Attack;
+
+		_targetStructureAttackPos = RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(_targetStructureAttackTile.Value);
+		SetPathfinding(_targetStructureAttackPos.Value);
+	}
+
+	private void StopAttackGoal()
+	{
+		State.Goal = Goal.None;
+		_targetGoal = null;
 	}
 
 	protected void AttackTick()
 	{
 		if (!HasTarget) return;
-		if (_target!.IsDestroyed)
+		if (_targ!.IsDestroyed)
 		{
-			HandleEnemyDeath();
+			HandleTargetDestruction();
 			return;
 		}
-		if (!IsInAttackRange) return;
+		if (!IsTargetInAttackRange) return;
 
 		_attackCooldown = AttackSpeed;
-		((IDestroyable)_target!).Damage(AttackDamage);
+		(_targ).Damage(AttackDamage);
 
-		if (_target!.IsDestroyed)
+		if (_targ!.IsDestroyed)
 		{
-			HandleEnemyDeath();
+			HandleTargetDestruction();
 			return;
 		}
 	}
 
-	private void HandleEnemyDeath()
+	private void HandleTargetDestruction()
 	{
+		// Console.WriteLine($"{Id}: Target died");
+		ClearTarget();
 		if (State.Goal == Goal.Attack)
 		{
-			State.Goal = Goal.None;
+			if (IsTargettingGoalTarget)
+			{
+				StopAttackGoal();
+			}
+			else
+			{
+				RestoreAttackGoal();
+			}
 		}
-
-		// Console.WriteLine($"{Id}: Target died");
-		_target = null;
 	}
 
-	private BaseUnit? FindValidTarget()
+	private bool IsTargettingGoalTarget { get => _targetGoal!.Equals(_targ); }
+
+	protected IDestroyable? FindTarget()
 	{
-		BaseUnit? target = null;
-		float targetDistance = float.PositiveInfinity;
-		int targetNumAttackers = int.MaxValue;
+		IDestroyable? target = null;
+		float targetPriority = -1;
 
-		foreach (BaseUnit unit in RtsEngine.Instance.State.Units)
+		foreach (IDestroyable entity in RtsEngine.Instance.State.Destroyables)
 		{
-			if (unit.OwnerId == this.OwnerId) continue;
-			if (unit.Id == this.Id) continue;
-			if (!IsUnitInAggroRange(unit)) continue;
-			if (unit._targetedByAmount > targetNumAttackers) continue;
+			float priority = TargetPriority(entity);
+			if (priority < 0) continue;
 
-			float distance = this.Pos.Distance(unit.Pos);
-
-			if ((unit._targetedByAmount < targetNumAttackers) ||
-				(unit._targetedByAmount == targetNumAttackers && distance < targetDistance))
+			if (priority > targetPriority)
 			{
-				target = unit;
-				targetDistance = distance;
-				targetNumAttackers = unit._targetedByAmount;
+				target = entity;
+				targetPriority = priority;
 			}
 		}
 
 		return target;
+	}
+
+	protected float TargetPriority(IDestroyable target)
+	{
+		if (target.OwnerId == this.OwnerId) return -1;
+		if (target.Id == this.Id) return -1;
+
+		Vec2 targetPos;
+		float typePriority; // could be refined further into more specific types priority
+
+		if (target is BaseStructure structure)
+		{
+			Vec2? structurePos = GetClosestReachablePointToStructure(structure);
+			if (structurePos == null) return -1;
+
+			targetPos = structurePos.Value;
+			typePriority = STRUCTURE_BASE_PRIORITY;
+		}
+		else if (target is BaseUnit unit)
+		{
+			targetPos = unit.Pos;
+			typePriority = UNIT_BASE_PRIORITY;
+		}
+		else
+		{
+			return -1;
+		}
+
+		if (!IsInAggroRange(targetPos)) return -1;
+
+		float distance = this.Pos.Distance(targetPos);
+		int numAttackers = target.TargetedByNum;
+
+		float distancePriority = (1.0f / (1.0f + distance)) * DISTANCE_PRIORITY_WEIGHT;
+		float attackersPriority = (1.0f / (1.0f + (float)numAttackers)) * ATTACKERS_PRIORITY_WEIGHT;
+
+		return (distancePriority + attackersPriority + typePriority);
 	}
 
 	public static BaseUnit FromType(Type type, uint ownerId, Vec2 pos)
@@ -496,7 +642,51 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void OnWalkGoalReached()
 	{
+		Halt();
 		WalkGoalReached?.Invoke();
+	}
+
+	protected Vec2? GetClosestReachablePointToStructure(BaseStructure structure)
+	{
+		Vec2Int? tile = GetClosestReachableTileToStructure(structure);
+		if (tile == null) return null;
+
+		return RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(tile.Value);
+	}
+
+	protected Vec2Int? GetClosestReachableTileToStructure(BaseStructure structure)
+	{
+		return GetClosestReachableTile(structure.GetSurroundingTiles());
+	}
+
+	protected Vec2Int? GetClosestReachableTile(List<Vec2Int> tiles)
+	{
+		Grid<Cell> map = RtsEngine.Instance.State.Map;
+		PathFinder pathFinder = RtsEngine.Instance.State.PathFinder;
+
+		Vec2Int? bestTile = null;
+		float bestDistance = float.PositiveInfinity;
+
+		foreach (Vec2Int tile in tiles)
+		{
+			if (!map.ContainsPos(tile)) continue;
+			if (!map[tile].IsWalkable) continue;
+
+			Vec2 tilePos = map.WorldSpaceFromCellPos(tile);
+			Map.Path path = pathFinder.GetPath(this.Pos, tilePos);
+
+			if (path.Count == 0) continue;
+
+			float pathLength = path.Length;
+
+			if (pathLength < bestDistance)
+			{
+				bestDistance = pathLength;
+				bestTile = tile;
+			}
+		}
+
+		return bestTile;
 	}
 }
 }

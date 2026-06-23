@@ -181,8 +181,7 @@ public class Worker : BaseUnit, IBuilder
 
 	private bool GoToStructureRange()
 	{
-		List<Vec2Int> surroundingTiles = _structure!.GetSurroundingTiles();
-		_closestReachableTile = GetClosestReachableTile(surroundingTiles);
+		_closestReachableTile = GetClosestReachableTileToStructure(_structure!);
 
 		bool hasTile = _closestReachableTile != null;
 
@@ -193,25 +192,6 @@ public class Worker : BaseUnit, IBuilder
 
 		_goingTowardsStructure = hasTile;
 		return hasTile;
-	}
-
-	private Vec2Int? GetClosestReachableTile(List<Vec2Int> tiles)
-	{
-		Grid<Cell> map = RtsEngine.Instance.State.Map;
-		PathFinder pathFinder = RtsEngine.Instance.State.PathFinder;
-
-		List<Vec2Int> candidateTiles = tiles
-			.Where(tile => map.ContainsPos(tile))
-			.Where(tile => map[tile].IsWalkable)
-			.OrderBy(tile => map.WorldSpaceFromCellPos(tile).Distance(this.Pos))
-			.ToList();
-
-		foreach (Vec2Int tile in candidateTiles)
-		{
-			if (pathFinder.HasPath(this.Pos, map.WorldSpaceFromCellPos(tile))) return tile;
-		}
-
-		return null;
 	}
 
 	private void StopBuilding()

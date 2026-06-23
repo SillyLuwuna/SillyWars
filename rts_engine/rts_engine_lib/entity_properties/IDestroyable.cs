@@ -1,13 +1,12 @@
-using System;
-using RtsEngine.Math;
-
 namespace RtsEngine.EntityProperties
 {
 
-public interface IDestroyable
+public interface IDestroyable : IEntity
 {
 	public int HitPoints { get; set; }
 	public bool IsDestroyed { get; set; }
+
+	public int TargetedByNum { get; set; }
 
 	public void Damage(int damage)
 	{
