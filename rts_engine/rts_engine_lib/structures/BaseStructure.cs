@@ -10,6 +10,10 @@ namespace RtsEngine.Structures
 
 public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 {
+	public const int ConstructionMaxHitpoints = 10;
+
+	private List<Vec2Int>? _surroundingTilesCache;
+
 	public List<Vec2Int> Tiles = null!;
 
 	public bool IsDestroyed { get; set; }
@@ -20,7 +24,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	public abstract int MaxHitPoints { get; set; }
 	public int HitPoints { get; set; }
-	public const int CONSTRUCTION_MAX_HITPOINTS = 10;
 
 	public abstract int BuildEffort { get; set; }
 	public bool HasBuildingStarted;
@@ -35,12 +38,13 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	private void Init(Vec2Int start, int height, int width)
 	{
+		_surroundingTilesCache = null;
 		Tiles = new List<Vec2Int>();
 		Start = start;
 		IsDestroyed = false;
 		TargetedByNum = 0;
 		IsBuilt = false;
-		HitPoints = CONSTRUCTION_MAX_HITPOINTS;
+		HitPoints = ConstructionMaxHitpoints;
 
 		Height = height;
 		Width = width;
@@ -140,7 +144,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	public bool HasMaxHP { get => HitPoints == MaxHitPoints; }
 
-	public List<Vec2Int> GetSurroundingTiles()
+	private List<Vec2Int> GetSurroundingTiles()
 	{
 		List<Vec2Int> surroundingTiles = new List<Vec2Int>();
 
@@ -159,13 +163,25 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 		return surroundingTiles;
 	}
 
-	public static BaseStructure FromType(Type type, uint ownerId, Vec2Int start)
+	public List<Vec2Int> SurroundingTiles {
+		get
+		{
+			if (_surroundingTilesCache == null)
+			{
+				_surroundingTilesCache = GetSurroundingTiles();
+			}
+
+			return _surroundingTilesCache;
+		}
+	}
+
+	public static BaseStructure FromType(StructureType type, uint ownerId, Vec2Int start)
 	{
 		switch (type)
 		{
-			case (Type.Castle):
+			case (StructureType.Castle):
 				return new Castle(ownerId, start);
-			case (Type.Barracks):
+			case (StructureType.Barracks):
 				return new Barracks(ownerId, start);
 			default:
 				throw new ArgumentException($"Unknown structure type {type}");

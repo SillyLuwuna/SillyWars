@@ -22,7 +22,11 @@ public class SerializerWriter : BinaryWriter
 
 	public void Serialize<T>(T obj)
 	{
-		if (SerializerTypeInfo<T>.IsSerializable)
+		if (SerializerTypeInfo<T>.IsNullable)
+		{
+			SerializeNullable<T>(obj);
+		}
+		else if (SerializerTypeInfo<T>.IsSerializable)
 		{
 			SerializeClasses<T>(obj);
 		}
@@ -110,6 +114,27 @@ public class SerializerWriter : BinaryWriter
 		{
 			serializer(objList[i]);
 		}
+	}
+
+	private void SerializeNullable<T>(T obj)
+	{
+		bool isNull = obj == null;
+		Write(isNull);
+		if (isNull) return;
+
+		object underlyingValue;
+
+		if (typeof(T).IsValueType)
+		{
+			underlyingValue = ((dynamic)obj!).Value;
+		}
+		else
+		{
+			underlyingValue = obj!;
+		}
+
+		Action<object> serializer = GetSerializer(SerializerTypeInfo<T>.NullableUnderlyingType);
+		serializer(underlyingValue);
 	}
 }
 }

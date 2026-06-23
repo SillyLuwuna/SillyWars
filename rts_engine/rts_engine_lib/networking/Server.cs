@@ -26,7 +26,7 @@ public class DataEventArgs : EventArgs
 
 public class Server
 {
-	private const int _MAX_DATA_LENGTH = 10 * 1024 * 1024;
+	private const int MaxDataLength = 10 * 1024 * 1024;
 
 	private readonly TcpListener _listener;
 	private readonly List<TcpClient> _clients;
@@ -79,7 +79,7 @@ public class Server
 
 				int length = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lengthBytes, 0));
 
-				if (length > _MAX_DATA_LENGTH)
+				if (length > MaxDataLength)
 				{
 					Console.WriteLine($"Message too large ({length}) bytes");
 					break;
@@ -138,7 +138,7 @@ public class Server
 		{
 			NetworkStream stream = client.GetStream();
 
-			if (data.Length > _MAX_DATA_LENGTH)
+			if (data.Length > MaxDataLength)
 			{
 				Console.WriteLine($"Message too large ({data.Length}) bytes");
 				return;

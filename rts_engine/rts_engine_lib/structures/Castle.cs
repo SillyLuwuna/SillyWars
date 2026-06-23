@@ -1,14 +1,20 @@
+using System.Collections.Generic;
 using RtsEngine.Math;
+using RtsEngine.Units;
 
 namespace RtsEngine.Structures
 {
 
-public class Castle : BaseStructure
+public class Castle : UnitProducer
 {
-	public const int HEIGHT = 3;
-	public const int WIDTH = 5;
-	public const int MAX_HITPOINTS = 40;
-	public const int BUILD_EFFORT = 20;
+	public const int BaseHeight = 3;
+	public const int BaseWidth = 5;
+	public const int BaseMaxHitpoints = 40;
+	public const int BaseBuildEffort = 20;
+
+	public const int BaseMaxUnitProduction = 4;
+	public static readonly List<UnitType> BaseAllowedUnitTypes = new List<UnitType> { UnitType.Worker };
+
 	public override int Height { get; set; }
 	public override int Width { get; set; }
 
@@ -16,15 +22,17 @@ public class Castle : BaseStructure
 
 	public override int BuildEffort { get; set; }
 
-	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, HEIGHT, WIDTH)
-	{
-		MaxHitPoints = MAX_HITPOINTS;
+	public override int MaxUnitProduction { get; set; }
+	public override List<UnitType> AllowedUnitTypes { get; set; }
 
-		BuildEffort = BUILD_EFFORT;
-	}
-
-	public override void Tick()
+	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{
+		MaxHitPoints = BaseMaxHitpoints;
+
+		BuildEffort = BaseBuildEffort;
+
+		MaxUnitProduction = BaseMaxUnitProduction;
+		AllowedUnitTypes = BaseAllowedUnitTypes;
 	}
 }
 

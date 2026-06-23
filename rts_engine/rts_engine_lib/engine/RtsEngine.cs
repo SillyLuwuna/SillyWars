@@ -15,13 +15,13 @@ public class RtsEngine
 	private static RtsEngine? _instance;
 
 	public const int TPS = 20;
-	private const int INTERVAL_MS = 1000 / TPS;
-	private const int PORT = 13774;
+	private const int IntervalMs = 1000 / TPS;
+	private const int Port = 13774;
 
-	private const int STAT_INTERVAL_MS = 1000;
-	private const bool SHOW_STATS = true;
+	private const int StatIntervalMs = 1000;
+	private const bool ShowStats = true;
 	
-	private const int NUM_PLAYERS = 2;
+	private const int NumPlayers = 2;
 
 	public bool IsRunning { get; private set; }
 	private PhysicsEngine _physicsEngine;
@@ -68,9 +68,9 @@ public class RtsEngine
 		_commandQueueLock = new object();
 		IsRunning = false;
 		_state = state;
-		_clock = new Clock(INTERVAL_MS);
+		_clock = new Clock(IntervalMs);
 		_clock.Tick += TickSubscriber;
-		_server = new Server(PORT, NUM_PLAYERS);
+		_server = new Server(Port, NumPlayers);
 		_server.MessageReceived += OnDataReceived;
 		_server.ConnectionEstablished += OnConnectionEstablished;
 		Reset();
@@ -238,14 +238,14 @@ public class RtsEngine
 	private void CalcStats(int deltaTime, float load, long elapsed)
 	{
 		#pragma warning disable CS0162
-		if (!SHOW_STATS) return;
+		if (!ShowStats) return;
 		#pragma warning restore CS0162
 
 		_statInterval += (int)deltaTime;
 		_statLoadSum += load;
 		_statTicks++;
 
-		if (_statInterval > STAT_INTERVAL_MS)
+		if (_statInterval > StatIntervalMs)
 		{
 			float loadAvg = (float)_statLoadSum/(float)_statTicks;
 

@@ -11,7 +11,7 @@ namespace RtsEngine.Networking
 
 public class Client
 {
-	private const int _MAX_DATA_LENGTH = 10 * 1024 * 1024;
+	private const int MaxDataLength = 10 * 1024 * 1024;
 
 	private readonly byte[] _buffer;
 	private TcpClient _client;
@@ -86,7 +86,7 @@ public class Client
 
 				int length = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lengthBytes, 0));
 
-				if (length > _MAX_DATA_LENGTH)
+				if (length > MaxDataLength)
 				{
 					Console.WriteLine($"Message too large ({length}) bytes");
 					break;

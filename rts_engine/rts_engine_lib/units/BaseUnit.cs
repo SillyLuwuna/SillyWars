@@ -13,10 +13,10 @@ namespace RtsEngine.Units
 
 public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable
 {
-	private const float STRUCTURE_BASE_PRIORITY = 1.0f;
-	private const float UNIT_BASE_PRIORITY = 10.0f;
-	private const float DISTANCE_PRIORITY_WEIGHT = 1.0f;
-	private const float ATTACKERS_PRIORITY_WEIGHT = 2.0f;
+	private const float StructurePriority = 1.0f;
+	private const float UnitPriority = 10.0f;
+	private const float DistancePriorityWeight = 1.0f;
+	private const float NumAttackersPriorityWeight = 2.0f;
 
 	public bool IsDestroyed { get; set; }
 
@@ -29,6 +29,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract float AggroRange { get; set; }
 
 	public abstract float MoveSpeed { get; set; }
+
+	public abstract int ProductionTime { get; set; }
 
 	public int TargetedByNum { get; set; }
 
@@ -116,6 +118,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		writer.Write(ChaseDistance);
 		writer.Write(AggroRange);
 		writer.Write(MoveSpeed);
+		writer.Write(ProductionTime);
 		writer.Write(State);
 	}
 
@@ -130,6 +133,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		ChaseDistance = reader.Read<float>();
 		AggroRange = reader.Read<float>();
 		MoveSpeed = reader.Read<float>();
+		ProductionTime = reader.Read<int>();
 		State = reader.Read<State>();
 	}
 
@@ -605,12 +609,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			if (structurePos == null) return -1;
 
 			targetPos = structurePos.Value;
-			typePriority = STRUCTURE_BASE_PRIORITY;
+			typePriority = StructurePriority;
 		}
 		else if (target is BaseUnit unit)
 		{
 			targetPos = unit.Pos;
-			typePriority = UNIT_BASE_PRIORITY;
+			typePriority = UnitPriority;
 		}
 		else
 		{
@@ -622,24 +626,23 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		float distance = this.Pos.Distance(targetPos);
 		int numAttackers = target.TargetedByNum;
 
-		float distancePriority = (1.0f / (1.0f + distance)) * DISTANCE_PRIORITY_WEIGHT;
-		float attackersPriority = (1.0f / (1.0f + (float)numAttackers)) * ATTACKERS_PRIORITY_WEIGHT;
+		float distancePriority = (1.0f / (1.0f + distance)) * DistancePriorityWeight;
+		float attackersPriority = (1.0f / (1.0f + (float)numAttackers)) * NumAttackersPriorityWeight;
 
 		return (distancePriority + attackersPriority + typePriority);
 	}
 
-	public static BaseUnit FromType(Type type, uint ownerId, Vec2 pos)
+	public static BaseUnit FromUnitType(UnitType type, uint ownerId, Vec2 pos)
 	{
-		switch (type)
+		return type switch
 		{
-			case (Type.Worker):
-				return new Worker(pos, ownerId);
-			case (Type.Knight):
-				return new Knight(pos, ownerId);
-			default:
-				throw new ArgumentException($"Unknown unit type {type}");
-		}
+			UnitType.Worker => new Worker(pos, ownerId),
+			UnitType.Knight => new Knight(pos, ownerId),
+			_ => throw new ArgumentException($"Unknown unit type {type}")
+		};
 	}
+
+	public abstract UnitType UnitType { get; }
 
 	private void OnWalkGoalReached()
 	{
@@ -657,7 +660,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected Vec2Int? GetClosestReachableTileToStructure(BaseStructure structure)
 	{
-		return GetClosestReachableTile(structure.GetSurroundingTiles());
+		return GetClosestReachableTile(structure.SurroundingTiles);
 	}
 
 	protected Vec2Int? GetClosestReachableTile(List<Vec2Int> tiles)

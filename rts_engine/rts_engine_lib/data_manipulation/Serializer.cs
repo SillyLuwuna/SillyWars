@@ -24,16 +24,5 @@ public static class Serializer
 		// return reader.Deserialize<T>();
 		return reader.Read<T>();
 	}
-
-	// public static T FromBytes<T>(byte[] data, out byte[] remainder) where T : ISerializable
-	// {
-	// 	using MemoryStream ms = new MemoryStream(data);
-	// 	using SerializerReader reader = new SerializerReader(ms);
-	//
-	// 	T obj = Deserialize<T>(reader);
-	// 	long remainderLen = reader.BaseStream.Length - reader.BaseStream.Position;
-	// 	remainder = reader.ReadBytes((int)remainderLen);
-	// 	return obj;
-	// }
 }
 }

@@ -10,11 +10,11 @@ namespace RtsEngine.Physics
 
 public class PhysicsObject : Entity, IPositionable
 {
-	private static float COLLISION_PUSHBACK_INTENSITY = 20.00f;
-	private static float COLLISION_PUSHBACK_DAMPENING = 0.001f;
-	private static float COLLISION_PUSHBACK_CLAMP = 0.20f;
-	private static float COLLISION_PUSHBACK_MIN = 0.10f;
-	private static float COLLISION_PUSHBACK_TOTAL_CLAMP = 1.0f;
+	private const float CollisionPushbackIntensity = 20.00f;
+	private const float CollisionPushbackDampening = 0.001f;
+	private const float CollisionPushbackClamp = 0.20f;
+	private const float CollisionPushbackMin = 0.10f;
+	private const float CollisionPushbackTotalClamp = 1.0f;
 
 	public Vec2 Pos { get; set; }
 
@@ -85,10 +85,10 @@ public class PhysicsObject : Entity, IPositionable
 
 		direction = direction.Unit;
 
-		float magnitude = COLLISION_PUSHBACK_INTENSITY * (COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + distance));
-		magnitude -= COLLISION_PUSHBACK_INTENSITY * (COLLISION_PUSHBACK_DAMPENING / (COLLISION_PUSHBACK_DAMPENING + Radius));
-		magnitude += COLLISION_PUSHBACK_MIN;
-		magnitude = MathF.Min(magnitude, COLLISION_PUSHBACK_CLAMP);
+		float magnitude = CollisionPushbackIntensity * (CollisionPushbackDampening / (CollisionPushbackDampening + distance));
+		magnitude -= CollisionPushbackIntensity * (CollisionPushbackDampening / (CollisionPushbackDampening + Radius));
+		magnitude += CollisionPushbackMin;
+		magnitude = MathF.Min(magnitude, CollisionPushbackClamp);
 
 		Vec2 pushbackForce = direction * magnitude;
 
@@ -125,9 +125,9 @@ public class PhysicsObject : Entity, IPositionable
 	private void ClampPushbackForce()
 	{
 		Vec2 pushbackAdjust = Vec2.Zero;
-		if (_totalPushbackForce.Magnitude > COLLISION_PUSHBACK_TOTAL_CLAMP)
+		if (_totalPushbackForce.Magnitude > CollisionPushbackTotalClamp)
 		{
-			Vec2 clampedPushbackForce = _totalPushbackForce.Unit * COLLISION_PUSHBACK_TOTAL_CLAMP;
+			Vec2 clampedPushbackForce = _totalPushbackForce.Unit * CollisionPushbackTotalClamp;
 			pushbackAdjust = _totalPushbackForce - clampedPushbackForce;
 		}
 		Force -= pushbackAdjust;

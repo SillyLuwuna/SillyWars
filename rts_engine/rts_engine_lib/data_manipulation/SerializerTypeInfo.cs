@@ -22,6 +22,9 @@ public static class SerializerTypeInfo<T>
 	public static readonly bool IsList = GetIsList(TType);
 	public static readonly Type ListElementType = IsList ? TType.GetGenericArguments()[0] : null!;
 
+	public static readonly bool IsNullable = GetIsNullable(TType);
+	public static readonly Type NullableUnderlyingType = IsNullable ? Nullable.GetUnderlyingType(TType) : null!;
+
 
 	private static bool GetIsSerializable(Type type)
 	{
@@ -51,6 +54,11 @@ public static class SerializerTypeInfo<T>
 	{
 		type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
 		return Marshal.SizeOf(type);
+	}
+
+	private static bool GetIsNullable(Type type)
+	{
+		return Nullable.GetUnderlyingType(type) != null;
 	}
 }
 }

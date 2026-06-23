@@ -15,7 +15,6 @@ public static class DataCompressor
 		}
 
 		return outputStream.ToArray();
-		// return data;
 	}
 
 	public static byte[] DecompressData(byte[] data)
@@ -26,7 +25,6 @@ public static class DataCompressor
 
 		zip.CopyTo(outputStream);
 		return outputStream.ToArray();
-		// return data;
 	}
 }
 

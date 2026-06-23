@@ -27,7 +27,11 @@ public class SerializerReader : BinaryReader
 
 	public T Deserialize<T>()
 	{
-		if (SerializerTypeInfo<T>.IsSerializable)
+		if (SerializerTypeInfo<T>.IsNullable)
+		{
+			return DeserializeNullable<T>();
+		}
+		else if (SerializerTypeInfo<T>.IsSerializable)
 		{
 			return DeserializeClasses<T>();
 		}
@@ -123,6 +127,15 @@ public class SerializerReader : BinaryReader
 		}
 
 		return (T)list;
+	}
+
+	private T DeserializeNullable<T>()
+	{
+		bool isNull = Read<bool>();
+		if (isNull) return (T)(object)null!;
+
+		Func<object> deserializer = GetDeserializer(SerializerTypeInfo<T>.NullableUnderlyingType);
+		return (T)deserializer();
 	}
 }
 }

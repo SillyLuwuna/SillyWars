@@ -7,6 +7,20 @@ namespace RtsEngine.Units
 
 public class Knight : BaseUnit
 {
+	public const float BaseRadius = 0.2f;
+	public const float BaseMass = 1.0f;
+	public const float BaseFriction = 1.0f;
+
+	public const int BaseHitPoints = 10;
+	public const int BaseAttackDamage = 3;
+	public const int BaseAttackSpeed = 35;
+	public const float BaseAttackRange = BaseRadius + 0.1f;
+	public const float BaseChaseDistance = 3.0f;
+	public const float BaseAggroRange = 3.0f;
+	public const float BaseMoveSpeed = 0.14f;
+
+	public const int BaseProductionTime = 10 * 10;
+
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
 	public override int AttackSpeed { get; set; }
@@ -14,20 +28,18 @@ public class Knight : BaseUnit
 	public override float ChaseDistance { get; set; }
 	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
+	public override int ProductionTime { get; set; }
 
-	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId)
+	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
-		Radius = 0.2f;
-		Mass = 1.0f;
-		Friction = 1.0f;
-
-		HitPoints = 10;
-		AttackDamage = 3;
-		AttackSpeed = 35;
-		AttackRange = Radius + 0.1f;
-		ChaseDistance = 3.0f;
-		AggroRange = 3.0f;
-		MoveSpeed = 0.15f;
+		HitPoints = BaseHitPoints;
+		AttackDamage = BaseAttackDamage;
+		AttackSpeed = BaseAttackSpeed;
+		AttackRange = BaseAttackRange;
+		ChaseDistance = BaseChaseDistance;
+		AggroRange = BaseAggroRange;
+		MoveSpeed = BaseMoveSpeed;
+		ProductionTime = BaseProductionTime;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)
@@ -39,6 +51,8 @@ public class Knight : BaseUnit
 	{
 		base.DeserializeFields(reader);
 	}
+
+	public override UnitType UnitType { get => UnitType.Knight; }
 
 	public override void Tick()
 	{

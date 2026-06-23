@@ -1,7 +1,7 @@
 namespace RtsEngine.Structures
 {
 
-public enum Type : byte
+public enum StructureType : byte
 {
 	Castle,
 	Barracks

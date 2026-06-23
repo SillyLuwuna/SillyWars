@@ -9,9 +9,9 @@ namespace RtsEngine.Commands
 public class BuildNewCommandArgs : EntityCommandArgs
 {
 	public Vec2Int Start;
-	public Type StructureType;
+	public StructureType StructureType;
 
-	public BuildNewCommandArgs(List<uint> entityIds, Vec2Int start, Type structureType) : base(entityIds)
+	public BuildNewCommandArgs(List<uint> entityIds, Vec2Int start, StructureType structureType) : base(entityIds)
 	{
 		Start = start;
 		StructureType = structureType;
@@ -28,7 +28,7 @@ public class BuildNewCommandArgs : EntityCommandArgs
 	{
 		base.DeserializeFields(reader);
 		Start = reader.Read<Vec2Int>();
-		StructureType = reader.Read<Type>();
+		StructureType = reader.Read<StructureType>();
 	}
 }
 

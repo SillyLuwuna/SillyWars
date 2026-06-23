@@ -12,6 +12,22 @@ namespace RtsEngine.Units
 
 public class Worker : BaseUnit, IBuilder
 {
+	public const float BaseRadius = 0.2f;
+	public const float BaseMass = 1.0f;
+	public const float BaseFriction = 1.0f;
+
+	public const int BaseHitPoints = 5;
+	public const int BaseAttackDamage = 1;
+	public const int BaseAttackSpeed = 20;
+	public const float BaseAttackRange = BaseRadius + 0.1f;
+	public const float BaseChaseDistance = 3.0f;
+	public const float BaseAggroRange = 3.0f;
+	public const float BaseMoveSpeed = 0.20f;
+
+	public const int BaseProductionTime = 20 * 10;
+
+	public const int BaseBuildSpeed = 20;
+
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
 	public override int AttackSpeed { get; set; }
@@ -19,6 +35,7 @@ public class Worker : BaseUnit, IBuilder
 	public override float ChaseDistance { get; set; }
 	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
+	public override int ProductionTime { get; set; }
 
 	public int BuildSpeed { get; set; }
 
@@ -28,21 +45,24 @@ public class Worker : BaseUnit, IBuilder
 
 	private int _buildCooldown;
 
-	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId)
+	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
-		HitPoints = 5;
-		AttackDamage = 1;
-		AttackSpeed = 20;
-		AttackRange = 0.25f;
-		ChaseDistance = 2.0f;
-		AggroRange = 2.0f;
-		MoveSpeed = 0.18f;
+		HitPoints = BaseHitPoints;
+		AttackDamage = BaseAttackDamage;
+		AttackSpeed = BaseAttackSpeed;
+		AttackRange = BaseAttackRange;
+		ChaseDistance = BaseChaseDistance;
+		AggroRange = BaseAggroRange;
+		MoveSpeed = BaseMoveSpeed;
+		ProductionTime = BaseProductionTime;
 
-		Radius = 0.2f;
-		Mass = 1.0f;
-		Friction = 1.0f;
+		BuildSpeed = BaseBuildSpeed;
 
-		BuildSpeed = 20;
+		Init();
+	}
+
+	private void Init()
+	{
 		_buildCooldown = 0;
 		_structure = null;
 		_closestReachableTile = null;
@@ -55,6 +75,7 @@ public class Worker : BaseUnit, IBuilder
 	public override void SerializeFields(SerializerWriter writer)
 	{
 		base.SerializeFields(writer);
+
 		writer.Write(BuildSpeed);
 	}
 
@@ -62,10 +83,12 @@ public class Worker : BaseUnit, IBuilder
 	{
 		base.DeserializeFields(reader);
 
-		State.Changed += OnStateChange;
-		WalkGoalReached += OnWalkGoalReached;
 		BuildSpeed = reader.Read<int>();
+
+		Init();
 	}
+
+	public override UnitType UnitType { get => UnitType.Worker; }
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
