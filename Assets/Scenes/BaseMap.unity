@@ -5594,8 +5594,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1da3ff5b59b23dcea1253f7b4a08fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitController
-  selectionBoxUI: {fileID: 1309459523}
-  unitManager: {fileID: 1436162569}
+  _selectionBoxUI: {fileID: 1309459523}
+  _unitManager: {fileID: 1436162569}
+  _structureManager: {fileID: 1117320220}
   UnitsSelected: []
 --- !u!1 &1436162567
 GameObject:

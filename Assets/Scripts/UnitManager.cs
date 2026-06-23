@@ -24,6 +24,7 @@ public class UnitManager : MonoBehaviour
 	private WorldState? _latestState;
 
 	private bool _newConnection;
+	private int _playerId;
 
     void Start()
     {
@@ -106,7 +107,10 @@ public class UnitManager : MonoBehaviour
 		_objectUnits.Clear();
 		_movingUnitsGoal.Clear();
 		_newConnection = false;
+		_playerId = _latestState!.PlayerVersion;
 	}
+
+	public int PlayerId { get => _playerId; }
 
 	public BaseUnit? GetUnit(GameObject obj)
 	{

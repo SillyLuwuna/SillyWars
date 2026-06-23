@@ -31,6 +31,8 @@ public class WorldState : ISerializable
 
 	private PathFinder _pathFinder = null!;
 
+	public int PlayerVersion { get; private set; }
+
 	public WorldState(Grid<Cell> map)
 	{
 		Init(map);
@@ -54,6 +56,8 @@ public class WorldState : ISerializable
 
 	public void SerializeFields(SerializerWriter writer)
 	{
+		writer.Write(PlayerVersion);
+
 		writer.Write(Map);
 
 		writer.Write(_entities.Count);
@@ -61,10 +65,13 @@ public class WorldState : ISerializable
 		{
 			writer.Write(entity);
 		}
+
 	}
 
 	public void DeserializeFields(SerializerReader reader)
 	{
+		PlayerVersion = reader.Read<int>();
+
 		Grid<Cell> map = reader.Read<Grid<Cell>>();
 		Init(map);
 
@@ -263,6 +270,11 @@ public class WorldState : ISerializable
 		using SerializerWriter writer = new SerializerWriter(zip);
 
 		writer.Write(this);
+	}
+
+	public void SetPlayerVersion(int playerId)
+	{
+		PlayerVersion = playerId;
 	}
 }
 }

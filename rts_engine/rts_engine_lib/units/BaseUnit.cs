@@ -27,7 +27,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private Vec2? _pivot;
 	private bool _isGoingToPivot;
 	private Vec2? _walkGoal;
-	private int _walkGoalCheckpoint;
 	private int _targetedByAmount;
 
 	public abstract float MoveSpeed { get; set; }
@@ -263,14 +262,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void RestoreWalkGoal()
 	{
-		// CurrWalkPathCheckpoint = _walkGoalCheckpoint;
 		SetPathfinding(_walkGoal!.Value);
 	}
-
-	// private void SaveWalkGoal()
-	// {
-	// 	_walkGoalCheckpoint = CurrWalkPathCheckpoint;
-	// }
 
 	private void ContinueTowardsCurrentGoal()
 	{
@@ -332,7 +325,6 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (_pivot == null)
 		{
-			// _walkGoalCheckpoint = CurrWalkPathCheckpoint;
 			_pivot = Pos;
 		}
 		_isGoingToPivot = false;

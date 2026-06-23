@@ -17,9 +17,10 @@ public class UnitController : MonoBehaviour
 	private static UnitController? _instance = null;
 	private static bool _awoken = false;
 
-	[SerializeField] private SelectionBoxUI selectionBoxUI = null!;
+	[SerializeField] private SelectionBoxUI _selectionBoxUI = null!;
 	// TODO UnitManager should be singleton
-	[SerializeField] private UnitManager unitManager = null!;
+	[SerializeField] private UnitManager _unitManager = null!;
+	[SerializeField] private StructureManager _structureManager = null!;
 	private Vector2 _dragStart;
 	private Vector2 _dragEnd;
 	// private Rect _selectionRect;
@@ -71,23 +72,51 @@ public class UnitController : MonoBehaviour
 		if (context.phase != InputActionPhase.Started) return;
 
 		Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-		GameObject? enemyUnit = GetEnemyUnitOnPos(mousePos);
-		if (_isWalkAttack)
+		GameObject? unitOnMouse = GetUnitOnPos(mousePos);
+		GameObject? structureObj = GetStructureOnPos(mousePos);
+		if (structureObj != null)
+		{
+			BaseStructure structure = _structureManager.GetStructure(structureObj)!;
+			if (structure.OwnerId == _unitManager.PlayerId)
+			{
+				BuildAction(structure.Id);
+			}
+			else
+			{
+				AttackAction(structure.Id);
+			}
+		}
+		else if (_isWalkAttack)
 		{
 			_isWalkAttack = false;
 			SetAggroAction(true);
 			MoveAction(mousePos);
 		}
-		else if (enemyUnit != null)
+		else if (unitOnMouse != null)
 		{
 			SetAggroAction(false);
-			AttackAction(enemyUnit);
+			BaseUnit unit = _unitManager.GetUnit(unitOnMouse)!;
+			AttackAction(unit.Id);
 		}
 		else
 		{
 			SetAggroAction(false);
 			MoveAction(mousePos);
 		}
+	}
+
+	public GameObject? GetStructureOnPos(Vector2 pos)
+	{
+		Collider2D? hit = Physics2D.OverlapPoint(pos);
+
+		if (hit == null) return null;
+
+		if (hit.CompareTag("Structure"))
+		{
+			return hit?.gameObject;
+		}
+
+		return null;
 	}
 
 	public void OnLeftClick(Vector2 screenMousePos)
@@ -116,11 +145,18 @@ public class UnitController : MonoBehaviour
 		Debug.Log($"walk attack: {_isWalkAttack}");
 	}
 
-	public GameObject? GetEnemyUnitOnPos(Vector2 pos)
+	public GameObject? GetUnitOnPos(Vector2 pos)
 	{
-		Collider2D hits = Physics2D.OverlapPoint(pos);
+		Collider2D? hit = Physics2D.OverlapPoint(pos);
 
-		return hits?.gameObject;
+		if (hit == null) return null;
+
+		if (hit.CompareTag("Unit"))
+		{
+			return hit?.gameObject;
+		}
+
+		return null;
 	}
 
 	private void BuildNewAction(Vector2 pos, RtsEngine.Structures.Type type)
@@ -142,15 +178,15 @@ public class UnitController : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	// private void BuildAction(Vector2 pos)
-	// {
-	// 	if (UnitsSelected == null) return;
-	//
-	// 	List<uint> unitIds = GetSelectedUnitIds();
-	// 	BuildCommandArgs args = new BuildCommandArgs(unitIds, );
-	// 	ICommand command = new BuildCommand(0, args);
-	// 	NetworkClient.Instance().SendCommand(command);
-	// }
+	private void BuildAction(uint structureId)
+	{
+		if (UnitsSelected == null) return;
+
+		List<uint> unitIds = GetSelectedUnitIds();
+		BuildCommandArgs args = new BuildCommandArgs(unitIds, structureId);
+		ICommand command = new BuildCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
 
 	private void MoveAction(Vector2 goal)
 	{
@@ -162,12 +198,12 @@ public class UnitController : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	private void AttackAction(GameObject enemyUnit)
+	private void AttackAction(uint entityId)
 	{
 		if (UnitsSelected == null) return;
 
 		List<uint> unitIds = GetSelectedUnitIds();
-		AttackCommandArgs args = new AttackCommandArgs(unitIds, unitManager.GetUnit(enemyUnit)!.Id);
+		AttackCommandArgs args = new AttackCommandArgs(unitIds, entityId);
 		ICommand command = new AttackCommand(0, args);
 		NetworkClient.Instance().SendCommand(command);
 	}
@@ -188,7 +224,7 @@ public class UnitController : MonoBehaviour
 
 		foreach (GameObject obj in UnitsSelected!)
 		{
-			BaseUnit unit = unitManager.GetUnit(obj)!;
+			BaseUnit unit = _unitManager.GetUnit(obj)!;
 			unitIds.Add(unit.Id);
 		}
 
@@ -229,7 +265,7 @@ public class UnitController : MonoBehaviour
 	private void OnDragEnd(InputAction.CallbackContext context)
 	{
 		_isDragging = false;
-		selectionBoxUI.HideBox();
+		_selectionBoxUI.HideBox();
 
 		_dragEnd = Mouse.current.position.ReadValue();
 		_isMouseClick = _isMouseClick && (Vector2.Distance(_dragStart, _dragEnd) < DRAG_AMOUNT_FOR_DETECTION);
@@ -316,7 +352,7 @@ public class UnitController : MonoBehaviour
 
 			if (!_isMouseClick)
 			{
-				selectionBoxUI.UpdateBox(_dragStart, _dragEnd);
+				_selectionBoxUI.UpdateBox(_dragStart, _dragEnd);
 			}
 		}
 	}

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 16951336236391121}
   - component: {fileID: 2049350134198787422}
-  - component: {fileID: 5753624718787779609}
+  - component: {fileID: 2683539944987755192}
   m_Layer: 0
   m_Name: Knight1
   m_TagString: Unit
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &5753624718787779609
+--- !u!61 &2683539944987755192
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
