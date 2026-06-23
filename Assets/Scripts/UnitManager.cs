@@ -169,7 +169,6 @@ public class UnitManager : MonoBehaviour
 
 	private void DestroyUnit(BaseUnit unit)
 	{
-		Debug.Log("Removing unit");
 		GameObject obj = _unitInstances[unit];
 		_unitInstances.Remove(unit);
 		_objectUnits.Remove(obj.GetInstanceID());

@@ -97,13 +97,29 @@ public class StructureManager : MonoBehaviour
 			return;
 		}
 
-		Vector3 pos = GetStructurePos(structure);
-
 		if (IsNewStructure(structure))
 		{
-			SpawnStructure(structure, pos);
-			return;
+			SpawnStructure(structure, GetStructurePos(structure));
 		}
+
+		if (structure.IsBuilt)
+		{
+			SetTransparency(structure, 1.0f);
+		}
+		else
+		{
+			SetTransparency(structure, 0.5f);
+		}
+	}
+
+	private void SetTransparency(BaseStructure structure, float alpha)
+	{
+		SpriteRenderer renderer = _structureInstances[structure].GetComponent<SpriteRenderer>();
+
+		Color color = renderer.color;
+		color.a = alpha;
+
+		renderer.color = color;
 	}
 
 	private Vector3 GetStructurePos(BaseStructure structure)
@@ -128,7 +144,6 @@ public class StructureManager : MonoBehaviour
 
 	private void DestroyStructure(BaseStructure structure)
 	{
-		Debug.Log("Removing structure");
 		GameObject obj = _structureInstances[structure];
 		_structureInstances.Remove(structure);
 		_objectStructures.Remove(obj.GetInstanceID());
