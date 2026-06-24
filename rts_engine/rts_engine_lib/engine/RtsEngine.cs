@@ -191,8 +191,8 @@ public class RtsEngine
 
 		await _server.SendData(compressedData, endpoint);
 
-		_statByteSum += compressedData.Length * _server.ConnectionCount;
-		_statPacketsSent += _server.ConnectionCount;
+		_statByteSum += compressedData.Length;
+		_statPacketsSent++;
 	}
 
 	private void TickSubscriber(object? sender, ClockEventArgs e)

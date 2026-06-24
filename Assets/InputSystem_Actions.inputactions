@@ -605,6 +605,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "EnqueueKnight",
+                    "type": "Button",
+                    "id": "0d7a877f-00a0-40d2-ad20-57405f956928",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1067,6 +1076,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "BuildBarracks",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a871a472-a8e4-4335-9fb4-df857e92450b",
+                    "path": "<Keyboard>/#(K)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnqueueKnight",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

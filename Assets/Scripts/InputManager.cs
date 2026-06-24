@@ -97,6 +97,13 @@ public class InputManager : MonoBehaviour
 		_playerController.OnWalkAttackInput();
 	}
 
+	public void OnEnqueueKnightInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_playerController.OnEnqueueKnightInput();
+	}
+
 	public void OnDrag(InputAction.CallbackContext context)
 	{
 		switch (context.phase)

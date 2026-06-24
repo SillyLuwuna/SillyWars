@@ -128,7 +128,7 @@ public abstract class UnitProducer : BaseStructure
 		Grid<Cell> map = RtsEngine.Instance.State.Map;
 		foreach (Vec2Int tile in this.SurroundingTiles)
 		{
-			if (map[tile].IsWalkable)
+			if (map.ContainsPos(tile) && map[tile].IsWalkable)
 			{
 				SpawnPosition = map.WorldSpaceFromCellPos(tile);
 				return;
@@ -140,8 +140,6 @@ public abstract class UnitProducer : BaseStructure
 
 	private void ProduceUnit()
 	{
-		_productionUnit = null;
-
 		BaseUnit unit = BaseUnit.FromUnitType(_productionUnit!.Value, this.OwnerId, SpawnPosition!.Value);
 		if (SpawnTarget != null)
 		{
@@ -149,6 +147,8 @@ public abstract class UnitProducer : BaseStructure
 		}
 
 		RtsEngine.Instance.State.AddEntity(unit);
+
+		_productionUnit = null;
 	}
 
 	private void DequeueNextUnit()

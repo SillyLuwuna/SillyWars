@@ -71,8 +71,11 @@ public class WorldStateManager : MonoBehaviour
 			if (!_refreshState) return;
 			_refreshState = false;
 
+			// Debug.Log("OnNewState");
 			OnNewState(_latestState!);
+			// Debug.Log("UpdateEntities");
 			UpdateEntities(_latestState!.Entities);
+			// Debug.Log("Update done");
 		}
     }
 

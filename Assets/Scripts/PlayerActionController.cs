@@ -21,35 +21,46 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseUnit unit)
 	{
-		_networkActionManager.SetAggroAction(_selectedEntities, false);
-		_networkActionManager.AttackAction(_selectedEntities, unit);
+		_networkActionManager.SetAggro(_selectedEntities, false);
+		_networkActionManager.Attack(_selectedEntities, unit);
 	}
 
 	public void OnRightClick(BaseStructure structure)
 	{
 		if (structure.OwnerId == _worldStateManager.PlayerId)
 		{
-			_networkActionManager.BuildAction(_selectedEntities, structure);
+			_networkActionManager.Build(_selectedEntities, structure);
 		}
 		else
 		{
-			_networkActionManager.AttackAction(_selectedEntities, structure);
+			_networkActionManager.Attack(_selectedEntities, structure);
 		}
 	}
 
 	public void OnRightClick(Vec2 mousePos)
 	{
+		if (_selectedEntities.Count == 1)
+		{
+			Entity selected = _selectedEntities[0];
+			if (selected is BaseStructure)
+			{
+				_networkActionManager.SetProductionSpawn(_selectedEntities, mousePos);
+				return;
+			}
+
+		}
+
 		if (_isWalkAttack)
 		{
 			_isWalkAttack = false;
 			Debug.Log($"walk attack: {_isWalkAttack}");
-			_networkActionManager.SetAggroAction(_selectedEntities, true);
-			_networkActionManager.MoveAction(_selectedEntities, mousePos);
+			_networkActionManager.SetAggro(_selectedEntities, true);
+			_networkActionManager.Move(_selectedEntities, mousePos);
 		}
 		else
 		{
-			_networkActionManager.SetAggroAction(_selectedEntities, false);
-			_networkActionManager.MoveAction(_selectedEntities, mousePos);
+			_networkActionManager.SetAggro(_selectedEntities, false);
+			_networkActionManager.Move(_selectedEntities, mousePos);
 		}
 	}
 
@@ -68,7 +79,7 @@ public class PlayerActionController : MonoBehaviour
 		if (_buildBarracks)
 		{
 			_buildBarracks = false;
-			_networkActionManager.BuildNewAction(_selectedEntities, mousePos, StructureType.Barracks);
+			_networkActionManager.BuildNew(_selectedEntities, mousePos, StructureType.Barracks);
 			Debug.Log($"build barracks: {_buildBarracks}");
 		}
 	}
@@ -83,6 +94,16 @@ public class PlayerActionController : MonoBehaviour
 	{
 		_isWalkAttack = !_isWalkAttack;
 		Debug.Log($"walk attack: {_isWalkAttack}");
+	}
+
+	public void OnEnqueueKnightInput()
+	{
+		if (_selectedEntities.Count != 1) return;
+		Entity selected = _selectedEntities[0];
+
+		if (!(selected is BaseStructure)) return;
+
+		_networkActionManager.EnqueueUnitProduction(_selectedEntities, UnitType.Knight);
 	}
 
 	public void OnDrag(List<Entity> selectedEntities)

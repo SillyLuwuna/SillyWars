@@ -126,9 +126,7 @@ public class SerializerWriter : BinaryWriter
 
 		if (typeof(T).IsValueType)
 		{
-			PropertyInfo? propertyInfo = obj!.GetType().GetProperty("Value");
-			underlyingValue = propertyInfo!.GetValue(obj);
-			// underlyingValue = ((dynamic)obj!).Value;
+			underlyingValue = Convert.ChangeType(obj, SerializerTypeInfo<T>.NullableUnderlyingType);
 		}
 		else
 		{

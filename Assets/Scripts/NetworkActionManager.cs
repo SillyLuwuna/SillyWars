@@ -3,6 +3,7 @@ using RtsEngine.Commands;
 using RtsEngine.EntityProperties;
 using RtsEngine.Math;
 using RtsEngine.Structures;
+using RtsEngine.Units;
 using UnityEngine;
 
 public class NetworkActionManager : MonoBehaviour
@@ -22,7 +23,27 @@ public class NetworkActionManager : MonoBehaviour
         
     }
 
-	public void BuildNewAction(List<Entity> entities, Vec2 pos, StructureType type)
+	public void SetProductionSpawn(List<Entity> entities, Vec2 spawnpoint)
+	{
+		if (entities.Count == 0) return;
+
+		List<uint> entityIds = GetSelectedEntityIds(entities);
+		SetProductionSpawnpointCommandArgs args = new SetProductionSpawnpointCommandArgs(entityIds, spawnpoint);
+		ICommand command = new SetProductionSpawnCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	public void EnqueueUnitProduction(List<Entity> entities, UnitType type)
+	{
+		if (entities.Count == 0) return;
+
+		List<uint> entityIds = GetSelectedEntityIds(entities);
+		EnqueueUnitProductionCommandArgs args = new EnqueueUnitProductionCommandArgs(entityIds, type);
+		ICommand command = new EnqueueUnitProductionCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	public void BuildNew(List<Entity> entities, Vec2 pos, StructureType type)
 	{
 		if (entities.Count == 0) return;
 
@@ -34,7 +55,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	public void BuildAction(List<Entity> entities, Entity structure)
+	public void Build(List<Entity> entities, Entity structure)
 	{
 		if (entities.Count == 0) return;
 
@@ -45,7 +66,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	public void MoveAction(List<Entity> entities, Vec2 goal)
+	public void Move(List<Entity> entities, Vec2 goal)
 	{
 		if (entities.Count == 0) return;
 
@@ -55,7 +76,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	public void AttackAction(List<Entity> entities, Entity entity)
+	public void Attack(List<Entity> entities, Entity entity)
 	{
 		if (entities.Count == 0) return;
 
@@ -65,7 +86,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance().SendCommand(command);
 	}
 
-	public void SetAggroAction(List<Entity> entities, bool aggro)
+	public void SetAggro(List<Entity> entities, bool aggro)
 	{
 		if (entities.Count == 0) return;
 

@@ -28,8 +28,6 @@ public class UnitManager : MonoBehaviour
 
 	private void InterpolateUnitsTowardsGoal()
 	{
-		// deltaTime is update from Update() -> Update(). We should need
-		// the deltaTime also from Tick() -> Update(). To account for position resets
 		float deltaTicks = Time.deltaTime / (1f / (float)NetworkClient.SERVER_TPS);
 
 		List<BaseUnit> completed = new List<BaseUnit>();
@@ -74,6 +72,8 @@ public class UnitManager : MonoBehaviour
 		{
 			unitObj.transform.position = _movingUnitsGoal[unit];
 		}
+
+		if (Vector3.Distance(unitObj.transform.position, pos) <= unit.MoveSpeed) return;
 
 		_movingUnitsGoal[unit] = pos;
 	}
