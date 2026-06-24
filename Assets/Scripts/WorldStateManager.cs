@@ -30,6 +30,7 @@ public class WorldStateManager : MonoBehaviour
 	[SerializeField]
 	private TextureManager _textureManager = null!;
 
+	private Dictionary<uint, Entity> _entitiesId = null!;
 	private Dictionary<Entity, GameObject> _entityInstances = null!;
 	private Dictionary<int, Entity> _objectEntities = null!;
 
@@ -48,6 +49,7 @@ public class WorldStateManager : MonoBehaviour
     void Start()
     {
 		_newConnection = true;
+		_entitiesId = new Dictionary<uint, Entity>();
 		_entityInstances = new Dictionary<Entity, GameObject>();
 		_objectEntities = new Dictionary<int, Entity>();
 
@@ -71,11 +73,9 @@ public class WorldStateManager : MonoBehaviour
 			if (!_refreshState) return;
 			_refreshState = false;
 
-			// Debug.Log("OnNewState");
 			OnNewState(_latestState!);
-			// Debug.Log("UpdateEntities");
 			UpdateEntities(_latestState!.Entities);
-			// Debug.Log("Update done");
+			RemoveEntities(_latestState!.RemovedEntities);
 		}
     }
 
@@ -94,6 +94,7 @@ public class WorldStateManager : MonoBehaviour
 		{
 			Destroy(obj);
 		}
+		_entitiesId.Clear();
 		_entityInstances.Clear();
 		_objectEntities.Clear();
 		_newConnection = false;
@@ -158,8 +159,18 @@ public class WorldStateManager : MonoBehaviour
 	{
 		GameObject instance = Instantiate(_textureManager.GetCorrespondingPrefab(entity), _textureManager.GetInstanceCoordinates(entity), Quaternion.identity);
 
+		_entitiesId.Add(entity.Id, entity);
 		_entityInstances.Add(entity, instance);
 		_objectEntities.Add(instance.GetInstanceID(), entity);
+	}
+
+	private void RemoveEntities(List<uint> entitiesIds)
+	{
+		int numEntities = entitiesIds.Count;
+		for(int i = 0; i < numEntities; i++)
+		{
+			DestroyEntity(entitiesIds[i]);
+		}
 	}
 
 	public static Vec2 Vector2ToVec2(Vector2 vec)
@@ -174,10 +185,21 @@ public class WorldStateManager : MonoBehaviour
 
 	private void DestroyEntity(Entity entity)
 	{
-		GameObject obj = _entityInstances[entity];
+		DestroyEntity(entity.Id);
+	}
+
+	private void DestroyEntity(uint entityId)
+	{
+		if (!_entitiesId.ContainsKey(entityId)) return;
+
+		Entity entity = _entitiesId[entityId];
+		GameObject entityObj = _entityInstances[entity];
+
+		_entitiesId.Remove(entityId);
 		_entityInstances.Remove(entity);
-		_objectEntities.Remove(obj.GetInstanceID());
-		Destroy(obj);
+		_objectEntities.Remove(entityObj.GetInstanceID());
+
+		Destroy(entityObj);
 	}
 
 	public WorldState? LatestState { get => _latestState; }

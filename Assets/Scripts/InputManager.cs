@@ -6,6 +6,7 @@ using RtsEngine.Structures;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using RtsEngine.EntityProperties;
+using RtsEngine.Resources;
 
 public class InputManager : MonoBehaviour
 {
@@ -19,8 +20,6 @@ public class InputManager : MonoBehaviour
 	private Vector2 _dragEnd;
 	private bool _isDragging = false;
 	private bool _isMouseClick = true;
-	private bool _isWalkAttack = false;
-	private bool _buildBarracks = false;
 
 	void Start()
 	{
@@ -61,6 +60,10 @@ public class InputManager : MonoBehaviour
 		{
 			_playerController.OnRightClick(structure);
 		}
+		else if (hitEntity is BaseResourceNode node)
+		{
+			_playerController.OnRightClick(node);
+		}
 	}
 
 	public void OnLeftClick(Vector2 screenMousePos)
@@ -81,6 +84,17 @@ public class InputManager : MonoBehaviour
 		{
 			_playerController.OnLeftClick(structure);
 		}
+		else if (hitEntity is BaseResourceNode node)
+		{
+			_playerController.OnLeftClick(node);
+		}
+	}
+
+	public void OnBuildCastleInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_playerController.OnBuildCastleInput();
 	}
 
 	public void OnBuildBarracksInput(InputAction.CallbackContext context)
@@ -102,6 +116,20 @@ public class InputManager : MonoBehaviour
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnEnqueueKnightInput();
+	}
+
+	public void OnEnqueueWorkerInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_playerController.OnEnqueueWorkerInput();
+	}
+
+	public void OnHaltInput(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_playerController.OnHaltInput();
 	}
 
 	public void OnDrag(InputAction.CallbackContext context)
@@ -195,7 +223,5 @@ public class InputManager : MonoBehaviour
 	{
 		_isDragging = false;
 		_isMouseClick = true;
-		_isWalkAttack = false;
-		_buildBarracks = false;
 	}
 }

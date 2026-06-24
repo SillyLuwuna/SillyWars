@@ -17,7 +17,7 @@ public class Knight : BaseUnit
 	public const float BaseAttackRange = BaseRadius + 0.1f;
 	public const float BaseChaseDistance = 3.0f;
 	public const float BaseAggroRange = 3.0f;
-	public const float BaseMoveSpeed = 0.14f;
+	public const float BaseMoveSpeed = 0.11f;
 
 	public const int BaseProductionTime = 10 * 10;
 

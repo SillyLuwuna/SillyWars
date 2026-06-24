@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 using RtsEngine.Units;
 
 namespace RtsEngine.Structures
@@ -33,6 +34,11 @@ public class Castle : UnitProducer
 
 		MaxUnitProduction = BaseMaxUnitProduction;
 		AllowedUnitTypes = BaseAllowedUnitTypes;
+	}
+
+	public void DeliverResource(ResourceStack resourceStack)
+	{
+		if (this.IsDestroyed || !this.IsBuilt) return;
 	}
 }
 

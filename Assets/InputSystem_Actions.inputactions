@@ -598,6 +598,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Halt",
+                    "type": "Button",
+                    "id": "90c898b3-6ce1-4f07-b7a4-cffc15293b50",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "BuildBarracks",
                     "type": "Button",
                     "id": "97fdd774-9b7f-439d-8714-9dd64a19d09b",
@@ -607,9 +616,27 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "BuildCastle",
+                    "type": "Button",
+                    "id": "25e9fb63-58d7-466a-a8fc-0808ac8cad46",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "EnqueueKnight",
                     "type": "Button",
                     "id": "0d7a877f-00a0-40d2-ad20-57405f956928",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnqueueWorker",
+                    "type": "Button",
+                    "id": "cfba9d85-544f-47a6-aca8-536f107b9f08",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1087,6 +1114,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "EnqueueKnight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "13296a8e-b16d-4c8d-a26b-87ed1c6e98a9",
+                    "path": "<Keyboard>/#(W)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnqueueWorker",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fb472a96-476c-42bb-99c6-f5ec823e445e",
+                    "path": "<Keyboard>/#(N)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BuildCastle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "592b026e-495e-4f4b-a1ed-3f02698c3c3c",
+                    "path": "<Keyboard>/#(C)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Halt",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

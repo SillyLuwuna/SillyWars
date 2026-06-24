@@ -9,9 +9,9 @@ public class AttackCommandArgs : EntityCommandArgs
 {
 	public uint TargetId;
 
-	public AttackCommandArgs(List<uint> entityIds, uint victimId) : base(entityIds)
+	public AttackCommandArgs(List<uint> entityIds, uint targetId) : base(entityIds)
 	{
-		TargetId = victimId;
+		TargetId = targetId;
 	}
 
 	public override void SerializeFields(SerializerWriter writer)

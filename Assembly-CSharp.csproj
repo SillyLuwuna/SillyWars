@@ -58,6 +58,7 @@
     <Compile Include="Assets/Scripts/InputManager.cs" />
     <Compile Include="Assets/Scripts/WorldStateManager.cs" />
     <Compile Include="Assets/Scripts/TextureManager.cs" />
+    <Compile Include="Assets/Scripts/ResourceManager.cs" />
     <Compile Include="Assets/Scripts/ConnectButton.cs" />
   </ItemGroup>
   <ItemGroup>

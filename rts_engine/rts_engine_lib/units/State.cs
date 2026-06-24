@@ -82,9 +82,6 @@ public class State : ISerializable
 			_stateFlags = (byte)((_stateFlags & ~GOAL_MASK) | ((int)value << 2));
 
 			OnStateChange(oldFlags, _stateFlags);
-
-			// _stateFlags &= unchecked((byte)~GOAL_MASK);
-			// _stateFlags |= (byte)((int)value << 2);
 		}
 	}
 

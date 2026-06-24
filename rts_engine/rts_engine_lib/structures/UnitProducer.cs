@@ -141,14 +141,13 @@ public abstract class UnitProducer : BaseStructure
 	private void ProduceUnit()
 	{
 		BaseUnit unit = BaseUnit.FromUnitType(_productionUnit!.Value, this.OwnerId, SpawnPosition!.Value);
-		if (SpawnTarget != null)
-		{
-			unit.SetGoal(SpawnTarget.Value);
-		}
+		_productionUnit = null;
+
+		if (SpawnTarget == null) return;
+
+		unit.SetGoal(SpawnTarget.Value);
 
 		RtsEngine.Instance.State.AddEntity(unit);
-
-		_productionUnit = null;
 	}
 
 	private void DequeueNextUnit()

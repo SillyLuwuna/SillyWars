@@ -23,6 +23,26 @@ public class NetworkActionManager : MonoBehaviour
         
     }
 
+	public void Gather(List<Entity> entities, IGatherable gatherable)
+	{
+		if (entities.Count == 0) return;
+
+		List<uint> entityIds = GetSelectedEntityIds(entities);
+		GatherCommandArgs args = new GatherCommandArgs(entityIds, gatherable);
+		ICommand command = new GatherCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
+	public void Halt(List<Entity> entities)
+	{
+		if (entities.Count == 0) return;
+
+		List<uint> entityIds = GetSelectedEntityIds(entities);
+		EntityCommandArgs args = new EntityCommandArgs(entityIds);
+		ICommand command = new HaltCommand(0, args);
+		NetworkClient.Instance().SendCommand(command);
+	}
+
 	public void SetProductionSpawn(List<Entity> entities, Vec2 spawnpoint)
 	{
 		if (entities.Count == 0) return;

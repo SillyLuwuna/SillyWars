@@ -46,7 +46,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private IDestroyable? _targetGoal;
 
 	private int _attackCooldown;
-	private IDestroyable? _targ;
+	private IDestroyable? _target;
 	private BaseUnit? _targetUnit;
 	private BaseStructure? _targetStructure;
 	private Vec2Int? _targetStructureAttackTile;
@@ -59,7 +59,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		IsDestroyed = false;
 		TargetedByNum = 0;
 
-		_targ = null;
+		_target = null;
 		_targetUnit = null;
 		_targetStructure = null;
 		_attackCooldown = 0;
@@ -217,12 +217,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void ClearTarget()
 	{
-		if (_targ != null)
+		if (_target != null)
 		{
-			_targ!.TargetedByNum--;
+			_target!.TargetedByNum--;
 		}
 
-		_targ = null;
+		_target = null;
 		_targetUnit = null;
 		_targetStructure = null;
 		_targetStructureAttackTile = null;
@@ -424,17 +424,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	}
 
 	// private bool HasTarget { get => _target != null; }
-	private bool HasTarget { get => _targ != null; }
+	protected bool HasTarget { get => _target != null; }
 
-	private bool HasPath { get => !(CurrWalkPath == null); }
+	protected bool HasPath { get => !(CurrWalkPath == null); }
 
-	private void PauseWalking()
+	protected void PauseWalking()
 	{
 		ClearVelocity();
 		_state.IsWalking = false;
 	}
 
-	private void ContinueWalking()
+	protected void ContinueWalking()
 	{
 		_state.IsWalking = true;
 	}
@@ -459,6 +459,17 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			ClearTarget();
 			_pivot = null;
 			_isGoingToPivot = false;
+			if (HasWalkGoal)
+			{
+				RestoreWalkGoal();
+			}
+		}
+		else
+		{
+			if (State.Goal == Goal.Gather)
+			{
+				State.Goal = Goal.None;
+			}
 		}
 		State.IsAggro = aggro;
 	}
@@ -479,8 +490,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		ClearTarget();
 
-		_targ = target;
-		_targ.TargetedByNum++;
+		_target = target;
+		_target.TargetedByNum++;
 
 		if (_pivot == null)
 		{
@@ -539,7 +550,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (_attackCooldown > 0) return;
 		if (!HasTarget) return;
-		if (_targ!.IsDestroyed)
+		if (_target!.IsDestroyed)
 		{
 			HandleTargetDestruction();
 			return;
@@ -547,9 +558,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (!IsTargetInAttackRange) return;
 
 		_attackCooldown = AttackSpeed;
-		(_targ).Damage(AttackDamage);
+		(_target).Damage(AttackDamage);
 
-		if (_targ!.IsDestroyed)
+		if (_target!.IsDestroyed)
 		{
 			HandleTargetDestruction();
 			return;
@@ -573,7 +584,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private bool IsTargettingGoalTarget { get => _targetGoal!.Equals(_targ); }
+	private bool IsTargettingGoalTarget { get => _targetGoal!.Equals(_target); }
 
 	protected IDestroyable? FindTarget()
 	{
@@ -652,23 +663,28 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected Vec2? GetClosestReachablePointToStructure(BaseStructure structure)
 	{
-		Vec2Int? tile = GetClosestReachableTileToStructure(structure);
-		if (tile == null) return null;
-
-		return RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(tile.Value);
+		return GetClosestReachableTile(structure.SurroundingTiles)?.Last;
 	}
 
 	protected Vec2Int? GetClosestReachableTileToStructure(BaseStructure structure)
 	{
+		Map.Path? path = GetClosestReachableTile(structure.SurroundingTiles);
+		if (path == null) return null;
+		return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(path.Last);
+	}
+
+	protected Map.Path? GetShortestReachablePathToStructure(BaseStructure structure)
+	{
 		return GetClosestReachableTile(structure.SurroundingTiles);
 	}
 
-	protected Vec2Int? GetClosestReachableTile(List<Vec2Int> tiles)
+	protected Map.Path? GetClosestReachableTile(List<Vec2Int> tiles)
 	{
 		Grid<Cell> map = RtsEngine.Instance.State.Map;
 		PathFinder pathFinder = RtsEngine.Instance.State.PathFinder;
 
-		Vec2Int? bestTile = null;
+		// Vec2Int? bestTile = null;
+		Map.Path? bestPath = null;
 		float bestDistance = float.PositiveInfinity;
 
 		foreach (Vec2Int tile in tiles)
@@ -686,11 +702,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			if (pathLength < bestDistance)
 			{
 				bestDistance = pathLength;
-				bestTile = tile;
+				bestPath = path;
+				// bestTile = tile;
 			}
 		}
 
-		return bestTile;
+		return bestPath;
+		// return bestTile;
 	}
 }
 }

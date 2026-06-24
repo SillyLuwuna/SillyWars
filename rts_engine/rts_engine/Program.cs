@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RtsEngine.Math;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
+using RtsEngine.Resources;
 
 namespace RtsEngine
 {
@@ -42,6 +43,9 @@ public static class Program
 		}
 
 		WorldState? state = new WorldState(grid);
+
+		GoldNode node = new GoldNode(new Vec2(14.5f, 1.5f), 0);
+		state.AddEntity(node);
 
 		for (int x = 0; x < grid.Width; x++)
 		{

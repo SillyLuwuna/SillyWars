@@ -14,7 +14,7 @@ public class PhysicsObject : Entity, IPositionable
 	private const float CollisionPushbackDampening = 0.001f;
 	private const float CollisionPushbackClamp = 0.20f;
 	private const float CollisionPushbackMin = 0.10f;
-	private const float CollisionPushbackTotalClamp = 1.0f;
+	private const float CollisionPushbackTotalClamp = 1.00f;
 
 	public Vec2 Pos { get; set; }
 
@@ -40,7 +40,9 @@ public class PhysicsObject : Entity, IPositionable
 		}
 	}
 
-	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction) : base(ownerId)
+	public bool IsStatic { get; set; }
+
+	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction, bool isStatic = false) : base(ownerId)
 	{
 		Pos = pos;
 		_totalPushbackForce = Vec2.Zero;
@@ -48,6 +50,7 @@ public class PhysicsObject : Entity, IPositionable
 		Friction = friction;
 		Mass = mass;
 		_enabled = true;
+		IsStatic = isStatic;
 	}
 
 	public void ClearForces()
@@ -92,11 +95,17 @@ public class PhysicsObject : Entity, IPositionable
 
 		Vec2 pushbackForce = direction * magnitude;
 
-		this._totalPushbackForce -= pushbackForce;
-		other._totalPushbackForce += pushbackForce;
+		if (this.Enabled && !this.IsStatic)
+		{
+			this._totalPushbackForce -= pushbackForce;
+			this.ApplyForce(-pushbackForce);
+		}
 
-		this.ApplyForce(-pushbackForce);
-		other.ApplyForce(pushbackForce);
+		if (other.Enabled && !other.IsStatic)
+		{
+			other._totalPushbackForce += pushbackForce;
+			other.ApplyForce(pushbackForce);
+		}
 	}
 
 	public override void Tick()
@@ -105,7 +114,7 @@ public class PhysicsObject : Entity, IPositionable
 
 	public void PhysicsTick()
 	{
-		if (!Enabled) return;
+		if (!Enabled || IsStatic) return;
 
 		Vec2 oldPos = new Vec2(Pos.x, Pos.y);
 
@@ -138,6 +147,8 @@ public class PhysicsObject : Entity, IPositionable
 	// public void LimitToBoundaries(Grid<Cell> map)
 	public void LimitToBoundaries(Grid<Cell> map)
 	{
+		if (!Enabled || IsStatic) return;
+
 		Vec2 oldPos = Pos - DeltaPos;
 
 		if (!map.ContainsPosFromWorldSpace(oldPos)) return;
@@ -191,6 +202,7 @@ public class PhysicsObject : Entity, IPositionable
 		writer.Write(Mass);
 
 		writer.Write(_enabled);
+		writer.Write(IsStatic);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
@@ -207,6 +219,7 @@ public class PhysicsObject : Entity, IPositionable
 		Mass = reader.Read<float>();
 
 		_enabled = reader.Read<bool>();
+		IsStatic = reader.Read<bool>();
 	}
 }
 

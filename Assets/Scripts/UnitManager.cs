@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using RtsEngine.Math;
 using RtsEngine.Units;
 using UnityEngine;
 
@@ -73,7 +74,7 @@ public class UnitManager : MonoBehaviour
 			unitObj.transform.position = _movingUnitsGoal[unit];
 		}
 
-		if (Vector3.Distance(unitObj.transform.position, pos) <= unit.MoveSpeed) return;
+		if (F.Eq(Vector3.Distance(unitObj.transform.position, pos), 0f)) return;
 
 		_movingUnitsGoal[unit] = pos;
 	}

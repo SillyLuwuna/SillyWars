@@ -1,4 +1,5 @@
 using RtsEngine.EntityProperties;
+using RtsEngine.Resources;
 using RtsEngine.Structures;
 using RtsEngine.Units;
 using UnityEngine;
@@ -13,6 +14,7 @@ public class TextureManager : MonoBehaviour
 	public GameObject[] KnightPrefabs = null!;
 	public GameObject[] CastlePrefabs = null!;
 	public GameObject[] BarracksPrefabs = null!;
+	public GameObject[] GoldNodePrefabs = null!;
 
 	public GameObject GetCorrespondingPrefab(Entity entity)
 	{
@@ -36,15 +38,24 @@ public class TextureManager : MonoBehaviour
 			if (entity.OwnerId > BarracksPrefabs.Length) return MissingTexture;
 			return BarracksPrefabs[entity.OwnerId];
 		}
+		else if (entity is GoldNode goldNode)
+		{
+			if (GoldNodePrefabs.Length <= 0) return MissingTexture;
+			return GoldNodePrefabs[0];
+		}
 
 		return MissingTexture;
 	}
 
 	public Vector3 GetInstanceCoordinates(Entity entity)
 	{
-		if (entity is BaseUnit unit)
+		// if (entity is BaseUnit unit)
+		// {
+		// 	return new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
+		// }
+		if (entity is IPositionable positionable)
 		{
-			return new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
+			return new Vector3(positionable.Pos.x, positionable.Pos.y, positionable.Pos.y);
 		}
 		else if (entity is BaseStructure structure)
 		{

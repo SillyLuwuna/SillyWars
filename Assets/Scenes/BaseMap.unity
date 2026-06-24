@@ -1969,6 +1969,12 @@ MonoBehaviour:
   BarracksPrefabs:
   - {fileID: 5588601534899918480, guid: ee5e3e41a12537797af8822adedf9807, type: 3}
   - {fileID: 5588601534899918480, guid: 50ccfe0534a9a3ea6a24cb1355aa24d1, type: 3}
+  GoldNodePrefabs:
+  - {fileID: 2601071250591669298, guid: fa4d02529f7bfc1c49a4461c6d410099, type: 3}
+  - {fileID: 2601071250591669298, guid: 43ee5957a6ed7aa68b8306e3cbd46242, type: 3}
+  - {fileID: 2601071250591669298, guid: 1ca249ba45c5fd343adf2a3a3acac85a, type: 3}
+  - {fileID: 2601071250591669298, guid: 505d5306a5b018232bf3b27741ef4eb3, type: 3}
+  - {fileID: 2601071250591669298, guid: b00ce4af6b09750568bda77a6bb12a1c, type: 3}
 --- !u!1 &596049909
 GameObject:
   m_ObjectHideFlags: 0
@@ -2600,6 +2606,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1787291891}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1007030209
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1007030210}
+  - component: {fileID: 1007030211}
+  m_Layer: 0
+  m_Name: ResourceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1007030210
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007030209}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2087673922}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1007030211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007030209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2ef1f2304b6647619e6767adfb1cb01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceManager
+  _worldStateManager: {fileID: 1117320222}
 --- !u!1 &1103153694
 GameObject:
   m_ObjectHideFlags: 0
@@ -3491,6 +3542,54 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 0d7a877f-00a0-40d2-ad20-57405f956928
     m_ActionName: 'UI/EnqueueKnight[/Keyboard/k]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1301551128}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: OnHaltInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 90c898b3-6ce1-4f07-b7a4-cffc15293b50
+    m_ActionName: 'UI/Halt[/Keyboard/c]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1301551128}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: OnBuildCastleInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 25e9fb63-58d7-466a-a8fc-0808ac8cad46
+    m_ActionName: 'UI/BuildCastle[/Keyboard/n]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1301551128}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: OnEnqueueWorkerInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: cfba9d85-544f-47a6-aca8-536f107b9f08
+    m_ActionName: 'UI/EnqueueWorker[/Keyboard/w]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: UI
@@ -7049,6 +7148,7 @@ Transform:
   - {fileID: 449070719}
   - {fileID: 181139506}
   - {fileID: 661066531}
+  - {fileID: 1007030210}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2098800659

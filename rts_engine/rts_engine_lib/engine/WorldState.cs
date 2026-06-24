@@ -27,11 +27,14 @@ public class WorldState : ISerializable
 	private List<BaseStructure> _structures = null!;
 
 	private Queue<Entity> _addQueue = null!;
+	private Queue<Entity> _removeQueue = null!;
 	private bool _isTickingEntities;
 
 	private PathFinder _pathFinder = null!;
 
 	public int PlayerVersion { get; private set; }
+	public List<uint> AddedEntities { get; private set; } = null!;
+	public List<uint> RemovedEntities { get; private set; } = null!;
 
 	public WorldState(Grid<Cell> map)
 	{
@@ -49,7 +52,11 @@ public class WorldState : ISerializable
 		_structures = new List<BaseStructure>();
 
 		_addQueue = new Queue<Entity>();
+		_removeQueue = new Queue<Entity>();
 		_isTickingEntities = false;
+
+		AddedEntities = new List<uint>();
+		RemovedEntities = new List<uint>();
 
 		_pathFinder = new PathFinder(Map);
 	}
@@ -66,6 +73,8 @@ public class WorldState : ISerializable
 			writer.Write(entity);
 		}
 
+		writer.Write(AddedEntities);
+		writer.Write(RemovedEntities);
 	}
 
 	public void DeserializeFields(SerializerReader reader)
@@ -81,6 +90,9 @@ public class WorldState : ISerializable
 			Entity curr = reader.Read<Entity>();
 			AddEntity(curr);
 		}
+
+		AddedEntities = reader.Read<List<uint>>();
+		RemovedEntities = reader.Read<List<uint>>();
 	}
 
 	public void AddEntity(Entity entity)
@@ -91,6 +103,7 @@ public class WorldState : ISerializable
 			return;
 		}
 
+		AddedEntities.Add(entity.Id);
 		_entities.Add(entity);
 		_entitiesId.Add(entity.Id, entity);
 
@@ -128,8 +141,12 @@ public class WorldState : ISerializable
 
 	public void Tick()
 	{
+		AddedEntities.Clear();
+		RemovedEntities.Clear();
+
 		TickEntities();
 		AddQueuedEntities();
+		RemoveQueuedEntities();
 	}
 
 	private void TickEntities()
@@ -163,6 +180,14 @@ public class WorldState : ISerializable
 		while (_addQueue.Count > 0)
 		{
 			AddEntity(_addQueue.Dequeue());
+		}
+	}
+
+	private void RemoveQueuedEntities()
+	{
+		while (_removeQueue.Count > 0)
+		{
+			RemoveEntity(_removeQueue.Dequeue());
 		}
 	}
 
@@ -208,7 +233,13 @@ public class WorldState : ISerializable
 
 	public void RemoveEntity(Entity entity)
 	{
-		// can be optimized by lazy deleting from arrays
+		if (_isTickingEntities)
+		{
+			_removeQueue.Enqueue(entity);
+			return;
+		}
+
+		RemovedEntities.Add(entity.Id);
 		_entities.Remove(entity);
 		_entitiesId.Remove(entity.Id);
 		if (entity is BaseUnit currUnit)

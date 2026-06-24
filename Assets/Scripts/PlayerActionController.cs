@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using RtsEngine.EntityProperties;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 using RtsEngine.Structures;
 using RtsEngine.Units;
 using UnityEngine;
@@ -13,6 +14,7 @@ public class PlayerActionController : MonoBehaviour
 	private List<Entity> _selectedEntities = new List<Entity>();
 	private bool _isWalkAttack = false;
 	private bool _buildBarracks = false;
+	private bool _buildCastle = false;
 
 	void Start()
 	{
@@ -35,6 +37,11 @@ public class PlayerActionController : MonoBehaviour
 		{
 			_networkActionManager.Attack(_selectedEntities, structure);
 		}
+	}
+
+	public void OnRightClick(BaseResourceNode node)
+	{
+		_networkActionManager.Gather(_selectedEntities, node);
 	}
 
 	public void OnRightClick(Vec2 mousePos)
@@ -74,6 +81,11 @@ public class PlayerActionController : MonoBehaviour
 		_selectedEntities = new List<Entity>() { structure };
 	}
 
+	public void OnLeftClick(BaseResourceNode node)
+	{
+		_selectedEntities = new List<Entity>() { node };
+	}
+
 	public void OnLeftClick(Vec2 mousePos)
 	{
 		if (_buildBarracks)
@@ -82,12 +94,26 @@ public class PlayerActionController : MonoBehaviour
 			_networkActionManager.BuildNew(_selectedEntities, mousePos, StructureType.Barracks);
 			Debug.Log($"build barracks: {_buildBarracks}");
 		}
+		else if (_buildCastle)
+		{
+			_buildCastle = false;
+			_networkActionManager.BuildNew(_selectedEntities, mousePos, StructureType.Castle);
+			Debug.Log($"build castle: {_buildCastle}");
+		}
 	}
 
 	public void OnBuildBarracksInput()
 	{
+		_buildCastle = false;
 		_buildBarracks = !_buildBarracks;
 		Debug.Log($"build barracks: {_buildBarracks}");
+	}
+
+	public void OnBuildCastleInput()
+	{
+		_buildBarracks = false;
+		_buildCastle = !_buildCastle;
+		Debug.Log($"build castle: {_buildCastle}");
 	}
 
 	public void OnWalkAttackInput()
@@ -106,6 +132,24 @@ public class PlayerActionController : MonoBehaviour
 		_networkActionManager.EnqueueUnitProduction(_selectedEntities, UnitType.Knight);
 	}
 
+	public void OnEnqueueWorkerInput()
+	{
+		if (_selectedEntities.Count != 1) return;
+		Entity selected = _selectedEntities[0];
+
+		if (!(selected is BaseStructure)) return;
+
+		_networkActionManager.EnqueueUnitProduction(_selectedEntities, UnitType.Worker);
+	}
+
+	public void OnHaltInput()
+	{
+		if (_selectedEntities.Count != 1) return;
+		Entity selected = _selectedEntities[0];
+
+		_networkActionManager.Halt(_selectedEntities);
+	}
+
 	public void OnDrag(List<Entity> selectedEntities)
 	{
 		_selectedEntities = selectedEntities;
@@ -116,6 +160,7 @@ public class PlayerActionController : MonoBehaviour
 		_selectedEntities = new List<Entity>();
 		_isWalkAttack = false;
 		_buildBarracks = false;
+		_buildCastle = false;
 	}
 
 	private List<uint> GetSelectedUnitIds(List<Entity> entities)

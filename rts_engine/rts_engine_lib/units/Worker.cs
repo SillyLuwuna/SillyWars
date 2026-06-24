@@ -5,12 +5,13 @@ using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 using RtsEngine.Structures;
 
 namespace RtsEngine.Units
 {
 
-public class Worker : BaseUnit, IBuilder
+public class Worker : BaseUnit, IBuilder, IGatherer
 {
 	public const float BaseRadius = 0.2f;
 	public const float BaseMass = 1.0f;
@@ -22,7 +23,7 @@ public class Worker : BaseUnit, IBuilder
 	public const float BaseAttackRange = BaseRadius + 0.1f;
 	public const float BaseChaseDistance = 3.0f;
 	public const float BaseAggroRange = 3.0f;
-	public const float BaseMoveSpeed = 0.20f;
+	public const float BaseMoveSpeed = 0.15f;
 
 	public const int BaseProductionTime = 20 * 10;
 
@@ -37,13 +38,24 @@ public class Worker : BaseUnit, IBuilder
 	public override float MoveSpeed { get; set; }
 	public override int ProductionTime { get; set; }
 
+
+	public int WorkPerGather { get => 1; }
+	public float GatherRange { get => BaseRadius + 0.1f; }
+
+	private IGatherable? _gatherableGoal;
+	private ResourceStack _resourceGathered;
+	private Castle? _nearestCastle;
+
+
 	public int BuildSpeed { get; set; }
 
 	private BaseStructure? _structure;
 	Vec2Int? _closestReachableTile;
 	private bool _goingTowardsStructure;
-
 	private int _buildCooldown;
+
+	private bool _isGathering;
+	private bool _isRetrieving;
 
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
@@ -67,6 +79,12 @@ public class Worker : BaseUnit, IBuilder
 		_structure = null;
 		_closestReachableTile = null;
 		_goingTowardsStructure = false;
+
+		_gatherableGoal = null;
+		_resourceGathered = new ResourceStack(Resource.None, 0);
+
+		_isGathering = false;
+		_isRetrieving = false;
 		
 		State.Changed += OnStateChange;
 		WalkGoalReached += OnWalkGoalReached;
@@ -77,34 +95,31 @@ public class Worker : BaseUnit, IBuilder
 		base.SerializeFields(writer);
 
 		writer.Write(BuildSpeed);
+		writer.Write(IsGathering);
+		writer.Write(IsRetrieving);
+		writer.Write(_resourceGathered);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
 	{
 		base.DeserializeFields(reader);
 
-		BuildSpeed = reader.Read<int>();
-
 		Init();
+
+		BuildSpeed = reader.Read<int>();
+		_isGathering = reader.Read<bool>();
+		_isRetrieving = reader.Read<bool>();
+		_resourceGathered = reader.Read<ResourceStack>();
 	}
 
 	public override UnitType UnitType { get => UnitType.Worker; }
 
+	public bool IsGathering { get => (State.Goal == Goal.Gather) && _isGathering; }
+	public bool IsRetrieving { get => (State.Goal == Goal.Gather) && _isRetrieving; }
+	public ResourceStack Holding { get => _resourceGathered; }
+
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
-		// if (args.OldState.Goal != args.NewState.Goal)
-		// {
-		// 	Console.WriteLine($"goal: {args.OldState.Goal} -> {args.NewState.Goal}");
-		// }
-		// if (args.OldState.IsWalking != args.NewState.IsWalking)
-		// {
-		// 	Console.WriteLine($"walking: {args.OldState.IsWalking} -> {args.NewState.IsWalking}");
-		// }
-		// if (args.OldState.IsAggro != args.NewState.IsAggro)
-		// {
-		// 	Console.WriteLine($"aggro: {args.OldState.IsAggro} -> {args.NewState.IsAggro}");
-		// }
-
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
 			StopBuilding();
@@ -130,7 +145,17 @@ public class Worker : BaseUnit, IBuilder
 		if (State.Goal == Goal.Build)
 		{
 			TickBuild();
-			return;
+		}
+		else if (State.Goal == Goal.Gather)
+		{
+			if (_isRetrieving)
+			{
+				TickRetrieve();
+			}
+			else
+			{
+				TickGather();
+			}
 		}
 	}
 
@@ -152,6 +177,7 @@ public class Worker : BaseUnit, IBuilder
 			return;
 		}
 
+		if (HasTarget) return;
 		if (_goingTowardsStructure) return;
 		if (_buildCooldown > 0) return;
 
@@ -238,6 +264,104 @@ public class Worker : BaseUnit, IBuilder
 		{
 			_goingTowardsStructure = false;
 		}
+		else if (State.Goal == Goal.Gather)
+		{
+			if (_isRetrieving)
+			{
+				ReachedRetrievalDestination();
+			}
+		}
+	}
+
+	private void ReachedRetrievalDestination()
+	{
+		// give player the resources :3
+		_nearestCastle!.DeliverResource(_resourceGathered);
+
+		_resourceGathered = new ResourceStack(Resource.None, 0);
+		_isRetrieving = false;
+	}
+
+	public void Gather(IGatherable gatherable)
+	{
+		Halt();
+		SetAggro(false);
+		State.Goal = Goal.Gather;
+		_gatherableGoal = gatherable;
+		_isGathering = false;
+		_isRetrieving = false;
+	}
+
+	private void TickGather()
+	{
+		if (!State.IsWalking && !_gatherableGoal!.IsInGatheringRange(this))
+		{
+			SetWalkingGoal(_gatherableGoal.Pos);
+			return;
+		}
+
+		if (!_gatherableGoal!.IsInGatheringRange(this)) return;
+
+		Halt();
+
+		_resourceGathered = _gatherableGoal!.TryGather(this);
+		_isGathering = false;
+
+		if (_resourceGathered.Resource == Resource.None)
+		{
+			return;
+		}
+
+		if (_resourceGathered.Amount <= 0)
+		{
+			_isGathering = true;
+			return;
+		}
+
+		_isRetrieving = true;
+	}
+
+	private void TickRetrieve()
+	{
+		if (State.IsWalking) return;
+
+		Vec2? castlePos = GetClosestCastle();
+		if (castlePos == null)
+		{
+			State.Goal = Goal.None;
+			return;
+		}
+
+		SetWalkingGoal(castlePos.Value);
+
+		// on arrival:
+	}
+
+	private Vec2? GetClosestCastle()
+	{
+		List<Castle> castles = RtsEngine.Instance.State.Structures.OfType<Castle>().ToList();
+
+		Vec2? shortest = null;
+		float bestDistance = float.PositiveInfinity;
+
+		foreach (Castle castle in castles)
+		{
+			if (!castle.IsBuilt) continue;
+
+			Path? path = GetShortestReachablePathToStructure(castle);
+			if (path == null) continue;
+
+			float currDistance = path.Length;
+			
+			if (currDistance < bestDistance)
+			{
+				_nearestCastle = castle;
+				bestDistance = currDistance;
+				shortest = path.Last;
+			}
+		}
+
+		return shortest;
 	}
 }
 }
