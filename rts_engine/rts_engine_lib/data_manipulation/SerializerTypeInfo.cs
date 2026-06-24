@@ -12,6 +12,9 @@ public static class SerializerTypeInfo<T>
 {
 	public static readonly Type TType = typeof(T);
 
+	public static readonly bool IsNullable = GetIsNullable(TType);
+	public static readonly Type NullableUnderlyingType = IsNullable ? Nullable.GetUnderlyingType(TType) : null!;
+
 	public static readonly bool IsUnmanaged = GetIsUnmanaged(TType);
 	public static readonly bool IsSerializable = GetIsSerializable(TType);
 	public static readonly int UnmanagedSize = IsUnmanaged ? GetUnmanagedSize(TType) : 0;
@@ -22,10 +25,6 @@ public static class SerializerTypeInfo<T>
 	public static readonly bool IsList = GetIsList(TType);
 	public static readonly Type ListElementType = IsList ? TType.GetGenericArguments()[0] : null!;
 
-	public static readonly bool IsNullable = GetIsNullable(TType);
-	public static readonly Type NullableUnderlyingType = IsNullable ? Nullable.GetUnderlyingType(TType) : null!;
-
-
 	private static bool GetIsSerializable(Type type)
 	{
 		return typeof(ISerializable).IsAssignableFrom(type);
@@ -33,6 +32,7 @@ public static class SerializerTypeInfo<T>
 
 	private static bool GetIsUnmanaged(Type type)
 	{
+		if (IsNullable) return false;
 		return (type.IsValueType && GetAreAllFieldsUnmanaged(type));
 	}
 

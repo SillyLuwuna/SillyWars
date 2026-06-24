@@ -20,6 +20,7 @@ public class RtsEngine
 
 	private const int StatIntervalMs = 1000;
 	private const bool ShowStats = true;
+	private const bool DEBUG = true;
 	
 	private const int NumPlayers = 2;
 
@@ -73,6 +74,7 @@ public class RtsEngine
 		_server = new Server(Port, NumPlayers);
 		_server.MessageReceived += OnDataReceived;
 		_server.ConnectionEstablished += OnConnectionEstablished;
+		_server.ConnectionLost += OnConnectionLost;
 		Reset();
 	}
 
@@ -126,7 +128,8 @@ public class RtsEngine
 		ExecutePlayerCommands();
 		UpdateWorldState();
 		UpdatePhysics();
-		BroadcastWorldState();
+		_currentBroadcastTask = BroadcastWorldState();
+		// BroadcastWorldState();
 	}
 
 	private void WaitForPreviousTickBroadcast()
@@ -172,13 +175,21 @@ public class RtsEngine
 		_physicsEngine.LimitToMapBoundaries(physicsObjects, _state.Map);
 	}
 
-	private void BroadcastWorldState()
+	private async Task BroadcastWorldState()
 	{
+		foreach (string endpoint in _playerIds.Keys)
+		{
+			await SendWorldState(endpoint);
+		}
+	}
+
+	private async Task SendWorldState(string endpoint)
+	{
+		_state.SetPlayerVersion((int)_playerIds[endpoint]);
 		byte[] data = Serializer.ToBytes(_state);
 		byte[] compressedData = DataCompressor.CompressData(data);
 
-		_currentBroadcastTask = _server.BroadcastData(compressedData);
-
+		await _server.SendData(compressedData, endpoint);
 
 		_statByteSum += compressedData.Length * _server.ConnectionCount;
 		_statPacketsSent += _server.ConnectionCount;
@@ -194,13 +205,11 @@ public class RtsEngine
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error during tick: {ex.Message}");
+			#pragma warning disable CS0162
+			if (DEBUG) Console.WriteLine(ex.StackTrace);
+			#pragma warning restore CS0162
 		}
 
-	}
-
-	private string GetPlayerEndpoint(string ip, int port)
-	{
-		return $"{ip}{port}";
 	}
 
 	private void OnDataReceived(object? sender, DataEventArgs args)
@@ -208,7 +217,7 @@ public class RtsEngine
 		_statByteIncSum += args.Data.Length;
 		_statPacketsReceived++;
 
-		uint playerId = _playerIds[GetPlayerEndpoint(args.Ip, args.Port)];
+		uint playerId = _playerIds[CustomTcpClient.GenerateEndpoint(args.Ip, args.Port)];
 		try
 		{
 			byte[] decompressedData = DataCompressor.DecompressData(args.Data);
@@ -228,11 +237,21 @@ public class RtsEngine
 
 	private void OnConnectionEstablished(object? sender, DataEventArgs args)
 	{
-		string playerEndpoint = GetPlayerEndpoint(args.Ip, args.Port);
+		string playerEndpoint = CustomTcpClient.GenerateEndpoint(args.Ip, args.Port);
 		uint playerId = (uint)_playerIds.Count;
 
 		_playerIds[playerEndpoint] = playerId;
 		_playerEndpoints[playerId] = playerEndpoint;
+	}
+
+	private void OnConnectionLost(object? sender, DataEventArgs args)
+	{
+		string playerEndpoint = CustomTcpClient.GenerateEndpoint(args.Ip, args.Port);
+
+		uint playerId = _playerIds[playerEndpoint];
+
+		_playerIds.Remove(playerEndpoint);
+		_playerEndpoints.Remove(playerId);
 	}
 
 	private void CalcStats(int deltaTime, float load, long elapsed)

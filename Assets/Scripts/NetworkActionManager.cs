@@ -39,6 +39,7 @@ public class NetworkActionManager : MonoBehaviour
 		if (entities.Count == 0) return;
 
 		List<uint> entityIds = GetSelectedEntityIds(entities);
+		Debug.Log("Repairing!");
 		BuildCommandArgs args = new BuildCommandArgs(entityIds, structure.Id);
 		ICommand command = new BuildCommand(0, args);
 		NetworkClient.Instance().SendCommand(command);
