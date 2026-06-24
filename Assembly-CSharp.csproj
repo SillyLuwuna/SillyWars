@@ -53,7 +53,11 @@
     <Compile Include="Assets/Scripts/StructureManager.cs" />
     <Compile Include="Assets/Scripts/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/SelectionBoxUI.cs" />
-    <Compile Include="Assets/Scripts/UnitController.cs" />
+    <Compile Include="Assets/Scripts/PlayerActionController.cs" />
+    <Compile Include="Assets/Scripts/NetworkActionManager.cs" />
+    <Compile Include="Assets/Scripts/InputManager.cs" />
+    <Compile Include="Assets/Scripts/WorldStateManager.cs" />
+    <Compile Include="Assets/Scripts/TextureManager.cs" />
     <Compile Include="Assets/Scripts/ConnectButton.cs" />
   </ItemGroup>
   <ItemGroup>

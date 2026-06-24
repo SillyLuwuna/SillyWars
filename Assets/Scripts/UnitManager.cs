@@ -1,61 +1,29 @@
 #nullable enable
 
 using System.Collections.Generic;
-using RtsEngine;
-using RtsEngine.Map;
 using RtsEngine.Units;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class UnitManager : MonoBehaviour
 {
-	public GameObject[] WorkerUnits = null!;
-	public GameObject[] KnightUnits = null!;
-	public GameObject MissingTexture = null!;
-
-	public Quaternion spawnRotation = Quaternion.identity;
-
-	private Dictionary<BaseUnit, GameObject> _unitInstances = null!;
-	private Dictionary<int, BaseUnit> _objectUnits = null!;
+	[SerializeField]
+	private WorldStateManager _worldStateManager = null!;
 
 	private Dictionary<BaseUnit, Vector3> _movingUnitsGoal = null!;
 
-	private object _updateLock = new object();
-	private WorldState? _latestState;
-
-	private bool _newConnection;
-	private int _playerId;
-
     void Start()
     {
-		_newConnection = true;
-		_unitInstances = new Dictionary<BaseUnit, GameObject>();
-		_objectUnits = new Dictionary<int, BaseUnit>();
-
 		_movingUnitsGoal = new Dictionary<BaseUnit, Vector3>();
 
-		_latestState = null;
-
-		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
-		NetworkClient.Instance().Tick += Tick;
+		_worldStateManager.EntityUpdate += OnEntityUpdate;
+		_worldStateManager.ResetState += OnReset;
+		_worldStateManager.NewEntity += OnNewEntity;
+		_worldStateManager.EntityDestroy += OnEntityDestroy;
     }
 
     void Update()
     {
-		lock(_updateLock)
-		{
-			InterpolateUnitsTowardsGoal();
-
-			if (_latestState == null) return;
-
-			if (_newConnection)
-			{
-				Reset();
-			}
-
-			UpdateUnits(_latestState.Units);
-			_latestState = null;
-		}
+		InterpolateUnitsTowardsGoal();
     }
 
 	private void InterpolateUnitsTowardsGoal()
@@ -67,7 +35,9 @@ public class UnitManager : MonoBehaviour
 		List<BaseUnit> completed = new List<BaseUnit>();
 		foreach (BaseUnit unit in _movingUnitsGoal.Keys)
 		{
-			GameObject unitObj = _unitInstances[unit];
+			GameObject? unitObj = _worldStateManager.GetGameObject(unit);
+			if (unitObj == null) continue;
+
 			Vector3 pos = unitObj.transform.position;
 			Vector3 goal = _movingUnitsGoal[unit];
 			Vector3 direction = (goal - pos).normalized;
@@ -89,114 +59,39 @@ public class UnitManager : MonoBehaviour
 		}
 	}
 
-	private void Tick(object? sender, WorldState state)
+	private void OnEntityUpdate(object? sender, EntityEventArgs args)
 	{
-		lock(_updateLock)
-		{
-			_latestState = state;
-		}
-	}
-
-	private void Reset()
-	{
-		foreach (GameObject obj in _unitInstances.Values)
-		{
-			Destroy(obj);
-		}
-		_unitInstances.Clear();
-		_objectUnits.Clear();
-		_movingUnitsGoal.Clear();
-		_newConnection = false;
-		_playerId = _latestState!.PlayerVersion;
-	}
-
-	public int PlayerId { get => _playerId; }
-
-	public BaseUnit? GetUnit(GameObject obj)
-	{
-		int key = obj.GetInstanceID();
-		if (!_objectUnits.ContainsKey(key)) return null;
-		return _objectUnits[key];
-	}
-
-	private void UpdateUnits(List<BaseUnit> units)
-	{
-		int numUnits = units.Count;
-		for(int i = 0; i < numUnits; i++)
-		{
-			BaseUnit unit = units[i];
-			
-			UpdateUnit(unit);
-		}
-	}
-
-	private void UpdateUnit(BaseUnit unit)
-	{
-		if (unit.IsDestroyed)
-		{
-			DestroyUnit(unit);
-			return;
-		}
+		if (!(args.Entity is BaseUnit unit)) return;
 
 		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
 
-		if (IsNewUnit(unit))
-		{
-			SpawnUnit(unit, pos);
-			return;
-		}
-
-		UpdateWalkingGoal(unit, pos);
+		UpdateWalkingGoal(unit, args.GameObject, pos);
 	}
 
-	private void UpdateWalkingGoal(BaseUnit unit, Vector3 pos)
+	private void UpdateWalkingGoal(BaseUnit unit, GameObject unitObj, Vector3 pos)
 	{
 		if (_movingUnitsGoal.ContainsKey(unit))
 		{
-			_unitInstances[unit].transform.position = _movingUnitsGoal[unit];
+			unitObj.transform.position = _movingUnitsGoal[unit];
 		}
 
 		_movingUnitsGoal[unit] = pos;
 	}
 
-	private bool IsNewUnit(BaseUnit unit)
+	private void OnReset()
 	{
-		return !_unitInstances.ContainsKey(unit);
+		_movingUnitsGoal.Clear();
 	}
 
-	private void SpawnUnit(BaseUnit unit, Vector3 pos)
+	private void OnNewEntity(object? sender, EntityEventArgs args)
 	{
-		GameObject instance = Instantiate(GetCorrespondingObject(unit), pos, spawnRotation);
-		_unitInstances.Add(unit, instance);
-		_objectUnits.Add(instance.GetInstanceID(), unit);
+
 	}
 
-	private void DestroyUnit(BaseUnit unit)
+	private void OnEntityDestroy(object? sender, EntityEventArgs args)
 	{
-		GameObject obj = _unitInstances[unit];
-		_unitInstances.Remove(unit);
-		_objectUnits.Remove(obj.GetInstanceID());
+		if (!(args.Entity is BaseUnit unit)) return;
+
 		_movingUnitsGoal.Remove(unit);
-		Destroy(obj);
-	}
-
-	private GameObject GetCorrespondingObject(BaseUnit unit)
-	{
-		if (unit is Worker)
-		{
-			return WorkerUnits[unit.OwnerId];
-		}
-		else if (unit is Knight)
-		{
-			return KnightUnits[unit.OwnerId];
-		}
-
-		Debug.LogError("Unknown unit");
-		return MissingTexture;
-	}
-
-	private void OnConnectionEstablished()
-	{
-		_newConnection = true;
 	}
 }

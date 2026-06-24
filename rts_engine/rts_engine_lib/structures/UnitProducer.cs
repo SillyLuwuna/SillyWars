@@ -70,22 +70,22 @@ public abstract class UnitProducer : BaseStructure
 		_productionCooldown = reader.Read<int>();
 	}
 
-	public bool CanProduce(BaseUnit unit)
+	public bool CanProduce(UnitType unitType)
 	{
 		foreach (UnitType allowedType in AllowedUnitTypes)
 		{
-			if (allowedType == unit.UnitType) return true;
+			if (allowedType == unitType) return true;
 		}
 
 		return false;
 	}
 
-	public void EnqueueProduction(BaseUnit unit)
+	public void EnqueueProduction(UnitType unitType)
 	{
-		if (!CanProduce(unit)) return;
+		if (!CanProduce(unitType)) return;
 		if (QueuedUnitsCount >= MaxUnitProduction) return;
 
-		_productionQueue.Enqueue(unit.UnitType);
+		_productionQueue.Enqueue(unitType);
 	}
 
 	public void ClearProduction()

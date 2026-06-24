@@ -241,6 +241,8 @@ public class WorldState : ISerializable
 
 	public List<IDestroyable> Destroyables { get => _destroyables; }
 
+	public List<Entity> Entities { get => _entities; }
+
 	public PathFinder PathFinder { get => _pathFinder; }
 
 	public bool IsTileOccupied(Vec2Int tile)

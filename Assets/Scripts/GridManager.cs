@@ -7,35 +7,38 @@ using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
-	public Tilemap tilemap = null!;
-	public RuleTile groundTile = null!; 
+	[SerializeField] private WorldStateManager _worldStateManager = null!;
 
-	private bool _newConnection;
+	[SerializeField] private Tilemap tilemap = null!;
+	[SerializeField] private RuleTile groundTile = null!;
+
+	private bool _hasReset = true;
 
     void Start()
     {
-		_newConnection = true;
-		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
-		NetworkClient.Instance().Tick += Tick;
+		_worldStateManager!.ResetState += OnReset;
+		_worldStateManager.NewState += OnNewState;
     }
 
     void Update()
     {
-        
     }
 
-	private void Tick(object? sender, WorldState state)
+	private void OnReset()
 	{
-		if (_newConnection)
+		_hasReset = true;
+	}
+
+	private void OnNewState(object? sender, WorldState state)
+	{
+		if (_hasReset)
 		{
 			UpdateTiles(state.Map);
-			_newConnection = false;
 		}
 	}
 
 	private void UpdateTiles(Grid<Cell> map)
 	{
-		Debug.Log("Updating tiles");
 		tilemap.ClearAllTiles();
 		for (int x = 0; x < map.Width; x++)
 		{
@@ -48,10 +51,5 @@ public class GridManager : MonoBehaviour
 				}
 			}
 		}
-	}
-
-	private void OnConnectionEstablished()
-	{
-		_newConnection = true;
 	}
 }
