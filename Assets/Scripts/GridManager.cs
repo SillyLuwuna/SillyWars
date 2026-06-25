@@ -7,8 +7,6 @@ using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
-	[SerializeField] private WorldStateManager _worldStateManager = null!;
-
 	[SerializeField] private Tilemap groundTilemap = null!;
 	[SerializeField] private Tilemap waterTilemap = null!;
 
@@ -19,8 +17,8 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {
-		_worldStateManager!.ResetState += OnReset;
-		_worldStateManager.NewState += OnNewState;
+		WorldStateManager.Instance!.ResetState += OnReset;
+		WorldStateManager.Instance.NewState += OnNewState;
     }
 
     void Update()

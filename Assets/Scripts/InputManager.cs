@@ -13,7 +13,6 @@ public class InputManager : MonoBehaviour
 	private const float DRAG_AMOUNT_FOR_DETECTION = 10;
 
 	[SerializeField] private PlayerActionController _playerController = null!;
-	[SerializeField] private WorldStateManager _worldStateManager = null!;
 	[SerializeField] private SelectionBoxUI _selectionBoxUI = null!;
 
 	private Vector2 _dragStart;
@@ -23,7 +22,7 @@ public class InputManager : MonoBehaviour
 
 	void Start()
 	{
-		_worldStateManager.ResetState += OnReset;
+		WorldStateManager.Instance.ResetState += OnReset;
 	}
 
 	void Update()
@@ -46,7 +45,7 @@ public class InputManager : MonoBehaviour
 
 		Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 		Collider2D? hit = Physics2D.OverlapPoint(mousePos);
-		Entity? hitEntity = (hit?.gameObject == null) ? null : _worldStateManager.GetEntity(hit.gameObject);
+		Entity? hitEntity = (hit?.gameObject == null) ? null : WorldStateManager.Instance.GetEntity(hit.gameObject);
 
 		if (hitEntity == null)
 		{
@@ -70,7 +69,7 @@ public class InputManager : MonoBehaviour
 	{
 		Vector2 mousePos = Camera.main.ScreenToWorldPoint(screenMousePos);
 		Collider2D? hit = Physics2D.OverlapPoint(mousePos);
-		Entity? hitEntity = (hit?.gameObject == null) ? null : _worldStateManager.GetEntity(hit.gameObject);
+		Entity? hitEntity = (hit?.gameObject == null) ? null : WorldStateManager.Instance.GetEntity(hit.gameObject);
 
 		if (hitEntity == null)
 		{
@@ -188,7 +187,7 @@ public class InputManager : MonoBehaviour
 
 		foreach (GameObject gameObj in gameObjects)
 		{
-			Entity? entity = _worldStateManager.GetEntity(gameObj);
+			Entity? entity = WorldStateManager.Instance.GetEntity(gameObj);
 			if (entity == null) continue;
 			entities.Add(entity);
 		}

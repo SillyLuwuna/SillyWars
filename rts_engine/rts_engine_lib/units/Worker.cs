@@ -122,6 +122,11 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
+		if (args.OldState.Goal != args.NewState.Goal)
+		{
+			Console.WriteLine($"{args.OldState.Goal} -> {args.NewState.Goal}");
+		}
+
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
 			StopBuilding();
@@ -130,11 +135,6 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public void Build(BaseStructure structure)
 	{
-		// if (!((IValuable)structure).TryPay()) return;
-		// if (!structure.IsPaid && !structure.HasBuildingStarted &&
-		// 	!RtsEngine.Instance.State.TryTakeResource(structure.Cost, this.OwnerId))
-		// 	return;
-
 		_structure = structure;
 		State.Goal = Goal.Build;
 		_closestReachableTile = null;

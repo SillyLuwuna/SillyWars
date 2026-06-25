@@ -25,11 +25,17 @@ public class EntityEventArgs : EventArgs
 	}
 }
 
+public enum ColorVariant { Blue, Red, Yellow, Purple, Black, Invalid }
+
 public class WorldStateManager : MonoBehaviour
 {
-	[SerializeField]
-	private TextureManager _textureManager = null!;
+	private static WorldStateManager? _instance = null;
+	private static bool _awoken = false;
 
+	[SerializeField]
+	private PrefabManager _prefabManager = null!;
+
+	private Dictionary<Entity, Entity> _previousVersion = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
 	private Dictionary<Entity, GameObject> _entityInstances = null!;
 	private Dictionary<int, Entity> _objectEntities = null!;
@@ -46,9 +52,32 @@ public class WorldStateManager : MonoBehaviour
 	public event EventHandler<WorldState>? NewState;
 	public event Action? ResetState;
 
+	private WorldStateManager() { }
+
+	public static WorldStateManager Instance
+	{
+		get
+		{
+			if (!_awoken || (_instance == null))
+			{
+				throw new MethodAccessException("Instance was not initialized yet");
+			}
+
+			return _instance;
+		}
+	}
+
+	void Awake()
+	{
+		_instance = this;
+		DontDestroyOnLoad(gameObject);
+		_awoken = true;
+	}
+
     void Start()
     {
 		_newConnection = true;
+		_previousVersion = new Dictionary<Entity, Entity>();
 		_entitiesId = new Dictionary<uint, Entity>();
 		_entityInstances = new Dictionary<Entity, GameObject>();
 		_objectEntities = new Dictionary<int, Entity>();
@@ -56,8 +85,8 @@ public class WorldStateManager : MonoBehaviour
 		_latestState = null;
 		_refreshState = false;
 
-		NetworkClient.Instance().ConnectionEstablished += OnConnectionEstablished;
-		NetworkClient.Instance().Tick += Tick;
+		NetworkClient.Instance.ConnectionEstablished += OnConnectionEstablished;
+		NetworkClient.Instance.Tick += Tick;
     }
 
     void Update()
@@ -73,6 +102,7 @@ public class WorldStateManager : MonoBehaviour
 			if (!_refreshState) return;
 			_refreshState = false;
 
+			UpdateEntityReferences(_latestState!); // should use a more efficient strategy
 			OnNewState(_latestState!);
 			UpdateEntities(_latestState!.Entities);
 			RemoveEntities(_latestState!.RemovedEntities);
@@ -94,12 +124,35 @@ public class WorldStateManager : MonoBehaviour
 		{
 			Destroy(obj);
 		}
+		_previousVersion.Clear();
 		_entitiesId.Clear();
 		_entityInstances.Clear();
 		_objectEntities.Clear();
 		_newConnection = false;
 		_refreshState = false;
 		_latestState = null;
+	}
+
+	private void UpdateEntityReferences(WorldState state)
+	{
+		foreach (Entity entity in state.Entities)
+		{
+			if (!_entityInstances.ContainsKey(entity)) continue;
+			int gameObj = _entityInstances[entity].GetInstanceID();
+
+			if (_entitiesId.ContainsKey(entity.Id))
+			{
+				_previousVersion[entity] = _entitiesId[entity.Id];
+			}
+
+			_entitiesId[entity.Id] = entity;
+			_objectEntities[gameObj] = entity;
+		}
+	}
+
+	public Entity? GetEntityOld(Entity entity)
+	{
+		return _previousVersion.TryGetValue(entity, out Entity previous) ? previous : null;
 	}
 
 	public Entity? GetEntity(GameObject obj)
@@ -157,7 +210,7 @@ public class WorldStateManager : MonoBehaviour
 
 	private void SpawnEntity(Entity entity)
 	{
-		GameObject instance = Instantiate(_textureManager.GetCorrespondingPrefab(entity), _textureManager.GetInstanceCoordinates(entity), Quaternion.identity);
+		GameObject instance = Instantiate(_prefabManager.GetCorrespondingPrefab(entity), _prefabManager.GetInstanceCoordinates(entity), Quaternion.identity);
 
 		_entitiesId.Add(entity.Id, entity);
 		_entityInstances.Add(entity, instance);
@@ -234,5 +287,15 @@ public class WorldStateManager : MonoBehaviour
 	private void OnNewState(WorldState state)
 	{
 		NewState?.Invoke(this, state);
+	}
+
+	public static ColorVariant GetColorVariant(uint playerId)
+	{
+		if (Enum.GetValues(typeof(ColorVariant)).Length < playerId)
+		{
+			return ColorVariant.Invalid;
+		}
+
+		return (ColorVariant)playerId;
 	}
 }

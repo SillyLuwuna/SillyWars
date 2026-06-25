@@ -10,7 +10,6 @@ using UnityEngine;
 public class PlayerActionController : MonoBehaviour
 {
 	[SerializeField] private NetworkActionManager _networkActionManager;
-	[SerializeField] private WorldStateManager _worldStateManager;
 	[SerializeField] private Camera _mainCamera;
 
 	[SerializeField] private float _cameraMoveSpeed = 0f;
@@ -27,16 +26,16 @@ public class PlayerActionController : MonoBehaviour
 
 	void Start()
 	{
-		_worldStateManager.ResetState += OnReset;
+		WorldStateManager.Instance.ResetState += OnReset;
 	}
 
 	void Update()
 	{
-		if (_worldStateManager.LatestState == null) return;
+		if (WorldStateManager.Instance.LatestState == null) return;
 
 		_mainCamera.transform.position += _cameraMoveVector * _cameraMoveSpeed * Time.deltaTime * _mainCamera.orthographicSize;
 
-		Grid<Cell> map = _worldStateManager.LatestState.Map;
+		Grid<Cell> map = WorldStateManager.Instance.LatestState.Map;
 		float clampedX = Mathf.Clamp(_mainCamera.transform.position.x, map.MinWorldX - _cameraBound, map.MaxWorldX + _cameraBound);
 		float clampedY = Mathf.Clamp(_mainCamera.transform.position.y, map.MinWorldY - _cameraBound, map.MaxWorldY + _cameraBound);
 
@@ -45,7 +44,7 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseUnit unit)
 	{
-		if (unit.OwnerId != _worldStateManager.PlayerId)
+		if (unit.OwnerId != WorldStateManager.Instance.PlayerId)
 		{
 			_networkActionManager.SetAggro(_selectedEntities, false);
 			_networkActionManager.Attack(_selectedEntities, unit);
@@ -58,7 +57,7 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseStructure structure)
 	{
-		if (structure.OwnerId == _worldStateManager.PlayerId)
+		if (structure.OwnerId == WorldStateManager.Instance.PlayerId)
 		{
 			_networkActionManager.Build(_selectedEntities, structure);
 		}

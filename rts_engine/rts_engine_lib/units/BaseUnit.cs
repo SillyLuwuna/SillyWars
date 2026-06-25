@@ -564,9 +564,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		if (!IsTargetInAttackRange) return;
 
 		_attackCooldown = AttackSpeed;
-		(_target).Damage(AttackDamage);
+		_target.Damage(AttackDamage);
 
-		if (_target!.IsDestroyed)
+		if (_target.IsDestroyed)
 		{
 			HandleTargetDestruction();
 			return;
@@ -576,17 +576,24 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private void HandleTargetDestruction()
 	{
 		// Console.WriteLine($"{Id}: Target died");
-		ClearTarget();
 		if (State.Goal == Goal.Attack)
 		{
 			if (IsTargettingGoalTarget)
 			{
+				Console.WriteLine("Stopping attack goal");
+				// Halt();
 				StopAttackGoal();
+				ClearTarget();
 			}
 			else
 			{
+				Console.WriteLine("Restoring attack goal");
 				RestoreAttackGoal();
 			}
+		}
+		else
+		{
+			ClearTarget();
 		}
 	}
 

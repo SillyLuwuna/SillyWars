@@ -5,15 +5,12 @@ using UnityEngine;
 
 public class StructureManager : MonoBehaviour
 {
-	[SerializeField]
-	private WorldStateManager _worldStateManager = null!;
-
     void Start()
     {
-		_worldStateManager.EntityUpdate += OnEntityUpdate;
-		_worldStateManager.ResetState += OnReset;
-		_worldStateManager.NewEntity += OnNewEntity;
-		_worldStateManager.EntityDestroy += OnEntityDestroy;
+		WorldStateManager.Instance.EntityUpdate += OnEntityUpdate;
+		WorldStateManager.Instance.ResetState += OnReset;
+		WorldStateManager.Instance.NewEntity += OnNewEntity;
+		WorldStateManager.Instance.EntityDestroy += OnEntityDestroy;
     }
 
     void Update()

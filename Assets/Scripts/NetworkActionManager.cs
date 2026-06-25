@@ -10,19 +10,6 @@ public class NetworkActionManager : MonoBehaviour
 {
 	// should validate actions not to overload server
 
-	[SerializeField]
-	private WorldStateManager _worldStateManager = null!;
-
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
-    }
-
 	public void Gather(List<Entity> entities, IGatherable gatherable)
 	{
 		if (entities.Count == 0) return;
@@ -30,7 +17,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		GatherCommandArgs args = new GatherCommandArgs(entityIds, gatherable);
 		ICommand command = new GatherCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void Halt(List<Entity> entities)
@@ -40,7 +27,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		EntityCommandArgs args = new EntityCommandArgs(entityIds);
 		ICommand command = new HaltCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void SetProductionSpawn(List<Entity> entities, Vec2 spawnpoint)
@@ -50,7 +37,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		SetProductionSpawnpointCommandArgs args = new SetProductionSpawnpointCommandArgs(entityIds, spawnpoint);
 		ICommand command = new SetProductionSpawnCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void EnqueueUnitProduction(List<Entity> entities, UnitType type)
@@ -60,19 +47,19 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		EnqueueUnitProductionCommandArgs args = new EnqueueUnitProductionCommandArgs(entityIds, type);
 		ICommand command = new EnqueueUnitProductionCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void BuildNew(List<Entity> entities, Vec2 pos, StructureType type)
 	{
 		if (entities.Count == 0) return;
 
-		Vec2Int start = _worldStateManager.LatestState.Map.CellPosFromWorldSpace(pos);
+		Vec2Int start = WorldStateManager.Instance.LatestState.Map.CellPosFromWorldSpace(pos);
 
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		BuildNewCommandArgs args = new BuildNewCommandArgs(entityIds, start, type);
 		ICommand command = new BuildNewCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void Build(List<Entity> entities, Entity structure)
@@ -83,7 +70,7 @@ public class NetworkActionManager : MonoBehaviour
 		Debug.Log("Repairing!");
 		BuildCommandArgs args = new BuildCommandArgs(entityIds, structure.Id);
 		ICommand command = new BuildCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void Move(List<Entity> entities, Vec2 goal)
@@ -93,7 +80,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		MoveCommandArgs args = new MoveCommandArgs(entityIds, goal);
 		ICommand command = new MoveCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void Attack(List<Entity> entities, Entity entity)
@@ -103,7 +90,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		AttackCommandArgs args = new AttackCommandArgs(entityIds, entity.Id);
 		ICommand command = new AttackCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	public void SetAggro(List<Entity> entities, bool aggro)
@@ -113,7 +100,7 @@ public class NetworkActionManager : MonoBehaviour
 		List<uint> entityIds = GetSelectedEntityIds(entities);
 		SetAggroCommandArgs args = new SetAggroCommandArgs(entityIds, aggro);
 		ICommand command = new SetAggroCommand(0, args);
-		NetworkClient.Instance().SendCommand(command);
+		NetworkClient.Instance.SendCommand(command);
 	}
 
 	private List<uint> GetSelectedEntityIds(List<Entity> entities)

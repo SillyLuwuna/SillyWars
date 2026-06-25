@@ -4,11 +4,11 @@ public class ConnectButton : MonoBehaviour
 {
 	public void OnButtonClickConnect()
 	{
-		NetworkClient.Instance().TryConnect();
+		NetworkClient.Instance.TryConnect();
 	}
 
 	public void OnButtonClickDisconnect()
 	{
-		NetworkClient.Instance().Disconnect();
+		NetworkClient.Instance.Disconnect();
 	}
 }

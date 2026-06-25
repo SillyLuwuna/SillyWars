@@ -19,28 +19,34 @@ public static class Program
 	public static async Task Main()
 	{
 		// Create map
-		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 20, 10);
+		// Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 200, 100);
+		// int segmentationSize = 80;
 
-		int thirdGridWidth = (int)grid.Width / 3;
+		// Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 30, 20);
+		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 25, 15);
+
+		int segmentationSize = 10;
+		int segmentationGridWidth = (int)grid.Width / segmentationSize;
 		for (int x = 0; x < grid.Width; x++)
 		{
 			for (int y = 0; y < grid.Height; y++)
 			{
-				if (x < thirdGridWidth || x > thirdGridWidth * 2)
-				{
-					grid[x, y] = new Cell(CellType.Ground);
-				}
-				else
-				{
-					if (y == grid.Height / 2)
-					{
-						grid[x, y] = new Cell(CellType.Ground);
-					}
-					else
-					{
-						grid[x, y] = new Cell(CellType.Empty);
-					}
-				}
+				grid[x, y] = new Cell(CellType.Ground);
+				// if (x < thirdGridWidth || x > thirdGridWidth * (segmentationSize - 1))
+				// {
+				// 	grid[x, y] = new Cell(CellType.Ground);
+				// }
+				// else
+				// {
+				// 	if (y == grid.Height / 2)
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Ground);
+				// 	}
+				// 	else
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Empty);
+				// 	}
+				// }
 			}
 		}
 
@@ -55,19 +61,18 @@ public static class Program
 		{
 			for (int y = 0; y < grid.Height; y++)
 			{
-				int offset = 3;
 				Vec2 pos = new Vec2(x + 0.5f, y + 0.4f);
-				if ((x + y) % 2 == 0)
-				{
-					continue;
-				}
-				if (x < thirdGridWidth - offset)
+				// if ((x + y) % 2 == 0)
+				// {
+				// 	continue;
+				// }
+				if (x < segmentationGridWidth)
 				{
 					uint owner = 1;
 					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
 					state.AddEntity(curr);
 				}
-				else if (x > thirdGridWidth * 2 + offset)
+				else if (x > grid.Width - segmentationGridWidth - 1)
 				{
 					uint owner = 0;
 					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);

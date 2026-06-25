@@ -11,7 +11,7 @@ public interface IDestroyable : IEntity
 	public void Damage(int damage)
 	{
 		HitPoints -= damage;
-		if (HitPoints < 0)
+		if (HitPoints <= 0)
 		{
 			Destroy();
 		}

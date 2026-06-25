@@ -25,7 +25,6 @@ public class NetworkClient : MonoBehaviour
 
 	private Client _client = null!;
 	// private readonly ConcurrentQueue<WorldState> _dataQueue = new ConcurrentQueue<WorldState>();
-	private WorldState _oldState = null!;
 	private WorldState _currState = null!;
 	private object _stateLock = new object();
 	private bool _update = false;
@@ -37,19 +36,22 @@ public class NetworkClient : MonoBehaviour
 
 	private NetworkClient() { }
 
-	public static NetworkClient Instance()
+	public static NetworkClient Instance
 	{
-		if (!_awoken || _instance == null)
+		get
 		{
-			throw new MethodAccessException("Instance was not initialized yet");
+			if (!_awoken || _instance == null)
+			{
+				throw new MethodAccessException("Instance was not initialized yet");
+			}
+
+			// if (_instance == null)
+			// {
+			// 	_instance = new NetworkClient();
+			// }
+
+			return _instance;
 		}
-
-		// if (_instance == null)
-		// {
-		// 	_instance = new NetworkClient();
-		// }
-
-		return _instance;
 	}
 
 	void Awake()
@@ -153,7 +155,6 @@ public class NetworkClient : MonoBehaviour
 
 			lock (_stateLock)
 			{
-				_oldState = _currState;
 				_currState = state;
 
 				_update = true;

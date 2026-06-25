@@ -7,19 +7,16 @@ using UnityEngine;
 
 public class UnitManager : MonoBehaviour
 {
-	[SerializeField]
-	private WorldStateManager _worldStateManager = null!;
-
 	private Dictionary<BaseUnit, Vector3> _movingUnitsGoal = null!;
 
     void Start()
     {
 		_movingUnitsGoal = new Dictionary<BaseUnit, Vector3>();
 
-		_worldStateManager.EntityUpdate += OnEntityUpdate;
-		_worldStateManager.ResetState += OnReset;
-		_worldStateManager.NewEntity += OnNewEntity;
-		_worldStateManager.EntityDestroy += OnEntityDestroy;
+		WorldStateManager.Instance.EntityUpdate += OnEntityUpdate;
+		WorldStateManager.Instance.ResetState += OnReset;
+		WorldStateManager.Instance.NewEntity += OnNewEntity;
+		WorldStateManager.Instance.EntityDestroy += OnEntityDestroy;
     }
 
     void Update()
@@ -34,7 +31,7 @@ public class UnitManager : MonoBehaviour
 		List<BaseUnit> completed = new List<BaseUnit>();
 		foreach (BaseUnit unit in _movingUnitsGoal.Keys)
 		{
-			GameObject? unitObj = _worldStateManager.GetGameObject(unit);
+			GameObject? unitObj = WorldStateManager.Instance.GetGameObject(unit);
 			if (unitObj == null) continue;
 
 			Vector3 pos = unitObj.transform.position;
@@ -63,7 +60,6 @@ public class UnitManager : MonoBehaviour
 		if (!(args.Entity is BaseUnit unit)) return;
 
 		Vector3 pos = new Vector3(unit.Pos.x, unit.Pos.y, unit.Pos.y);
-
 		UpdateWalkingGoal(unit, args.GameObject, pos);
 	}
 
