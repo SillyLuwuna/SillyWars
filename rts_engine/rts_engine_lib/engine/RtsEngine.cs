@@ -22,8 +22,6 @@ public class RtsEngine
 	private const bool ShowStats = true;
 	private const bool DEBUG = true;
 	
-	private const int NumPlayers = 2;
-
 	public bool IsRunning { get; private set; }
 	private PhysicsEngine _physicsEngine;
 	private WorldState _state;
@@ -71,7 +69,7 @@ public class RtsEngine
 		_state = state;
 		_clock = new Clock(IntervalMs);
 		_clock.Tick += TickSubscriber;
-		_server = new Server(Port, NumPlayers);
+		_server = new Server(Port, _state.NumPlayers);
 		_server.MessageReceived += OnDataReceived;
 		_server.ConnectionEstablished += OnConnectionEstablished;
 		_server.ConnectionLost += OnConnectionLost;

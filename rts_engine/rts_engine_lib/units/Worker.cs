@@ -38,9 +38,11 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 	public override float MoveSpeed { get; set; }
 	public override int ProductionTime { get; set; }
 
+	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 20); }
+
 
 	public int WorkPerGather { get => 1; }
-	public float GatherRange { get => BaseRadius + 0.1f; }
+	public float GatherRange { get => BaseRadius + 0.2f; }
 
 	private IGatherable? _gatherableGoal;
 	private ResourceStack _resourceGathered;
@@ -128,6 +130,11 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public void Build(BaseStructure structure)
 	{
+		// if (!((IValuable)structure).TryPay()) return;
+		// if (!structure.IsPaid && !structure.HasBuildingStarted &&
+		// 	!RtsEngine.Instance.State.TryTakeResource(structure.Cost, this.OwnerId))
+		// 	return;
+
 		_structure = structure;
 		State.Goal = Goal.Build;
 		_closestReachableTile = null;
@@ -199,6 +206,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 			}
 			else
 			{
+				if (!((IValuable)_structure).TryPay()) return;
 				_structure.StartBuilding();
 				_buildCooldown = BuildSpeed;
 			}
@@ -347,6 +355,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		foreach (Castle castle in castles)
 		{
 			if (!castle.IsBuilt) continue;
+			if (castle.OwnerId != this.OwnerId) continue;
 
 			Path? path = GetShortestReachablePathToStructure(castle);
 			if (path == null) continue;

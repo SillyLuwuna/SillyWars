@@ -1,6 +1,7 @@
 using System;
 using RtsEngine.Data;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 
 namespace RtsEngine.Units
 {
@@ -29,6 +30,8 @@ public class Knight : BaseUnit
 	public override float AggroRange { get; set; }
 	public override float MoveSpeed { get; set; }
 	public override int ProductionTime { get; set; }
+
+	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 10); }
 
 	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{

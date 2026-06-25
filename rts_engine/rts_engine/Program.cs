@@ -14,6 +14,8 @@ namespace RtsEngine
 
 public static class Program
 {
+	private static int NumPlayers = 2;
+
 	public static async Task Main()
 	{
 		// Create map
@@ -42,10 +44,12 @@ public static class Program
 			}
 		}
 
-		WorldState? state = new WorldState(grid);
+		WorldState? state = new WorldState(grid, NumPlayers);
 
 		GoldNode node = new GoldNode(new Vec2(14.5f, 1.5f), 0);
 		state.AddEntity(node);
+		Entity entity = new Worker(new Vec2(4.5f, 2.5f), 2);
+		state.AddEntity(entity);
 
 		for (int x = 0; x < grid.Width; x++)
 		{
@@ -70,6 +74,12 @@ public static class Program
 					state.AddEntity(curr);
 				}
 			}
+		}
+
+		ResourceStack initialResources = new ResourceStack(Resource.Gold, 200);
+		for (uint i = 0; i < NumPlayers; i++)
+		{
+			state.GiveResource(initialResources, i);
 		}
 
 		// Save map

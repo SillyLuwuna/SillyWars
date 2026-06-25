@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 using RtsEngine.Units;
 
 namespace RtsEngine.Structures
@@ -24,6 +25,8 @@ public class Barracks : UnitProducer
 
 	public override int MaxUnitProduction { get; set; }
 	public override List<UnitType> AllowedUnitTypes { get; set; }
+
+	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 50); }
 
 	public Barracks(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{

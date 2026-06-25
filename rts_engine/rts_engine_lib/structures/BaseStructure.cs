@@ -4,11 +4,12 @@ using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Map;
 using RtsEngine.Math;
+using RtsEngine.Resources;
 
 namespace RtsEngine.Structures
 {
 
-public abstract class BaseStructure : Entity, ISerializable, IDestroyable
+public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValuable
 {
 	public const int ConstructionMaxHitpoints = 10;
 
@@ -29,6 +30,9 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 	public bool HasBuildingStarted;
 	public bool IsBuilt { get; protected set; }
 
+	public abstract ResourceStack Cost { get; }
+	public bool IsPaid { get; set; }
+
 	public Vec2Int Start;
 
 	public BaseStructure(uint ownerId, Vec2Int start, int height, int width) : base(ownerId)
@@ -38,6 +42,8 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable
 
 	private void Init(Vec2Int start, int height, int width)
 	{
+		IsPaid = false;
+
 		_surroundingTilesCache = null;
 		Tiles = new List<Vec2Int>();
 		Start = start;

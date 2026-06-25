@@ -7,11 +7,12 @@ using System;
 using RtsEngine.Physics;
 using System.Collections.Generic;
 using RtsEngine.Structures;
+using RtsEngine.Resources;
 
 namespace RtsEngine.Units
 {
 
-public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable
+public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable, IValuable
 {
 	private const float StructurePriority = 1.0f;
 	private const float UnitPriority = 10.0f;
@@ -31,6 +32,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public abstract float MoveSpeed { get; set; }
 
 	public abstract int ProductionTime { get; set; }
+
+	public abstract ResourceStack Cost { get; }
+	public bool IsPaid { get; set; }
 
 	public int TargetedByNum { get; set; }
 
@@ -58,6 +62,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		IsDestroyed = false;
 		TargetedByNum = 0;
+
+		IsPaid = false;
 
 		_target = null;
 		_targetUnit = null;
@@ -651,6 +657,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			UnitType.Knight => new Knight(pos, ownerId),
 			_ => throw new ArgumentException($"Unknown unit type {type}")
 		};
+	}
+
+	public static BaseUnit Dummy(UnitType type)
+	{
+		return FromUnitType(type, ~0u, Vec2.Zero);
 	}
 
 	public abstract UnitType UnitType { get; }

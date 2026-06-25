@@ -20,22 +20,22 @@ public class TextureManager : MonoBehaviour
 	{
 		if (entity is Worker)
 		{
-			if (entity.OwnerId > WorkerPrefabs.Length) return MissingTexture;
+			if (entity.OwnerId >= WorkerPrefabs.Length) return MissingTexture;
 			return WorkerPrefabs[entity.OwnerId];
 		}
 		else if (entity is Knight)
 		{
-			if (entity.OwnerId > KnightPrefabs.Length) return MissingTexture;
+			if (entity.OwnerId >= KnightPrefabs.Length) return MissingTexture;
 			return KnightPrefabs[entity.OwnerId];
 		}
 		else if (entity is Castle)
 		{
-			if (entity.OwnerId > CastlePrefabs.Length) return MissingTexture;
+			if (entity.OwnerId >= CastlePrefabs.Length) return MissingTexture;
 			return CastlePrefabs[entity.OwnerId];
 		}
 		else if (entity is Barracks)
 		{
-			if (entity.OwnerId > BarracksPrefabs.Length) return MissingTexture;
+			if (entity.OwnerId >= BarracksPrefabs.Length) return MissingTexture;
 			return BarracksPrefabs[entity.OwnerId];
 		}
 		else if (entity is GoldNode goldNode)

@@ -23,8 +23,15 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseUnit unit)
 	{
-		_networkActionManager.SetAggro(_selectedEntities, false);
-		_networkActionManager.Attack(_selectedEntities, unit);
+		if (unit.OwnerId != _worldStateManager.PlayerId)
+		{
+			_networkActionManager.SetAggro(_selectedEntities, false);
+			_networkActionManager.Attack(_selectedEntities, unit);
+		}
+		else
+		{
+			_networkActionManager.Move(_selectedEntities, unit.Pos);
+		}
 	}
 
 	public void OnRightClick(BaseStructure structure)

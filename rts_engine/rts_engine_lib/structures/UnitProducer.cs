@@ -85,6 +85,8 @@ public abstract class UnitProducer : BaseStructure
 		if (!CanProduce(unitType)) return;
 		if (QueuedUnitsCount >= MaxUnitProduction) return;
 
+		if (!RtsEngine.Instance.State.TryTakeResource(BaseUnit.Dummy(unitType).Cost, this.OwnerId)) return;
+
 		_productionQueue.Enqueue(unitType);
 	}
 
@@ -143,9 +145,10 @@ public abstract class UnitProducer : BaseStructure
 		BaseUnit unit = BaseUnit.FromUnitType(_productionUnit!.Value, this.OwnerId, SpawnPosition!.Value);
 		_productionUnit = null;
 
-		if (SpawnTarget == null) return;
-
-		unit.SetGoal(SpawnTarget.Value);
+		if (SpawnTarget != null)
+		{
+			unit.SetGoal(SpawnTarget.Value);
+		}
 
 		RtsEngine.Instance.State.AddEntity(unit);
 	}

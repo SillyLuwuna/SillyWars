@@ -10,13 +10,17 @@ using System;
 using RtsEngine.Physics;
 using RtsEngine.Math;
 using RtsEngine.Structures;
+using RtsEngine.Resources;
 
 namespace RtsEngine
 {
 
 public class WorldState : ISerializable
 {
+	private static int ResourceNum = Enum.GetValues(typeof(Resource)).Length;
+
 	private const bool DEBUG = true;
+	public int NumPlayers { get; private set; }
 
 	public Grid<Cell> Map = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
@@ -32,18 +36,34 @@ public class WorldState : ISerializable
 
 	private PathFinder _pathFinder = null!;
 
+	// public List<List<int>> PlayerResources { get; private set; } = null!;
+	public int[] _playerResources = null!;
+
 	public int PlayerVersion { get; private set; }
 	public List<uint> AddedEntities { get; private set; } = null!;
 	public List<uint> RemovedEntities { get; private set; } = null!;
 
-	public WorldState(Grid<Cell> map)
+	public WorldState(Grid<Cell> map, int numPlayers)
 	{
-		Init(map);
+		Init(map, numPlayers);
 	}
 
-	private void Init(Grid<Cell> map)
+	private void Init(Grid<Cell> map, int numPlayers)
 	{
 		Map = map;
+		NumPlayers = numPlayers;
+
+		_playerResources = new int[numPlayers * ResourceNum];
+		// PlayerResources = new List<List<int>>();
+		// for (int i = 0; i < numPlayers; i++)
+		// {
+		// 	PlayerResources.Add(new List<int>());
+		// 	for (int j = 0; j < ResourceNum; j++)
+		// 	{
+		// 		PlayerResources[i].Add(0);
+		// 	}
+		// }
+
 		_entitiesId = new Dictionary<uint, Entity>();
 		_entities = new List<Entity>();
 		_units = new List<BaseUnit>();
@@ -55,10 +75,10 @@ public class WorldState : ISerializable
 		_removeQueue = new Queue<Entity>();
 		_isTickingEntities = false;
 
+		_pathFinder = new PathFinder(Map);
+
 		AddedEntities = new List<uint>();
 		RemovedEntities = new List<uint>();
-
-		_pathFinder = new PathFinder(Map);
 	}
 
 	public void SerializeFields(SerializerWriter writer)
@@ -66,6 +86,9 @@ public class WorldState : ISerializable
 		writer.Write(PlayerVersion);
 
 		writer.Write(Map);
+		writer.Write(NumPlayers);
+
+		writer.Write(_playerResources);
 
 		writer.Write(_entities.Count);
 		foreach (Entity entity in _entities)
@@ -82,7 +105,11 @@ public class WorldState : ISerializable
 		PlayerVersion = reader.Read<int>();
 
 		Grid<Cell> map = reader.Read<Grid<Cell>>();
-		Init(map);
+		int numPlayers = reader.Read<int>();
+		Init(map, numPlayers);
+
+		// PlayerResources = reader.Read<List<List<int>>>();
+		_playerResources = reader.Read<int[]>();
 
 		int entitiesNum = reader.Read<int>();
 		for (int i = 0; i < entitiesNum; i++)
@@ -137,6 +164,35 @@ public class WorldState : ISerializable
 		{
 			Map[tile].Type = cellType;
 		}
+	}
+
+	public int GetResource(uint playerId, Resource resource)
+	{
+		return _playerResources[playerId * ResourceNum + (int)resource];
+	}
+
+	public void GiveResource(ResourceStack resourceStack, uint playerId)
+	{
+		_playerResources[playerId * ResourceNum + (int)resourceStack.Resource] += resourceStack.Amount;
+		Console.WriteLine($"{playerId}: (+{resourceStack.Amount}) {GetResource(playerId, resourceStack.Resource)}");
+	}
+
+	public bool TryTakeResource(ResourceStack resourceStack, uint playerId)
+	{
+		if (!HasEnoughResources(resourceStack, playerId))
+		{
+			Console.WriteLine($"{playerId}: not enough {resourceStack.Resource} ({resourceStack.Amount})");
+			return false;
+		}
+
+		_playerResources[playerId * ResourceNum + (int)resourceStack.Resource] -= resourceStack.Amount;
+		Console.WriteLine($"{playerId}: (-{resourceStack.Amount}) {GetResource(playerId, resourceStack.Resource)}");
+		return true;
+	}
+
+	public bool HasEnoughResources(ResourceStack resourceStack, uint playerId)
+	{
+		return (_playerResources[playerId * ResourceNum + (int)resourceStack.Resource]) >= resourceStack.Amount;
 	}
 
 	public void Tick()

@@ -26,6 +26,8 @@ public class Castle : UnitProducer
 	public override int MaxUnitProduction { get; set; }
 	public override List<UnitType> AllowedUnitTypes { get; set; }
 
+	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 100); }
+
 	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{
 		MaxHitPoints = BaseMaxHitpoints;
@@ -39,6 +41,8 @@ public class Castle : UnitProducer
 	public void DeliverResource(ResourceStack resourceStack)
 	{
 		if (this.IsDestroyed || !this.IsBuilt) return;
+
+		RtsEngine.Instance.State.GiveResource(resourceStack, OwnerId);
 	}
 }
 
