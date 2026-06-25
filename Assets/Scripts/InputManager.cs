@@ -224,4 +224,14 @@ public class InputManager : MonoBehaviour
 		_isDragging = false;
 		_isMouseClick = true;
 	}
+
+	public void OnCameraMoveInput(InputAction.CallbackContext context)
+	{
+		_playerController.OnCameraMoveInput(context.ReadValue<Vector2>());
+	}
+
+	public void OnScrollInput(InputAction.CallbackContext context)
+	{
+		_playerController.OnScrollInput(context.ReadValue<Vector2>().y);
+	}
 }

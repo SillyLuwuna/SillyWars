@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RtsEngine.EntityProperties;
+using RtsEngine.Map;
 using RtsEngine.Math;
 using RtsEngine.Resources;
 using RtsEngine.Structures;
@@ -10,6 +11,14 @@ public class PlayerActionController : MonoBehaviour
 {
 	[SerializeField] private NetworkActionManager _networkActionManager;
 	[SerializeField] private WorldStateManager _worldStateManager;
+	[SerializeField] private Camera _mainCamera;
+
+	[SerializeField] private float _cameraMoveSpeed = 0f;
+	[SerializeField] private float _cameraZoomSpeed = 0f;
+	[SerializeField] private float _cameraMinZoom = 0f;
+	[SerializeField] private float _cameraMaxZoom = 0f;
+	[SerializeField] private float _cameraBound = 0f;
+	private Vector3 _cameraMoveVector;
 
 	private List<Entity> _selectedEntities = new List<Entity>();
 	private bool _isWalkAttack = false;
@@ -19,6 +28,19 @@ public class PlayerActionController : MonoBehaviour
 	void Start()
 	{
 		_worldStateManager.ResetState += OnReset;
+	}
+
+	void Update()
+	{
+		if (_worldStateManager.LatestState == null) return;
+
+		_mainCamera.transform.position += _cameraMoveVector * _cameraMoveSpeed * Time.deltaTime * _mainCamera.orthographicSize;
+
+		Grid<Cell> map = _worldStateManager.LatestState.Map;
+		float clampedX = Mathf.Clamp(_mainCamera.transform.position.x, map.MinWorldX - _cameraBound, map.MaxWorldX + _cameraBound);
+		float clampedY = Mathf.Clamp(_mainCamera.transform.position.y, map.MinWorldY - _cameraBound, map.MaxWorldY + _cameraBound);
+
+		_mainCamera.transform.position = new Vector3(clampedX, clampedY, _mainCamera.transform.position.z);
 	}
 
 	public void OnRightClick(BaseUnit unit)
@@ -180,5 +202,16 @@ public class PlayerActionController : MonoBehaviour
 		}
 
 		return unitIds;
+	}
+
+	public void OnCameraMoveInput(Vector2 direction)
+	{
+		_cameraMoveVector = ((Vector3)direction.normalized);
+	}
+
+	public void OnScrollInput(float scrollDirection)
+	{
+		_mainCamera.orthographicSize -= scrollDirection * _cameraZoomSpeed;
+		_mainCamera.orthographicSize = Mathf.Clamp(_mainCamera.orthographicSize, _cameraMinZoom, _cameraMaxZoom);
 	}
 }

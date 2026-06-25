@@ -9,8 +9,11 @@ public class GridManager : MonoBehaviour
 {
 	[SerializeField] private WorldStateManager _worldStateManager = null!;
 
-	[SerializeField] private Tilemap tilemap = null!;
+	[SerializeField] private Tilemap groundTilemap = null!;
+	[SerializeField] private Tilemap waterTilemap = null!;
+
 	[SerializeField] private RuleTile groundTile = null!;
+	[SerializeField] private AnimatedTile waterTile = null!;
 
 	private bool _hasReset = true;
 
@@ -33,13 +36,15 @@ public class GridManager : MonoBehaviour
 	{
 		if (_hasReset)
 		{
+			_hasReset = false;
 			UpdateTiles(state.Map);
 		}
 	}
 
 	private void UpdateTiles(Grid<Cell> map)
 	{
-		tilemap.ClearAllTiles();
+		groundTilemap.ClearAllTiles();
+		waterTilemap.ClearAllTiles();
 		for (int x = 0; x < map.Width; x++)
 		{
 			for (int y = 0; y < map.Height; y++)
@@ -47,7 +52,8 @@ public class GridManager : MonoBehaviour
 				CellType currType = map[x, y].Type;
 				if (currType == CellType.Ground || currType == CellType.Structure)
 				{
-					tilemap.SetTile(new Vector3Int(x, y, 0), groundTile);
+					groundTilemap.SetTile(new Vector3Int(x, y, 0), groundTile);
+					waterTilemap.SetTile(new Vector3Int(x, y, 0), waterTile);
 				}
 			}
 		}
