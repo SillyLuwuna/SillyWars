@@ -9,10 +9,31 @@ using UnityEngine.UI;
 public class SelectionMenuManager : MonoBehaviour
 {
 	private const string _unitPortraitsPath = "Tiny Swords/UI Elements/Human Avatars";
+	private static readonly List<EntityAction> _workerAllowedActions = new List<EntityAction>() {
+		EntityAction.Halt,
+		EntityAction.Move,
+		EntityAction.Attack,
+		EntityAction.Build,
+		// EntityAction.Repair,
+		// EntityAction.Mine
+	};
+	private static readonly List<EntityAction> _knightAllowedActions = new List<EntityAction>() {
+		EntityAction.Halt,
+		EntityAction.Move,
+		EntityAction.Attack,
+	};
 
-	public GameObject SelectionMenu;
-	public TMP_Text UnitHpText;
-	public Image UnitSelectionPortrait;
+	[Header("General")]
+	[SerializeField] private GameObject _selectionMenu;
+
+	[Header("EntityActions")]
+	[SerializeField] private Transform _actionContainer;
+	[SerializeField] private GameObject _actionButtonPrefab;
+
+	[Header("Unit UI")]
+	[SerializeField] private GameObject _unitSpecificParts;
+	[SerializeField] private TMP_Text _unitHpText;
+	[SerializeField] private Image _unitSelectionPortrait;
 
 
 	private List<Entity> _currEntities;
@@ -68,20 +89,21 @@ public class SelectionMenuManager : MonoBehaviour
 
 	private void UpdateOneUnit(BaseUnit unit)
 	{
-		UnitHpText.text = $"{unit.HitPoints}/{unit.MaxHitPoints}";
+		_unitHpText.text = $"{unit.HitPoints}/{unit.MaxHitPoints}";
 	}
 
 	public void Enable()
 	{
 		_isEnabled = true;
-		SelectionMenu.SetActive(true);
+		_selectionMenu.SetActive(true);
+		_unitSpecificParts.SetActive(false);
 	}
 
 	public void Disable()
 	{
 		_currEntities.Clear();
 		_isEnabled = false;
-		SelectionMenu.SetActive(false);
+		_selectionMenu.SetActive(false);
 	}
 
 	private void OpenOne(Entity entity)
@@ -90,12 +112,41 @@ public class SelectionMenuManager : MonoBehaviour
 		{
 			OpenOneUnit(unit);
 		}
+
+		ClearEntityActionButtons();
+		SetEntityActionButtons(GetAllowedEntityActions(entity));
 	}
 
 	private void OpenOneUnit(BaseUnit unit)
 	{
+		_unitSpecificParts.SetActive(true);
 		ColorVariant color = WorldStateManager.GetColorVariant(unit.OwnerId);
-		UnitSelectionPortrait.sprite = AssetLoader.Instance.GetSprite($"{_unitPortraitsPath}/{color} {unit.UnitType}");
+		_unitSelectionPortrait.sprite = AssetLoader.Instance.GetSprite($"{_unitPortraitsPath}/{color} {unit.UnitType}");
+	}
+
+	private List<EntityAction> GetAllowedEntityActions(Entity entity) => entity switch
+	{
+		Worker => _workerAllowedActions,
+		Knight => _knightAllowedActions,
+		_ => new List<EntityAction>(),
+	};
+
+	private void ClearEntityActionButtons()
+	{
+		foreach (Transform child in _actionContainer)
+		{
+			Destroy(child.gameObject);
+		}
+	}
+
+	private void SetEntityActionButtons(List<EntityAction> allowedEntityActions)
+	{
+		foreach (EntityAction action in allowedEntityActions)
+		{
+			GameObject button = Instantiate(_actionButtonPrefab, _actionContainer);
+			EntityActionButton actionButton = button.GetComponent<EntityActionButton>();
+			actionButton.SetEntityAction(action);
+		}
 	}
 
 	public void Open(List<Entity> entities)

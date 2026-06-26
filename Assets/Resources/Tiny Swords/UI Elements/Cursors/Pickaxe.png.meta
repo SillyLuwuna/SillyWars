@@ -1,17 +1,10 @@
 fileFormatVersion: 2
-guid: d5341ee0556844303a17dd8cb83e9727
-AssetOrigin:
-  serializedVersion: 1
-  productId: 352566
-  packageName: Tiny Swords
-  packageVersion: 1.0
-  assetPath: Assets/Tiny Swords/UI Elements/Cursors/Cursor_02.png
-  uploadId: 844324
+guid: 56296efd254f3e3299515b66035b5979
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5692790224009147283
-    second: Cursor_02_0
+      213: 7020999033397855073
+    second: Tool_04_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -120,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Cursor_02_0
+      name: Tool_04_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 14
-        width: 29
-        height: 34
+        x: 20
+        y: 19
+        width: 25
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -135,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 393b1ea0c8ad00f40800000000000000
-      internalID: 5692790224009147283
+      spriteID: 1634a0a0c699f6160800000000000000
+      internalID: 7020999033397855073
       vertices: []
       indices: 
       edges: []
@@ -155,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Cursor_02_0: 5692790224009147283
+      Tool_04_0: 7020999033397855073
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Network/WorldStateManager.cs" />
+    <Compile Include="Assets/Scripts/UI/EntityActionButton.cs" />
     <Compile Include="Assets/Scripts/Network/NetworkActionManager.cs" />
     <Compile Include="Assets/Scripts/Map/GridManager.cs" />
     <Compile Include="Assets/Scripts/Particles/ParticleFx.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="Assets/Scripts/EntityManagers/UnitManager.cs" />
     <Compile Include="Assets/Scripts/Animation/AnimationController.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/StructureManager.cs" />
+    <Compile Include="Assets/Scripts/UI/EntityAction.cs" />
     <Compile Include="Assets/Scripts/UI/SelectionMenuManager.cs" />
     <Compile Include="Assets/Scripts/Input/InputManager.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/PrefabManager.cs" />

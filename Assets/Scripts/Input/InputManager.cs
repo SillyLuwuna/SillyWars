@@ -5,24 +5,49 @@ using RtsEngine.Units;
 using RtsEngine.Structures;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using RtsEngine.EntityProperties;
 using RtsEngine.Resources;
 
 public class InputManager : MonoBehaviour
 {
 	private const float DRAG_AMOUNT_FOR_DETECTION = 10;
+	private const string _cursorsPath = "Tiny Swords/UI Elements/Cursors";
 
 	[SerializeField] private PlayerActionController _playerController = null!;
 	[SerializeField] private SelectionBoxUI _selectionBoxUI = null!;
+	[SerializeField] private RectTransform _uiSpace = null!;
+
+	private Texture2D _defaultMouse = null!;
+	private Texture2D _selectMouse = null!;
+	private Texture2D _goldMouse = null!;
+	private Texture2D _attackMouse = null!;
+	private Texture2D _repairMouse = null!;
+	private Vector2 _normalMouseOffset = new Vector2(23, 18);
+	private Vector2 _iconMouseOffset = new Vector2(32, 32);
 
 	private Vector2 _dragStart;
 	private Vector2 _dragEnd;
 	private bool _isDragging = false;
 	private bool _isMouseClick = true;
 
+
+	public void SetDefaultMouse() => Cursor.SetCursor(_defaultMouse, _normalMouseOffset, CursorMode.Auto);
+	public void SetSelectMouse() => Cursor.SetCursor(_selectMouse, _normalMouseOffset, CursorMode.Auto);
+	public void SetGoldMouse() => Cursor.SetCursor(_goldMouse, _iconMouseOffset, CursorMode.Auto);
+	public void SetAttackMouse() => Cursor.SetCursor(_attackMouse, _iconMouseOffset, CursorMode.Auto);
+	public void SetRepairMouse() => Cursor.SetCursor(_repairMouse, _iconMouseOffset, CursorMode.Auto);
+
 	void Start()
 	{
 		WorldStateManager.Instance.ResetState += OnReset;
+		AssetLoader.Instance.LoadAssets(_cursorsPath);
+		_defaultMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Cursor_01")!;
+		_selectMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Cursor_02")!;
+		_goldMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Pickaxe")!;
+		_attackMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Sword")!;
+		_repairMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Hammer")!;
+		SetDefaultMouse();
 	}
 
 	void Update()
@@ -35,15 +60,66 @@ public class InputManager : MonoBehaviour
 			if (!_isMouseClick)
 			{
 				_selectionBoxUI.UpdateBox(_dragStart, _dragEnd);
+				SetDefaultMouse();
 			}
 		}
+		else
+		{
+			Vector2 mousePos = Mouse.current.position.ReadValue();
+			if (IsPointerOverUI(mousePos)) return;
+
+			Entity? entity = GetEntityOnMousePos(mousePos);
+			if (entity == null)
+			{
+				SetDefaultMouse();
+				return;
+			}
+
+			SetCorrespondingMouse(entity);
+		}
+	}
+
+	public void SetCorrespondingMouse(Entity target)
+	{
+		if ((target is IDestroyable) && (target.OwnerId != WorldStateManager.Instance.PlayerId))
+		{
+			SetAttackMouse();
+		}
+		else if (target is BaseUnit)
+		{
+			SetSelectMouse();
+		}
+		else if (target is BaseStructure)
+		{
+			SetRepairMouse();
+		}
+		else if (target is BaseResourceNode)
+		{
+			SetGoldMouse();
+		}
+	}
+
+	public bool IsPointerOverUI(Vector2 mousePos)
+	{
+		return RectTransformUtility.RectangleContainsScreenPoint(_uiSpace, mousePos);
+	}
+
+	public Entity? GetEntityOnMousePos(Vector2 mousePos)
+	{
+		Vector2 worldMousePos = Camera.main.ScreenToWorldPoint(mousePos);
+		Collider2D? hit = Physics2D.OverlapPoint(worldMousePos);
+		Entity? hitEntity = (hit?.gameObject == null) ? null : WorldStateManager.Instance.GetEntity(hit.gameObject);
+		return hitEntity;
 	}
 
 	public void OnRightClick(InputAction.CallbackContext context)
 	{
 		if (context.phase != InputActionPhase.Started) return;
 
-		Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+		Vector2 screenMousePos = Mouse.current.position.ReadValue();
+		if (IsPointerOverUI(screenMousePos)) return;
+
+		Vector2 mousePos = Camera.main.ScreenToWorldPoint(screenMousePos);
 		Collider2D? hit = Physics2D.OverlapPoint(mousePos);
 		Entity? hitEntity = (hit?.gameObject == null) ? null : WorldStateManager.Instance.GetEntity(hit.gameObject);
 
@@ -67,6 +143,8 @@ public class InputManager : MonoBehaviour
 
 	public void OnLeftClick(Vector2 screenMousePos)
 	{
+		if (IsPointerOverUI(screenMousePos)) return;
+
 		Vector2 mousePos = Camera.main.ScreenToWorldPoint(screenMousePos);
 		Collider2D? hit = Physics2D.OverlapPoint(mousePos);
 		Entity? hitEntity = (hit?.gameObject == null) ? null : WorldStateManager.Instance.GetEntity(hit.gameObject);

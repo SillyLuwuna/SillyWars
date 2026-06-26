@@ -14,8 +14,12 @@ public class AssetLoader : MonoBehaviour
 	public AnimationClip? GetAnimation(string path) => _animationMap.TryGetValue(GetAssetString(path), out var clip) ? clip : null;
 
 	private Dictionary<string, Sprite> _spriteMap = new Dictionary<string, Sprite>();
-	public Sprite? GetSprite(string path) => _spriteMap.TryGetValue(GetAssetString(path), out var sprite) ? sprite : MissingTexture;
-	public Sprite? MissingTexture => _spriteMap.TryGetValue("missing_texture", out var sprite) ? sprite : null;
+	public Sprite? GetSprite(string path) => _spriteMap.TryGetValue(GetAssetString(path), out var sprite) ? sprite : MissingSprite;
+	public Sprite? MissingSprite => _spriteMap.TryGetValue("missing_sprite", out var sprite) ? sprite : null;
+
+	private Dictionary<string, Texture2D> _textureMap = new Dictionary<string, Texture2D>();
+	public Texture2D? GetTexture(string path) => _textureMap.TryGetValue(GetAssetString(path), out var texture) ? texture: MissingTexture;
+	public Texture2D? MissingTexture => _textureMap.TryGetValue("missing_texture", out var texture) ? texture : null;
 
 	private Dictionary<string, RuntimeAnimatorController> _animatorControllerMap = new Dictionary<string, RuntimeAnimatorController>();
 	public RuntimeAnimatorController? GetAnimatorController(string path) => _animatorControllerMap.TryGetValue(GetAssetString(path), out var controller) ? controller : null;
@@ -42,7 +46,8 @@ public class AssetLoader : MonoBehaviour
 		_instance = this;
 		DontDestroyOnLoad(gameObject);
 		_awoken = true;
-		LoadAsset<Sprite>("missing_texture");
+		LoadAsset<Sprite>("missing_sprite");
+		LoadAsset<Texture2D>("missing_texture");
 	}
 
 	public void LoadAsset<T>(string path) where T : UnityEngine.Object
@@ -71,6 +76,11 @@ public class AssetLoader : MonoBehaviour
 		{
 			_animatorControllerMap[GetAssetString(path)] = controller;
 		}
+
+		if (asset is Texture2D texture)
+		{
+			_textureMap[GetAssetString(path)] = texture;
+		}
 	}
 
 	public void LoadAssets(string path)
@@ -87,20 +97,6 @@ public class AssetLoader : MonoBehaviour
 
 	public static string GetAssetString(string fileName)
 	{
-		// string assetString = fileName;
-		//
-		// int firstUnderscore = fileName.IndexOf('_');
-		// int lastUnderscore = fileName.LastIndexOf('_');
-		// if (firstUnderscore >= 0 && (firstUnderscore != lastUnderscore))
-		// {
-		// 	assetString = assetString.Substring(firstUnderscore + 1, lastUnderscore - firstUnderscore - 1);
-		// }
-		// else if (firstUnderscore >= 0 && (firstUnderscore == lastUnderscore))
-		// {
-		// 	assetString = assetString.Substring(lastUnderscore + 1, assetString.Length - lastUnderscore - 1);
-		// }
-		//
-		// return assetString.Replace(" ", "_").ToLower();
 		return fileName.Replace(" ", "_").ToLower();
 	}
 }
