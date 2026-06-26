@@ -3,6 +3,7 @@ namespace RtsEngine.EntityProperties
 
 public interface IDestroyable : IEntity
 {
+	public int MaxHitPoints { get; }
 	public int HitPoints { get; set; }
 	public bool IsDestroyed { get; set; }
 

@@ -23,7 +23,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 	public abstract int Height { get; set; }
 	public abstract int Width { get; set; }
 
-	public abstract int MaxHitPoints { get; set; }
+	public abstract int MaxHitPoints { get; }
 	public int HitPoints { get; set; }
 
 	public abstract int BuildEffort { get; set; }
@@ -79,7 +79,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 
 		writer.Write(IsDestroyed);
 
-		writer.Write(MaxHitPoints);
 		writer.Write(HitPoints);
 
 		writer.Write(BuildEffort);
@@ -98,7 +97,6 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 
 		IsDestroyed = reader.Read<bool>();
 
-		MaxHitPoints = reader.Read<int>();
 		HitPoints = reader.Read<int>();
 
 		BuildEffort = reader.Read<int>();

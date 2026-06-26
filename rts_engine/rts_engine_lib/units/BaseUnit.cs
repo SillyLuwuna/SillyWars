@@ -21,6 +21,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	public bool IsDestroyed { get; set; }
 
+	public abstract int MaxHitPoints { get; }
 	public abstract int HitPoints { get; set; }
 
 	public abstract int AttackDamage { get; set; }

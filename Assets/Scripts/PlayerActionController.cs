@@ -10,6 +10,7 @@ using UnityEngine;
 public class PlayerActionController : MonoBehaviour
 {
 	[SerializeField] private NetworkActionManager _networkActionManager;
+	[SerializeField] private SelectionMenuManager _selectionMenu = null!;
 	[SerializeField] private Camera _mainCamera;
 
 	[SerializeField] private float _cameraMoveSpeed = 0f;
@@ -101,21 +102,25 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnLeftClick(BaseUnit unit)
 	{
+		_selectionMenu.OpenOne(unit);
 		_selectedEntities = new List<Entity>() { unit };
 	}
 
 	public void OnLeftClick(BaseStructure structure)
 	{
+		_selectionMenu.OpenOne(structure);
 		_selectedEntities = new List<Entity>() { structure };
 	}
 
 	public void OnLeftClick(BaseResourceNode node)
 	{
+		_selectionMenu.OpenOne(node);
 		_selectedEntities = new List<Entity>() { node };
 	}
 
 	public void OnLeftClick(Vec2 mousePos)
 	{
+		_selectionMenu.Close();
 		if (_buildBarracks)
 		{
 			_buildBarracks = false;
@@ -181,10 +186,12 @@ public class PlayerActionController : MonoBehaviour
 	public void OnDrag(List<Entity> selectedEntities)
 	{
 		_selectedEntities = selectedEntities;
+		_selectionMenu.Open(selectedEntities);
 	}
 
 	public void OnReset()
 	{
+		_selectionMenu.Close();
 		_selectedEntities = new List<Entity>();
 		_isWalkAttack = false;
 		_buildBarracks = false;
@@ -212,5 +219,10 @@ public class PlayerActionController : MonoBehaviour
 	{
 		_mainCamera.orthographicSize -= scrollDirection * _cameraZoomSpeed;
 		_mainCamera.orthographicSize = Mathf.Clamp(_mainCamera.orthographicSize, _cameraMinZoom, _cameraMaxZoom);
+	}
+
+	public void OnCancel()
+	{
+		OnReset();
 	}
 }

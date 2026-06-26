@@ -233,4 +233,11 @@ public class InputManager : MonoBehaviour
 	{
 		_playerController.OnScrollInput(context.ReadValue<Vector2>().y);
 	}
+
+	public void OnCancel(InputAction.CallbackContext context)
+	{
+		if (context.phase != InputActionPhase.Started) return;
+
+		_playerController.OnCancel();
+	}
 }

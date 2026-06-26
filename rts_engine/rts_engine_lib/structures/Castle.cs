@@ -10,7 +10,6 @@ public class Castle : UnitProducer
 {
 	public const int BaseHeight = 3;
 	public const int BaseWidth = 5;
-	public const int BaseMaxHitpoints = 40;
 	public const int BaseBuildEffort = 20;
 
 	public const int BaseMaxUnitProduction = 4;
@@ -19,7 +18,7 @@ public class Castle : UnitProducer
 	public override int Height { get; set; }
 	public override int Width { get; set; }
 
-	public override int MaxHitPoints { get; set; }
+	public override int MaxHitPoints { get => 40; }
 
 	public override int BuildEffort { get; set; }
 
@@ -30,8 +29,6 @@ public class Castle : UnitProducer
 
 	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{
-		MaxHitPoints = BaseMaxHitpoints;
-
 		BuildEffort = BaseBuildEffort;
 
 		MaxUnitProduction = BaseMaxUnitProduction;

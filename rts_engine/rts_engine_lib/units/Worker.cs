@@ -17,7 +17,6 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 	public const float BaseMass = 1.0f;
 	public const float BaseFriction = 1.0f;
 
-	public const int BaseHitPoints = 5;
 	public const int BaseAttackDamage = 1;
 	public const int BaseAttackSpeed = 15;
 	public const float BaseAttackRange = BaseRadius + 0.1f;
@@ -29,6 +28,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public const int BaseBuildSpeed = 20;
 
+	public override int MaxHitPoints { get => 5; }
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
 	public override int AttackSpeed { get; set; }
@@ -62,7 +62,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
-		HitPoints = BaseHitPoints;
+		HitPoints = MaxHitPoints;
 		AttackDamage = BaseAttackDamage;
 		AttackSpeed = BaseAttackSpeed;
 		AttackRange = BaseAttackRange;
