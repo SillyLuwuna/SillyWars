@@ -4,11 +4,15 @@ using RtsEngine.EntityProperties;
 using RtsEngine.Units;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SelectionMenuManager : MonoBehaviour
 {
+	private const string _unitPortraitsPath = "Tiny Swords/UI Elements/Human Avatars";
+
 	public GameObject SelectionMenu;
 	public TMP_Text UnitHpText;
+	public Image UnitSelectionPortrait;
 
 
 	private List<Entity> _currEntities;
@@ -20,6 +24,7 @@ public class SelectionMenuManager : MonoBehaviour
     {
 		_currEntities = new List<Entity>();
 		WorldStateManager.Instance.NewState += OnNewState;
+		AssetLoader.Instance.LoadAssets(_unitPortraitsPath);
 		Disable();
     }
 
@@ -79,15 +84,32 @@ public class SelectionMenuManager : MonoBehaviour
 		SelectionMenu.SetActive(false);
 	}
 
-	public void Open(List<Entity> entities)
+	private void OpenOne(Entity entity)
 	{
-		Enable();
-		_currEntities = entities;
+		if (entity is BaseUnit unit)
+		{
+			OpenOneUnit(unit);
+		}
 	}
 
-	public void OpenOne(Entity entity)
+	private void OpenOneUnit(BaseUnit unit)
 	{
-		Open(new List<Entity>() { entity });
+		ColorVariant color = WorldStateManager.GetColorVariant(unit.OwnerId);
+		UnitSelectionPortrait.sprite = AssetLoader.Instance.GetSprite($"{_unitPortraitsPath}/{color} {unit.UnitType}");
+	}
+
+	public void Open(List<Entity> entities)
+	{
+		if (entities.Count <= 0) return;
+
+		Enable();
+		_currEntities = entities;
+
+		if (_currEntities.Count == 1)
+		{
+			OpenOne(_currEntities[0]);
+			return;
+		}
 	}
 
 	public void Close()

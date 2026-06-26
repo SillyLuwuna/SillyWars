@@ -18,14 +18,14 @@ public class Castle : UnitProducer
 	public override int Height { get; set; }
 	public override int Width { get; set; }
 
-	public override int MaxHitPoints { get => 40; }
+	public override int MaxHitPoints => 40;
 
 	public override int BuildEffort { get; set; }
 
 	public override int MaxUnitProduction { get; set; }
 	public override List<UnitType> AllowedUnitTypes { get; set; }
 
-	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 100); }
+	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 100);
 
 	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{
@@ -51,6 +51,8 @@ public class Castle : UnitProducer
 
 		return castle;
 	}
+
+	public override StructureType StructureType => StructureType.Castle;
 }
 
 }

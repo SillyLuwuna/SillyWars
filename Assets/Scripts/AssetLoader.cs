@@ -14,7 +14,8 @@ public class AssetLoader : MonoBehaviour
 	public AnimationClip? GetAnimation(string path) => _animationMap.TryGetValue(GetAssetString(path), out var clip) ? clip : null;
 
 	private Dictionary<string, Sprite> _spriteMap = new Dictionary<string, Sprite>();
-	public Sprite? GetSprite(string path) => _spriteMap.TryGetValue(GetAssetString(path), out var sprite) ? sprite : null;
+	public Sprite? GetSprite(string path) => _spriteMap.TryGetValue(GetAssetString(path), out var sprite) ? sprite : MissingTexture;
+	public Sprite? MissingTexture => _spriteMap.TryGetValue("missing_texture", out var sprite) ? sprite : null;
 
 	private Dictionary<string, RuntimeAnimatorController> _animatorControllerMap = new Dictionary<string, RuntimeAnimatorController>();
 	public RuntimeAnimatorController? GetAnimatorController(string path) => _animatorControllerMap.TryGetValue(GetAssetString(path), out var controller) ? controller : null;
@@ -41,6 +42,35 @@ public class AssetLoader : MonoBehaviour
 		_instance = this;
 		DontDestroyOnLoad(gameObject);
 		_awoken = true;
+		LoadAsset<Sprite>("missing_texture");
+	}
+
+	public void LoadAsset<T>(string path) where T : UnityEngine.Object
+	{
+		UnityEngine.Object asset = Resources.Load<T>(path);
+		CacheAsset(path, asset);
+	}
+
+	public void LoadAsset(string path)
+	{
+		UnityEngine.Object asset = Resources.Load(path);
+		CacheAsset(path, asset);
+	}
+
+	private void CacheAsset(string path, UnityEngine.Object asset)
+	{
+		if (asset is AnimationClip animation)
+		{
+			_animationMap[GetAssetString(path)] = animation;
+		}
+		else if (asset is Sprite sprite)
+		{
+			_spriteMap[GetAssetString(path)] = sprite;
+		}
+		else if (asset is RuntimeAnimatorController controller)
+		{
+			_animatorControllerMap[GetAssetString(path)] = controller;
+		}
 	}
 
 	public void LoadAssets(string path)
@@ -51,24 +81,7 @@ public class AssetLoader : MonoBehaviour
 		UnityEngine.Object[] assets = Resources.LoadAll(path);
 		foreach (UnityEngine.Object asset in assets)
 		{
-			if (asset is AnimationClip animation)
-			{
-				// if (!_pathAnimations.ContainsKey(path))
-				// {
-				// 	_pathAnimations[path] = new Dictionary<string, AnimationClip>();
-				// }
-				//
-				// _pathAnimations[$"{path}"][$"{GetAssetString(asset.name)}"] = animation;
-				_animationMap[GetAssetString($"{path}/{asset.name}")] = animation;
-			}
-			else if (asset is Sprite sprite)
-			{
-				_spriteMap[GetAssetString($"{path}/{asset.name}")] = sprite;
-			}
-			else if (asset is RuntimeAnimatorController controller)
-			{
-				_animatorControllerMap[GetAssetString($"{path}/{asset.name}")] = controller;
-			}
+			CacheAsset($"{path}/{asset.name}", asset);
 		}
 	}
 

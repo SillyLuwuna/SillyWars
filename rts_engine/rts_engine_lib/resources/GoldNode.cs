@@ -6,11 +6,11 @@ namespace RtsEngine.Resources
 
 public class GoldNode : BaseResourceNode
 {
-	public override int MaxAmount { get => 100; }
-	public override int RequiredWork { get => 100; }
-	public override int MaxGatherers { get => 3; }
-	public override int GatherAmount { get => 1; }
-	public override Resource Resource { get => Resource.Gold; }
+	public override int MaxAmount => 100;
+	public override int RequiredWork => 100;
+	public override int MaxGatherers => 3;
+	public override int GatherAmount => 1;
+	public override Resource Resource => Resource.Gold;
 
 	public GoldNode(Vec2 pos, uint ownerId) : base(pos, ownerId, 0.5f)
 	{

@@ -102,20 +102,20 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnLeftClick(BaseUnit unit)
 	{
-		_selectionMenu.OpenOne(unit);
 		_selectedEntities = new List<Entity>() { unit };
+		_selectionMenu.Open(_selectedEntities);
 	}
 
 	public void OnLeftClick(BaseStructure structure)
 	{
-		_selectionMenu.OpenOne(structure);
 		_selectedEntities = new List<Entity>() { structure };
+		_selectionMenu.Open(_selectedEntities);
 	}
 
 	public void OnLeftClick(BaseResourceNode node)
 	{
-		_selectionMenu.OpenOne(node);
 		_selectedEntities = new List<Entity>() { node };
+		_selectionMenu.Open(_selectedEntities);
 	}
 
 	public void OnLeftClick(Vec2 mousePos)

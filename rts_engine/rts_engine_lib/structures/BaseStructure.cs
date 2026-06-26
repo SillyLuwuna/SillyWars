@@ -144,9 +144,9 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 		}
 	}
 
-	public bool IsFullyBuilt { get => IsBuilt && HasMaxHP; }
+	public bool IsFullyBuilt => IsBuilt && HasMaxHP;
 
-	public bool HasMaxHP { get => HitPoints == MaxHitPoints; }
+	public bool HasMaxHP => HitPoints == MaxHitPoints;
 
 	private List<Vec2Int> GetSurroundingTiles()
 	{
@@ -191,6 +191,8 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 				throw new ArgumentException($"Unknown structure type {type}");
 		}
 	}
+
+	public abstract StructureType StructureType { get; }
 }
 
 }

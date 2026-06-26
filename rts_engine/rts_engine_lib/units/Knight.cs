@@ -21,7 +21,7 @@ public class Knight : BaseUnit
 
 	public const int BaseProductionTime = 10 * 10;
 
-	public override int MaxHitPoints { get => 10; }
+	public override int MaxHitPoints => 10;
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
 	public override int AttackSpeed { get; set; }
@@ -31,7 +31,7 @@ public class Knight : BaseUnit
 	public override float MoveSpeed { get; set; }
 	public override int ProductionTime { get; set; }
 
-	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 10); }
+	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 10);
 
 	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
@@ -55,7 +55,7 @@ public class Knight : BaseUnit
 		base.DeserializeFields(reader);
 	}
 
-	public override UnitType UnitType { get => UnitType.Knight; }
+	public override UnitType UnitType => UnitType.Knight;
 
 	public override void Tick()
 	{

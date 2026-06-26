@@ -114,7 +114,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	public bool Attacked { get => _attacked; }
+	public bool Attacked => _attacked;
 
 	protected virtual void DecreaseCooldowns()
 	{
@@ -226,8 +226,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		this.ApplyForce(direction * MoveSpeed);
 	}
 
-	private bool TargetIsUnit { get => _targetUnit != null; }
-	private bool TargetIsStructure { get => _targetStructure != null; }
+	private bool TargetIsUnit => _targetUnit != null;
+	private bool TargetIsStructure => _targetStructure != null;
 
 	private void Checkpoint()
 	{
@@ -288,7 +288,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private bool HasWalkGoal { get => _walkGoal != null; }
+	private bool HasWalkGoal => _walkGoal != null;
 
 	private void HandlePathArrival()
 	{
@@ -353,8 +353,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private bool IsGoingToPivot { get => _isGoingToPivot; }
-	private bool HasPivot { get => _pivot != null; }
+	private bool IsGoingToPivot => _isGoingToPivot;
+	private bool HasPivot => _pivot != null;
 
 	private void UpdateMoveAggro()
 	{
@@ -452,10 +452,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	// private bool HasTarget { get => _target != null; }
-	protected bool HasTarget { get => _target != null; }
+	protected bool HasTarget => _target != null;
 
-	protected bool HasPath { get => !(CurrWalkPath == null); }
+	protected bool HasPath => !(CurrWalkPath == null);
 
 	protected void PauseWalking()
 	{
@@ -619,7 +618,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
-	private bool IsTargettingGoalTarget { get => _targetGoal!.Equals(_target); }
+	private bool IsTargettingGoalTarget => _targetGoal!.Equals(_target);
 
 	protected IDestroyable? FindTarget()
 	{

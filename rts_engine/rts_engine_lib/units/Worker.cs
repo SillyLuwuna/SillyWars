@@ -28,7 +28,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public const int BaseBuildSpeed = 20;
 
-	public override int MaxHitPoints { get => 5; }
+	public override int MaxHitPoints => 5;
 	public override int HitPoints { get; set; }
 	public override int AttackDamage { get; set; }
 	public override int AttackSpeed { get; set; }
@@ -38,11 +38,11 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 	public override float MoveSpeed { get; set; }
 	public override int ProductionTime { get; set; }
 
-	public override ResourceStack Cost { get => new ResourceStack(Resource.Gold, 20); }
+	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 20);
 
 
-	public int WorkPerGather { get => 1; }
-	public float GatherRange { get => BaseRadius + 0.2f; }
+	public int WorkPerGather => 1;
+	public float GatherRange => BaseRadius + 0.2f;
 
 	private IGatherable? _gatherableGoal;
 	private ResourceStack _resourceGathered;
@@ -118,12 +118,12 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		_resourceGathered = reader.Read<ResourceStack>();
 	}
 
-	public override UnitType UnitType { get => UnitType.Worker; }
+	public override UnitType UnitType => UnitType.Worker;
 
-	public bool IsGathering { get => (State.Goal == Goal.Gather) && _isGathering; }
-	public bool IsRetrieving { get => (State.Goal == Goal.Gather) && _isRetrieving; }
-	public bool IsBuilding { get => (State.Goal == Goal.Build) && _isBuilding; }
-	public ResourceStack Holding { get => _resourceGathered; }
+	public bool IsGathering => (State.Goal == Goal.Gather) && _isGathering;
+	public bool IsRetrieving => (State.Goal == Goal.Gather) && _isRetrieving;
+	public bool IsBuilding => (State.Goal == Goal.Build) && _isBuilding;
+	public ResourceStack Holding => _resourceGathered;
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
@@ -235,9 +235,9 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		_buildCooldown = BuildSpeed;
 	}
 
-	private bool IsBuildingNewStructure { get => !_structure!.HasBuildingStarted; }
+	private bool IsBuildingNewStructure => !_structure!.HasBuildingStarted;
 
-	private bool HasClosestReachableTile { get => _closestReachableTile != null; }
+	private bool HasClosestReachableTile => _closestReachableTile != null;
 
 	private bool IsInRangeToBuild
 	{
