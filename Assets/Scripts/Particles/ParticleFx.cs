@@ -37,13 +37,13 @@ public class ParticleFx : MonoBehaviour
 		Object[] animations = Resources.LoadAll(path, typeof(AnimationClip));
 		foreach (Object animation in animations)
 		{
-			_animations.Add(AnimationController.GetAssetString(animation.name), (AnimationClip)animation);
+			_animations.Add(AssetLoader.GetAssetString(animation.name), (AnimationClip)animation);
 		}
 
 		Object[] controllers = Resources.LoadAll(path, typeof(RuntimeAnimatorController));
 		foreach (Object controller in controllers)
 		{
-			string name = AnimationController.GetAssetString(controller.name);
+			string name = AssetLoader.GetAssetString(controller.name);
 			string animationName = $"{name}_animation";
 			if (!_animations.ContainsKey(animationName))
 			{

@@ -48,21 +48,25 @@
     <Analyzer Include="/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Scripts/AnimationController.cs" />
-    <Compile Include="Assets/Scripts/GridManager.cs" />
-    <Compile Include="Assets/Scripts/UnitManager.cs" />
-    <Compile Include="Assets/Scripts/PrefabManager.cs" />
-    <Compile Include="Assets/Scripts/StructureManager.cs" />
-    <Compile Include="Assets/Scripts/NetworkClient.cs" />
-    <Compile Include="Assets/Scripts/ParticleFx.cs" />
-    <Compile Include="Assets/Scripts/SelectionBoxUI.cs" />
-    <Compile Include="Assets/Scripts/PlayerActionController.cs" />
-    <Compile Include="Assets/Scripts/NetworkActionManager.cs" />
-    <Compile Include="Assets/Scripts/InputManager.cs" />
-    <Compile Include="Assets/Scripts/WorldStateManager.cs" />
-    <Compile Include="Assets/Scripts/SelectionMenuManager.cs" />
-    <Compile Include="Assets/Scripts/ResourceManager.cs" />
-    <Compile Include="Assets/Scripts/ConnectButton.cs" />
+    <Compile Include="Assets/Scripts/Network/WorldStateManager.cs" />
+    <Compile Include="Assets/Scripts/Network/NetworkActionManager.cs" />
+    <Compile Include="Assets/Scripts/Map/GridManager.cs" />
+    <Compile Include="Assets/Scripts/Particles/ParticleFx.cs" />
+    <Compile Include="Assets/Scripts/Network/NetworkClient.cs" />
+    <Compile Include="Assets/Scripts/Input/PlayerActionController.cs" />
+    <Compile Include="Assets/Scripts/AssetLoader.cs" />
+    <Compile Include="Assets/Scripts/UI/ConnectButton.cs" />
+    <Compile Include="Assets/Scripts/EntityManagers/ResourceManager.cs" />
+    <Compile Include="Assets/Scripts/EntityManagers/UnitManager.cs" />
+    <Compile Include="Assets/Scripts/Animation/AnimationController.cs" />
+    <Compile Include="Assets/Scripts/EntityManagers/StructureManager.cs" />
+    <Compile Include="Assets/Scripts/UI/SelectionMenuManager.cs" />
+    <Compile Include="Assets/Scripts/Input/InputManager.cs" />
+    <Compile Include="Assets/Scripts/EntityManagers/PrefabManager.cs" />
+    <Compile Include="Assets/Scripts/UI/SelectionBoxUI.cs" />
+    <Compile Include="Assets/Scripts/Animation/NodeAnimationController.cs" />
+    <Compile Include="Assets/Scripts/Animation/UnitAnimationController.cs" />
+    <Compile Include="Assets/Scripts/Animation/StructureAnimationController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />

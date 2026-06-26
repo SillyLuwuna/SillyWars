@@ -604,14 +604,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		{
 			if (IsTargettingGoalTarget)
 			{
-				Console.WriteLine("Stopping attack goal");
-				// Halt();
+				Halt();
 				StopAttackGoal();
 				ClearTarget();
 			}
 			else
 			{
-				Console.WriteLine("Restoring attack goal");
 				RestoreAttackGoal();
 			}
 		}

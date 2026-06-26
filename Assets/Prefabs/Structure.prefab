@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 199173966503357673}
   - component: {fileID: 7628377557975574085}
   - component: {fileID: 5132410351936595030}
-  - component: {fileID: 4162819604633309920}
+  - component: {fileID: 6129644037805332029}
   m_Layer: 0
   m_Name: Structure
   m_TagString: Structure
@@ -139,7 +139,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3, y: 3}
   m_EdgeRadius: 0
---- !u!114 &4162819604633309920
+--- !u!114 &6129644037805332029
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,6 +148,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 5588601534899918480}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27e601b7bfa663c25a926cb255e9f9c6, type: 3}
+  m_Script: {fileID: 11500000, guid: cdba6ae215b7fe479b460bea62c899c3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
+  m_EditorClassIdentifier: Assembly-CSharp::StructureAnimationController
