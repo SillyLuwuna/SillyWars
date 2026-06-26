@@ -14,7 +14,7 @@ public class Knight : BaseUnit
 
 	public const int BaseHitPoints = 10;
 	public const int BaseAttackDamage = 3;
-	public const int BaseAttackSpeed = 35;
+	public const int BaseAttackSpeed = 15;
 	public const float BaseAttackRange = BaseRadius + 0.1f;
 	public const float BaseChaseDistance = 3.0f;
 	public const float BaseAggroRange = 3.0f;

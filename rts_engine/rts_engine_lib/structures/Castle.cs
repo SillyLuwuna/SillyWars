@@ -44,6 +44,16 @@ public class Castle : UnitProducer
 
 		RtsEngine.Instance.State.GiveResource(resourceStack, OwnerId);
 	}
+
+	public static Castle CreateBuilt(uint ownerId, Vec2Int start)
+	{
+		Castle castle = new Castle(ownerId, start);
+
+		castle.HasBuildingStarted = true;
+		castle.IsBuilt = true;
+
+		return castle;
+	}
 }
 
 }

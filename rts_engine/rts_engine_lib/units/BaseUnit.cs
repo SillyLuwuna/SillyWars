@@ -58,6 +58,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	private Vec2? _pivot;
 	private bool _isGoingToPivot;
 
+	// for client
+	private bool _attacked;
+	public Vec2? NextWaypoint;
+	// for client
+
 	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
 	{
 		IsDestroyed = false;
@@ -75,11 +80,15 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 		CurrWalkPath = null;
 		_state = new State();
+
+		_attacked = false;
 	}
 
 	public override void Tick()
 	{
 		base.Tick();
+
+		_attacked = false;
 
 		DecreaseCooldowns();
 
@@ -104,6 +113,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 	}
 
+	public bool Attacked { get => _attacked; }
+
 	protected virtual void DecreaseCooldowns()
 	{
 		if (_attackCooldown > 0)
@@ -126,6 +137,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		writer.Write(MoveSpeed);
 		writer.Write(ProductionTime);
 		writer.Write(State);
+		writer.Write(_attacked);
+
+		NextWaypoint = null;
+		if (!(CurrWalkPath == null) && CurrWalkPathCheckpoint < CurrWalkPath.Count )
+		{
+			NextWaypoint = CurrWalkPath[CurrWalkPathCheckpoint];
+		}
+		writer.Write(NextWaypoint);
 	}
 
 	public override void DeserializeFields(SerializerReader reader)
@@ -141,6 +160,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		MoveSpeed = reader.Read<float>();
 		ProductionTime = reader.Read<int>();
 		State = reader.Read<State>();
+
+		_attacked = reader.Read<bool>();
+		NextWaypoint = reader.Read<Vec2?>();
 	}
 
 	public virtual void SetGoal(Vec2 goal)
@@ -565,6 +587,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 		_attackCooldown = AttackSpeed;
 		_target.Damage(AttackDamage);
+		_attacked = true;
 
 		if (_target.IsDestroyed)
 		{

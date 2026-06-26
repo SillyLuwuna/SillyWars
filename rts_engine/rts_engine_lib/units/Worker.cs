@@ -19,7 +19,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public const int BaseHitPoints = 5;
 	public const int BaseAttackDamage = 1;
-	public const int BaseAttackSpeed = 20;
+	public const int BaseAttackSpeed = 15;
 	public const float BaseAttackRange = BaseRadius + 0.1f;
 	public const float BaseChaseDistance = 3.0f;
 	public const float BaseAggroRange = 3.0f;
@@ -58,6 +58,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	private bool _isGathering;
 	private bool _isRetrieving;
+	private bool _isBuilding;
 
 	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
@@ -87,6 +88,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 		_isGathering = false;
 		_isRetrieving = false;
+		_isBuilding = false;
 		
 		State.Changed += OnStateChange;
 		WalkGoalReached += OnWalkGoalReached;
@@ -99,6 +101,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		writer.Write(BuildSpeed);
 		writer.Write(IsGathering);
 		writer.Write(IsRetrieving);
+		writer.Write(IsBuilding);
 		writer.Write(_resourceGathered);
 	}
 
@@ -111,6 +114,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		BuildSpeed = reader.Read<int>();
 		_isGathering = reader.Read<bool>();
 		_isRetrieving = reader.Read<bool>();
+		_isBuilding = reader.Read<bool>();
 		_resourceGathered = reader.Read<ResourceStack>();
 	}
 
@@ -118,14 +122,15 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public bool IsGathering { get => (State.Goal == Goal.Gather) && _isGathering; }
 	public bool IsRetrieving { get => (State.Goal == Goal.Gather) && _isRetrieving; }
+	public bool IsBuilding { get => (State.Goal == Goal.Build) && _isBuilding; }
 	public ResourceStack Holding { get => _resourceGathered; }
 
 	private void OnStateChange(object? sender, StateEventArgs args)
 	{
-		if (args.OldState.Goal != args.NewState.Goal)
-		{
-			Console.WriteLine($"{args.OldState.Goal} -> {args.NewState.Goal}");
-		}
+		// if (args.OldState.Goal != args.NewState.Goal)
+		// {
+		// 	Console.WriteLine($"{args.OldState.Goal} -> {args.NewState.Goal}");
+		// }
 
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)
 		{
@@ -135,6 +140,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	public void Build(BaseStructure structure)
 	{
+		_isBuilding = false;
 		_structure = structure;
 		State.Goal = Goal.Build;
 		_closestReachableTile = null;
@@ -178,6 +184,11 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	private void TickBuild()
 	{
+		if (IsInRangeToBuild && !State.IsWalking && !HasTarget)
+		{
+			_isBuilding = true;
+		}
+
 		if (_structure!.IsDestroyed)
 		{
 			StopBuilding();
@@ -223,7 +234,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		_structure.DoBuildWork();
 		_buildCooldown = BuildSpeed;
 	}
-	
+
 	private bool IsBuildingNewStructure { get => !_structure!.HasBuildingStarted; }
 
 	private bool HasClosestReachableTile { get => _closestReachableTile != null; }
@@ -258,9 +269,10 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		if (State.Goal == Goal.Build)
 		{
 			State.Goal = Goal.None;
-			return;
+			// return;
 		}
 
+		_isBuilding = false;
 		_structure = null;
 		_closestReachableTile = null;
 		_goingTowardsStructure = false;

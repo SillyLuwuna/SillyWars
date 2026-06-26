@@ -37,6 +37,16 @@ public class Barracks : UnitProducer
 		MaxUnitProduction = BaseMaxUnitProduction;
 		AllowedUnitTypes = BaseAllowedUnitTypes;
 	}
+
+	public static Barracks CreateBuilt(uint ownerId, Vec2Int start)
+	{
+		Barracks barracks = new Barracks(ownerId, start);
+
+		barracks.HasBuildingStarted = true;
+		barracks.IsBuilt = true;
+
+		return barracks;
+	}
 }
 
 }

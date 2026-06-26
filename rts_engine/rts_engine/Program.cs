@@ -8,6 +8,7 @@ using RtsEngine.Math;
 using RtsEngine.Data;
 using RtsEngine.EntityProperties;
 using RtsEngine.Resources;
+using RtsEngine.Structures;
 
 namespace RtsEngine
 {
@@ -81,7 +82,14 @@ public static class Program
 			}
 		}
 
-		ResourceStack initialResources = new ResourceStack(Resource.Gold, 200);
+		Barracks barracks1 = Barracks.CreateBuilt(1, new Vec2Int(20, 5));
+		Barracks barracks2 = Barracks.CreateBuilt(1, new Vec2Int(20, 8));
+		Barracks barracks3 = Barracks.CreateBuilt(1, new Vec2Int(20, 11));
+		state.AddEntity(barracks1);
+		state.AddEntity(barracks2);
+		state.AddEntity(barracks3);
+
+		ResourceStack initialResources = new ResourceStack(Resource.Gold, 10000);
 		for (uint i = 0; i < NumPlayers; i++)
 		{
 			state.GiveResource(initialResources, i);

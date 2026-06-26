@@ -13,14 +13,16 @@ public class ParticleFx : MonoBehaviour
 
 	private static bool _hasLoadedParticles = false;
 
-	public static void Dust1(Vector3 pos) => Spawn(pos, "dust_1");
-	public static void Dust2(Vector3 pos) => Spawn(pos, "dust_2");
-	public static void Explosion1(Vector3 pos) => Spawn(pos, "explosion_1");
-	public static void Explosion2(Vector3 pos) => Spawn(pos, "explosion_2");
-	public static void Fire1(Vector3 pos) => Spawn(pos, "fire_1");
-	public static void Fire2(Vector3 pos) => Spawn(pos, "fire_2");
-	public static void Fire3(Vector3 pos) => Spawn(pos, "fire_3");
-	public static void WaterSplash(Vector3 pos) => Spawn(pos, "water_splash");
+	public static void Dust1(Vector3 pos, float size = 1f) => Spawn(pos, "dust_1", size);
+	public static void Dust2(Vector3 pos, float size = 1f) => Spawn(pos, "dust_2", size);
+	public static void Explosion1(Vector3 pos, float size = 1f) => Spawn(pos, "explosion_1", size);
+	public static void Explosion2(Vector3 pos, float size = 1f) => Spawn(pos, "explosion_2", size);
+	public static void Fire1(Vector3 pos, float size = 1f) => Spawn(pos, "fire_1", size);
+	public static void Fire2(Vector3 pos, float size = 1f) => Spawn(pos, "fire_2", size);
+	public static void Fire3(Vector3 pos, float size = 1f) => Spawn(pos, "fire_3", size);
+	public static void WaterSplash(Vector3 pos, float size = 1f) => Spawn(pos, "water_splash", size);
+
+	private static bool _quitting = false;
 
 	private void Initialize(AnimationClip? clip)
 	{
@@ -74,8 +76,10 @@ public class ParticleFx : MonoBehaviour
 	}
 
 
-	public static void Spawn(Vector3 position, string name)
+	public static void Spawn(Vector3 position, string name, float size = 1f)
 	{
+		if (_quitting) return;
+
 		if (!_hasLoadedParticles)
 		{
 			LoadAllParticles();
@@ -86,6 +90,7 @@ public class ParticleFx : MonoBehaviour
 		if (prefab == null) return;
 
 		GameObject effect = Instantiate(prefab, position, Quaternion.identity);
+		effect.transform.localScale *= size;
 		effect.SetActive(true);
 
 		ParticleFx prefabParticleFx = effect.GetComponent<ParticleFx>();
@@ -94,4 +99,13 @@ public class ParticleFx : MonoBehaviour
 		particleFx.Initialize(GetParticleFx(name));
 	}
 
+
+	void OnApplicationQuit()
+	{
+		_quitting = true;
+		foreach (GameObject obj in _particleFxPrefabMap.Values)
+		{
+			Destroy(obj);
+		}
+	}
 }
