@@ -7,6 +7,7 @@ namespace RtsEngine.EntityProperties
 public interface IGatherable : IEntity, IPositionable
 {
 	public int Remaining { get; }
+	public int MaxAmount { get; }
 	public int RequiredWork { get; }
 	public int MaxGatherers { get; }
 	public int GatherAmount { get; }

@@ -14,6 +14,9 @@ namespace RtsEngine.Units
 
 public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttacker, IDestroyable, IValuable
 {
+	private const int ScanTargetBaseCooldown = 15;
+	private const int ScanTargetCooldownRandomRange = 10;
+
 	private const float StructurePriority = 1.0f;
 	private const float UnitPriority = 10.0f;
 	private const float DistancePriorityWeight = 1.0f;
@@ -50,6 +53,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private IDestroyable? _targetGoal;
 
+	private int _scanTargetCooldown;
+
 	private int _attackCooldown;
 	private IDestroyable? _target;
 	private BaseUnit? _targetUnit;
@@ -83,6 +88,13 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		_state = new State();
 
 		_attacked = false;
+
+		_scanTargetCooldown = 0;
+	}
+
+	private void ResetScanTargetCooldown()
+	{
+		_scanTargetCooldown = ScanTargetBaseCooldown + RtsEngine.Instance.RngInterval(ScanTargetCooldownRandomRange);
 	}
 
 	public override void Tick()
@@ -211,6 +223,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		// Console.WriteLine($"HasTarget: {HasTarget}");
 		// Console.WriteLine($"IsWalking: {State.IsWalking}");
 		// Console.WriteLine($"HasWalkGoal: {HasWalkGoal}");
+		// int walkPathLength = CurrWalkPath == null ? -1 : CurrWalkPath.Count;
+		// Console.WriteLine($"PathLength: {walkPathLength}");
+		// Console.WriteLine($"PathCheckpoint: {CurrWalkPathCheckpoint}");
 		// Console.WriteLine($"IsGoingToPivot: {IsGoingToPivot}");
 		// Console.WriteLine("============= MoveTick =============");
 		Vec2 target = CurrWalkPath![CurrWalkPathCheckpoint];
@@ -292,6 +307,9 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void HandlePathArrival()
 	{
+		PauseWalking();
+		CurrWalkPath = null;
+
 		if (_isGoingToPivot)
 		{
 			// Console.WriteLine($"{Id}: Arrived at pivot");
@@ -370,6 +388,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void TryFindTarget()
 	{
+		if (_scanTargetCooldown > 0)
+		{
+			_scanTargetCooldown--;
+			return;
+		}
+
+		ResetScanTargetCooldown();
+
 		IDestroyable? targetFound = FindTarget();
 		if (targetFound != null)
 		{
@@ -494,6 +520,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		}
 		else
 		{
+			if (State.IsAggro != true) // prevents spam clicking resetting
+			{
+				ResetScanTargetCooldown();
+			}
+
 			if (State.Goal == Goal.Gather)
 			{
 				State.Goal = Goal.None;
@@ -615,6 +646,10 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		else
 		{
 			ClearTarget();
+			if (HasWalkGoal)
+			{
+				RestoreWalkGoal();
+			}
 		}
 	}
 

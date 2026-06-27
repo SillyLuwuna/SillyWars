@@ -33,6 +33,8 @@ public class RtsEngine
 	private object _commandQueueLock;
 	private Queue<ICommand> _commandQueue;
 
+	private Random _rng;
+
 	private ulong _totalTicks;
 	private int _statInterval;
 	private float _statLoadSum;
@@ -58,6 +60,7 @@ public class RtsEngine
 
 	private RtsEngine(WorldState state)
 	{
+		_rng = new Random();
 		_physicsEngine = new PhysicsEngine();
 		_currentBroadcastTask = null;
 		_broadcastLock = new object();
@@ -312,6 +315,15 @@ public class RtsEngine
 			_statPacketsReceived = 0;
 			_statPacketsSent = 0;
 		}
+	}
+
+	// random value between 0 and 1;
+	public double Rng => _rng.NextDouble();
+
+	// random integer between 0 and max (inclusive);
+	public int RngInterval(int max)
+	{
+		return _rng.Next() % (max + 1);
 	}
 }
 }

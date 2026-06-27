@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using RtsEngine;
 using RtsEngine.EntityProperties;
+using RtsEngine.Resources;
 using RtsEngine.Structures;
 using RtsEngine.Units;
 using TMPro;
@@ -12,6 +13,7 @@ public class SelectionMenuManager : MonoBehaviour
 {
 	private const string _unitPortraitsPath = "Tiny Swords/UI Elements/Human Avatars";
 	private const string _structurePath = "Tiny Swords/Buildings";
+	private const string _resourceNodesPath = "Tiny Swords/Resources";
 
 	private static readonly List<EntityAction> _workerAllowedActions = new List<EntityAction>() {
 		EntityAction.Halt,
@@ -48,7 +50,7 @@ public class SelectionMenuManager : MonoBehaviour
 
 	[Header("Unit UI")]
 	[SerializeField] private GameObject _unitSpecificParts;
-	[SerializeField] private TMP_Text _unitHpText;
+	[SerializeField] private TMP_Text _unitInfoText;
 	[SerializeField] private Image _unitSelectionPortrait;
 
 	[Header("Build UI")]
@@ -85,8 +87,9 @@ public class SelectionMenuManager : MonoBehaviour
 	{
 		_firstState = false;
 		_buildOptionsContainer.gameObject.SetActive(false);
+		_unitSpecificParts.SetActive(false);
 		_buildHelper.Close();
-		Disable();
+		SetPortrait(null);
 	}
 
 	private void InitBuildOptions()
@@ -119,7 +122,6 @@ public class SelectionMenuManager : MonoBehaviour
 		if (_firstState)
 		{
 			_firstState = false;
-			Debug.Log("Init");
 			InitBuildOptions();
 		}
 
@@ -149,6 +151,10 @@ public class SelectionMenuManager : MonoBehaviour
 		{
 			UpdateOne(_currEntities[0]);
 		}
+		else
+		{
+			UpdateMany(_currEntities);
+		}
     }
 
 	private void UpdateOne(Entity entity)
@@ -157,11 +163,30 @@ public class SelectionMenuManager : MonoBehaviour
 		{
 			UpdateHPText(destroyable);
 		}
+		else if (entity is IGatherable gatherable)
+		{
+			UpdateGatherableText(gatherable);
+		}
+	}
+
+	private void SetInfoText(string text)
+	{
+		_unitInfoText.text = text;
 	}
 
 	private void UpdateHPText(IDestroyable destroyable)
 	{
-		_unitHpText.text = $"{destroyable.HitPoints}/{destroyable.MaxHitPoints}";
+		SetInfoText($"{destroyable.HitPoints}/{destroyable.MaxHitPoints} HP");
+	}
+
+	private void UpdateGatherableText(IGatherable gatherable)
+	{
+		SetInfoText($"{gatherable.Remaining} Left\n{gatherable.CurrGathererCount}/{gatherable.MaxGatherers} Workers");
+	}
+
+	private void UpdateMany(List<Entity> entities)
+	{
+		SetInfoText($"{entities.Count} Selected");
 	}
 
 	public void Enable()
@@ -178,6 +203,7 @@ public class SelectionMenuManager : MonoBehaviour
 	{
 		ClearEntityActionButtons();
 		// ClearBuildOptions();
+		_unitSpecificParts.SetActive(false);
 		_buildOptionsContainer.gameObject.SetActive(false);
 		_currEntities = new List<Entity>();
 		_isEnabled = false;
@@ -206,6 +232,11 @@ public class SelectionMenuManager : MonoBehaviour
 				OpenOneStructure(structure);
 			}
 		}
+		else if (entity is BaseResourceNode node)
+		{
+			SetResourceNodePortrait(node);
+			OpenOneResourceNode(node);
+		}
 
 		ClearEntityActionButtons();
 		if (entity.OwnerId == playerId)
@@ -216,7 +247,29 @@ public class SelectionMenuManager : MonoBehaviour
 
 	private void SetPortrait(Sprite sprite)
 	{
+		if (sprite == null)
+		{
+			_unitSelectionPortrait.color = Color.clear;
+		}
+		else
+		{
+			_unitSelectionPortrait.color = Color.white;
+		}
 		_unitSelectionPortrait.sprite = sprite;
+	}
+
+	private void SetResourceNodePortrait(BaseResourceNode node)
+	{
+		AssetLoader.Instance.LoadAssets($"{_resourceNodesPath}/{node.Resource}/Node");
+		if (node is GoldNode)
+		{
+			SetPortrait(AssetLoader.Instance.GetSprite($"{_resourceNodesPath}/{node.Resource}/Node/Gold Stone 6"));
+		}
+	}
+
+	private void OpenOneResourceNode(BaseResourceNode node)
+	{
+
 	}
 
 	private void SetUnitPortrait(BaseUnit unit)
@@ -304,8 +357,43 @@ public class SelectionMenuManager : MonoBehaviour
 		}
 	}
 
+	private void SetEntitiesActionButtons(List<Entity> entities)
+	{
+		HashSet<EntityAction> groupAllowedActions = new HashSet<EntityAction>();
+		ColorVariant color = WorldStateManager.GetColorVariant(WorldStateManager.Instance.PlayerId);
+
+		foreach (Entity entity in entities) // inefficient
+		{
+			List<EntityAction> individualAllowedActions = GetAllowedEntityActions(entity);
+			foreach (EntityAction action in individualAllowedActions)
+			{
+				groupAllowedActions.Add(action);
+			}
+		}
+
+		foreach (EntityAction action in groupAllowedActions)
+		{
+			GameObject button = Instantiate(_actionButtonPrefab, _actionContainer);
+			EntityActionButton actionButton = button.GetComponent<EntityActionButton>();
+			actionButton.SetEntityAction(_playerActionController, action, color);
+			actionButton.Pressed += OnActionButtonPressed;
+		}
+	}
+
+	private void OpenMany(List<Entity> entities)
+	{
+		_unitSpecificParts.SetActive(true);
+		uint playerId = WorldStateManager.Instance.PlayerId;
+
+		ClearEntityActionButtons();
+		SetEntitiesActionButtons(entities);
+	}
+
 	public void Open(List<Entity> entities)
 	{
+		_buildHelper.Close();
+		SetPortrait(null);
+		SetInfoText("");
 		if (entities.Count <= 0) return;
 
 		Enable();
@@ -314,6 +402,11 @@ public class SelectionMenuManager : MonoBehaviour
 		if (_currEntities.Count == 1)
 		{
 			OpenOne(_currEntities[0]);
+			return;
+		}
+		else
+		{
+			OpenMany(_currEntities);
 			return;
 		}
 	}

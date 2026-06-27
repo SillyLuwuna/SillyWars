@@ -182,7 +182,7 @@ public class PlayerActionController : MonoBehaviour
 
 		if (IsWalkAttack)
 		{
-			IsWalkAttack= false;
+			IsWalkAttack = false;
 			NetworkActionManager.SetAggro(SelectedEntities, true);
 			NetworkActionManager.Move(SelectedEntities, mousePos);
 		}
@@ -248,29 +248,16 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnEnqueueKnightInput()
 	{
-		if (SelectedEntities.Count != 1) return;
-		Entity selected = SelectedEntities[0];
-
-		if (!(selected is BaseStructure)) return;
-
 		NetworkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Knight);
 	}
 
 	public void OnEnqueueWorkerInput()
 	{
-		if (SelectedEntities.Count != 1) return;
-		Entity selected = SelectedEntities[0];
-
-		if (!(selected is BaseStructure)) return;
-
 		NetworkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Worker);
 	}
 
 	public void OnHaltInput()
 	{
-		if (SelectedEntities.Count != 1) return;
-		Entity selected = SelectedEntities[0];
-
 		NetworkActionManager.Halt(SelectedEntities);
 	}
 

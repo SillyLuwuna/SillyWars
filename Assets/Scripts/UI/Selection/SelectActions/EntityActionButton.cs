@@ -66,8 +66,6 @@ public class EntityActionButton : MonoBehaviour
 				break;
 			case EntityAction.Attack:
 				_playerActionController.IsWalkAttack = true;
-				_playerActionController.BuildBarracks = false;
-				_playerActionController.BuildCastle = false;
 				break;
 			case EntityAction.EnqueueWorker:
 				_playerActionController.OnEnqueueWorkerInput();
