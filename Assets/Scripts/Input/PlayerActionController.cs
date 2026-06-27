@@ -30,8 +30,11 @@ public class PlayerActionController : MonoBehaviour
 		get => _isWalkAttack;
 		set
 		{
-			ResetState();
-			_isWalkAttack = true;
+			if (value == true)
+			{
+				ResetState();
+			}
+			_isWalkAttack = value;
 		}
 	}
 
@@ -40,8 +43,11 @@ public class PlayerActionController : MonoBehaviour
 		get => _buildBarracks;
 		set
 		{
-			ResetState();
-			_buildBarracks = true;
+			if (value == true)
+			{
+				ResetState();
+			}
+			_buildBarracks = value;
 		}
 	}
 
@@ -50,7 +56,11 @@ public class PlayerActionController : MonoBehaviour
 		get => _buildCastle;
 		set
 		{
-			_buildCastle = true;
+			if (value == true)
+			{
+				ResetState();
+			}
+			_buildCastle = value;
 		}
 	}
 
@@ -81,6 +91,7 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseUnit unit)
 	{
+		_selectionMenu.OnEmptyClick();
 		if (unit.OwnerId != WorldStateManager.Instance.PlayerId)
 		{
 			NetworkActionManager.SetAggro(SelectedEntities, false);
@@ -94,6 +105,7 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseStructure structure)
 	{
+		_selectionMenu.OnEmptyClick();
 		if (structure.OwnerId == WorldStateManager.Instance.PlayerId)
 		{
 			NetworkActionManager.Build(SelectedEntities, structure);
@@ -106,11 +118,13 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnRightClick(BaseResourceNode node)
 	{
+		_selectionMenu.OnEmptyClick();
 		NetworkActionManager.Gather(SelectedEntities, node);
 	}
 
 	public void OnRightClick(Vec2 mousePos)
 	{
+		_selectionMenu.OnEmptyClick();
 		if (SelectedEntities.Count == 1)
 		{
 			Entity selected = SelectedEntities[0];

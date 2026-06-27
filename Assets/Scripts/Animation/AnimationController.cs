@@ -22,6 +22,8 @@ public abstract class AnimationController<T> : MonoBehaviour where T : Entity
 
 	public Entity? Entity = null;
 
+	public bool DisableDestroyAnimations { get; set; } = false;
+
 
     void Start()
     {
@@ -159,8 +161,10 @@ public abstract class AnimationController<T> : MonoBehaviour where T : Entity
 	void OnDestroy()
 	{
 		if (_quitting) return;
-
 		WorldStateManager.Instance.NewState -= OnNewState;
+
+		if (DisableDestroyAnimations) return;
+
 		DeathEffect();
 	}
 

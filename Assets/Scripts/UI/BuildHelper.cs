@@ -34,6 +34,7 @@ public class BuildHelper : MonoBehaviour
 
 		StructureAnimationController animationController = _dummyStructure.GetComponent<StructureAnimationController>();
 		animationController.Entity = dummyStructure;
+		animationController.DisableDestroyAnimations = true;
 
 		Debug.Log("instantiated");
 		Debug.Log(_dummyStructure);
@@ -69,6 +70,10 @@ public class BuildHelper : MonoBehaviour
 
 	public void Close()
 	{
+		if (_dummyStructure != null)
+		{
+			Destroy(_dummyStructure);
+		}
 		_dummyStructure = null;
 	}
 }

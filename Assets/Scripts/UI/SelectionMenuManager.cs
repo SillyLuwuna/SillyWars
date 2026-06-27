@@ -158,8 +158,11 @@ public class SelectionMenuManager : MonoBehaviour
 	public void Disable()
 	{
 		ClearEntityActionButtons();
+		// ClearBuildOptions();
+		_buildOptionsContainer.gameObject.SetActive(false);
 		_currEntities.Clear();
 		_isEnabled = false;
+		_buildHelper.Close();
 		// _selectionMenu.SetActive(false);
 	}
 
