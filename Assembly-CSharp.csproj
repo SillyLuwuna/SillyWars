@@ -52,12 +52,14 @@
     <Compile Include="Assets/Scripts/UI/Selection/StructureSelect/TrainQueueItem.cs" />
     <Compile Include="Assets/Scripts/UI/Selection/StructureSelect/TrainQueueManager.cs" />
     <Compile Include="Assets/Scripts/Network/NetworkActionManager.cs" />
+    <Compile Include="Assets/Scripts/UI/ResourceBar/ResourceBarUnit.cs" />
     <Compile Include="Assets/Scripts/Map/GridManager.cs" />
     <Compile Include="Assets/Scripts/UI/Selection/SelectActions/EntityActionButton.cs" />
     <Compile Include="Assets/Scripts/UI/Building/BuildOption.cs" />
     <Compile Include="Assets/Scripts/Particles/ParticleFx.cs" />
     <Compile Include="Assets/Scripts/Network/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/Input/PlayerActionController.cs" />
+    <Compile Include="Assets/Scripts/UI/ResourceBar/ResourceBar.cs" />
     <Compile Include="Assets/Scripts/AssetLoader.cs" />
     <Compile Include="Assets/Scripts/UI/ConnectButton.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/ResourceManager.cs" />

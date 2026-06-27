@@ -37,7 +37,7 @@ public class WorldState : ISerializable
 	private PathFinder _pathFinder = null!;
 
 	// public List<List<int>> PlayerResources { get; private set; } = null!;
-	public int[] _playerResources = null!;
+	public int[] _playerResources = null!; // should be private
 
 	public int PlayerVersion { get; private set; }
 	public List<uint> AddedEntities { get; private set; } = null!;
