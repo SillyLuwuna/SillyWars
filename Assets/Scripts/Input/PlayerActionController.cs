@@ -82,7 +82,7 @@ public class PlayerActionController : MonoBehaviour
 
 	private void ResetEntityColor()
 	{
-		foreach (Entity entity in _selectedEntities)
+		foreach (Entity entity in SelectedEntities)
 		{
 			GameObject entityObj = WorldStateManager.Instance.GetGameObject(entity);
 			if (entityObj == null) continue;
@@ -96,7 +96,7 @@ public class PlayerActionController : MonoBehaviour
 
 	private void HighlightEntityColor()
 	{
-		foreach (Entity entity in _selectedEntities)
+		foreach (Entity entity in SelectedEntities)
 		{
 			GameObject entityObj = WorldStateManager.Instance.GetGameObject(entity);
 			if (entityObj == null) continue;

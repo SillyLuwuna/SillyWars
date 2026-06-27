@@ -28,6 +28,16 @@ public class SelectionMenuManager : MonoBehaviour
 		EntityAction.Attack,
 	};
 
+	private static readonly List<EntityAction> _castleAllowedActions = new List<EntityAction>()
+	{
+		EntityAction.EnqueueWorker,
+	};
+
+	private static readonly List<EntityAction> _barracksAllowedActions = new List<EntityAction>()
+	{
+		EntityAction.EnqueueKnight,
+	};
+
 	[Header("General")]
 	[SerializeField] private GameObject _selectionMenu;
 	[SerializeField] private PlayerActionController _playerActionController;
@@ -169,7 +179,7 @@ public class SelectionMenuManager : MonoBehaviour
 		ClearEntityActionButtons();
 		// ClearBuildOptions();
 		_buildOptionsContainer.gameObject.SetActive(false);
-		_currEntities.Clear();
+		_currEntities = new List<Entity>();
 		_isEnabled = false;
 		_buildHelper.Close();
 		// _selectionMenu.SetActive(false);
@@ -200,7 +210,7 @@ public class SelectionMenuManager : MonoBehaviour
 		ClearEntityActionButtons();
 		if (entity.OwnerId == playerId)
 		{
-			SetEntityActionButtons(GetAllowedEntityActions(entity));
+			SetEntityActionButtons(entity);
 		}
 	}
 
@@ -238,6 +248,8 @@ public class SelectionMenuManager : MonoBehaviour
 	{
 		Worker => _workerAllowedActions,
 		Knight => _knightAllowedActions,
+		Castle => _castleAllowedActions,
+		Barracks => _barracksAllowedActions,
 		_ => new List<EntityAction>(),
 	};
 
@@ -249,13 +261,16 @@ public class SelectionMenuManager : MonoBehaviour
 		}
 	}
 
-	private void SetEntityActionButtons(List<EntityAction> allowedEntityActions)
+	private void SetEntityActionButtons(Entity entity)
 	{
+		List<EntityAction> allowedEntityActions = GetAllowedEntityActions(entity);
+		ColorVariant color = WorldStateManager.GetColorVariant(entity.OwnerId);
+
 		foreach (EntityAction action in allowedEntityActions)
 		{
 			GameObject button = Instantiate(_actionButtonPrefab, _actionContainer);
 			EntityActionButton actionButton = button.GetComponent<EntityActionButton>();
-			actionButton.SetEntityAction(_playerActionController, action);
+			actionButton.SetEntityAction(_playerActionController, action, color);
 			actionButton.Pressed += OnActionButtonPressed;
 		}
 	}

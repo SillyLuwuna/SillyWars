@@ -6,4 +6,6 @@ public enum EntityAction
 	Build,
 	Repair,
 	Mine,
+	EnqueueWorker,
+	EnqueueKnight,
 }
