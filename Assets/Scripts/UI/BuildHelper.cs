@@ -30,7 +30,7 @@ public class BuildHelper : MonoBehaviour
 		_structureType = structureType;
 
 		BaseStructure dummyStructure = GetDummyStructureAtMousePos();
-		_dummyStructure = Instantiate(_prefabManager.GetCorrespondingPrefab(dummyStructure), _prefabManager.GetInstanceCoordinates(dummyStructure), Quaternion.identity);
+		_dummyStructure = Instantiate(_prefabManager.GetCorrespondingPrefab(dummyStructure), PrefabManager.GetInstanceCoordinates(dummyStructure), Quaternion.identity);
 
 		StructureAnimationController animationController = _dummyStructure.GetComponent<StructureAnimationController>();
 		animationController.Entity = dummyStructure;
@@ -46,7 +46,7 @@ public class BuildHelper : MonoBehaviour
 	{
 		BaseStructure dummyStructure = GetDummyStructureAtMousePos();
 
-		_dummyStructure!.transform.position = _prefabManager.GetInstanceCoordinates(dummyStructure);
+		_dummyStructure!.transform.position = PrefabManager.GetInstanceCoordinates(dummyStructure);
 	}
 
 	private BaseStructure GetDummyStructureAtMousePos()

@@ -37,7 +37,7 @@ public class PrefabManager : MonoBehaviour
 		return UnknownPrefab;
 	}
 
-	public Vector3 GetInstanceCoordinates(Entity entity)
+	public static Vector3 GetInstanceCoordinates(Entity entity)
 	{
 		if (entity is IPositionable positionable)
 		{

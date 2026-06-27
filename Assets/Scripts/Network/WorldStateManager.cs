@@ -210,7 +210,7 @@ public class WorldStateManager : MonoBehaviour
 
 	private void SpawnEntity(Entity entity)
 	{
-		GameObject instance = Instantiate(_prefabManager.GetCorrespondingPrefab(entity), _prefabManager.GetInstanceCoordinates(entity), Quaternion.identity);
+		GameObject instance = Instantiate(_prefabManager.GetCorrespondingPrefab(entity), PrefabManager.GetInstanceCoordinates(entity), Quaternion.identity);
 
 		_entitiesId.Add(entity.Id, entity);
 		_entityInstances.Add(entity, instance);

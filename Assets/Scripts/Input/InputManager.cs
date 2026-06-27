@@ -66,7 +66,11 @@ public class InputManager : MonoBehaviour
 		else
 		{
 			Vector2 mousePos = Mouse.current.position.ReadValue();
-			if (IsPointerOverUI(mousePos)) return;
+			if (IsPointerOverUI(mousePos))
+			{
+				SetDefaultMouse();
+				return;
+			}
 
 			Entity? entity = GetEntityOnMousePos(mousePos);
 			if (entity == null)
@@ -81,26 +85,40 @@ public class InputManager : MonoBehaviour
 
 	public void SetCorrespondingMouse(Entity target)
 	{
-		if (_playerController.SelectedEntities.Count <= 0)
+		bool targetIsOwned = (target.OwnerId == WorldStateManager.Instance.PlayerId);
+		bool hasSelectedEntities = _playerController.SelectedEntities.Count > 0;
+		bool targetIsUnit = (target is BaseUnit);
+		bool targetIsStructure = (target is BaseStructure);
+		bool targetIsNode = (target is BaseResourceNode);
+
+		if (!hasSelectedEntities)
 		{
-			if (target.OwnerId == WorldStateManager.Instance.PlayerId)
-			{
-				SetSelectMouse();
-			}
+			SetSelectMouse();
 			return;
 		}
 
-		if ((target is IDestroyable) && (target.OwnerId != WorldStateManager.Instance.PlayerId))
+		if ((targetIsUnit || targetIsStructure) && !targetIsOwned)
 		{
 			SetAttackMouse();
+			return;
 		}
-		else if (target is BaseStructure)
+
+		if (targetIsUnit)
+		{
+			SetSelectMouse();
+			return;
+		}
+
+		if (targetIsStructure)
 		{
 			SetRepairMouse();
+			return;
 		}
-		else if (target is BaseResourceNode)
+
+		if (targetIsNode)
 		{
 			SetGoldMouse();
+			return;
 		}
 	}
 

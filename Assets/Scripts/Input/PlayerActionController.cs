@@ -12,6 +12,8 @@ public class PlayerActionController : MonoBehaviour
 	[SerializeField] private SelectionMenuManager _selectionMenu = null!;
 	[SerializeField] private Camera _mainCamera;
 
+	[SerializeField] private Color _highlightColor;
+
 	[SerializeField] private float _cameraMoveSpeed = 0f;
 	[SerializeField] private float _cameraZoomSpeed = 0f;
 	[SerializeField] private float _cameraMinZoom = 0f;
@@ -19,7 +21,7 @@ public class PlayerActionController : MonoBehaviour
 	[SerializeField] private float _cameraBound = 0f;
 	private Vector3 _cameraMoveVector;
 
-	public List<Entity> SelectedEntities { get; private set; } = new List<Entity>();
+	private List<Entity> _selectedEntities = new List<Entity>();
 
 	private bool _isWalkAttack = false;
 	private bool _buildBarracks = false;
@@ -61,6 +63,48 @@ public class PlayerActionController : MonoBehaviour
 				ResetState();
 			}
 			_buildCastle = value;
+		}
+	}
+
+	public List<Entity> SelectedEntities
+	{
+		get
+		{
+			return _selectedEntities;
+		}
+		private set
+		{
+			ResetEntityColor();
+			_selectedEntities = value;
+			HighlightEntityColor();
+		}
+	}
+
+	private void ResetEntityColor()
+	{
+		foreach (Entity entity in _selectedEntities)
+		{
+			GameObject entityObj = WorldStateManager.Instance.GetGameObject(entity);
+			if (entityObj == null) continue;
+
+			SpriteRenderer renderer = entityObj.GetComponent<SpriteRenderer>();
+			if (renderer == null) continue;
+
+			renderer.color = Color.white;
+		}
+	}
+
+	private void HighlightEntityColor()
+	{
+		foreach (Entity entity in _selectedEntities)
+		{
+			GameObject entityObj = WorldStateManager.Instance.GetGameObject(entity);
+			if (entityObj == null) continue;
+
+			SpriteRenderer renderer = entityObj.GetComponent<SpriteRenderer>();
+			if (renderer == null) continue;
+
+			renderer.color = _highlightColor;
 		}
 	}
 
@@ -182,6 +226,7 @@ public class PlayerActionController : MonoBehaviour
 		}
 		else
 		{
+			SelectedEntities = new List<Entity>();
 			_selectionMenu.Close();
 		}
 	}

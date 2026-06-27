@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7628377557975574085}
   - component: {fileID: 5132410351936595030}
   - component: {fileID: 6129644037805332029}
+  - component: {fileID: 8067668928338811603}
   m_Layer: 0
   m_Name: Structure
   m_TagString: Structure
@@ -91,7 +92,7 @@ SpriteRenderer:
   m_Size: {x: 1.28, y: 1.28}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!61 &5132410351936595030
 BoxCollider2D:
@@ -151,3 +152,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdba6ae215b7fe479b460bea62c899c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StructureAnimationController
+--- !u!114 &8067668928338811603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5588601534899918480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ea799d6b46ecfa7d81cdfb330e61867, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoSquareColliderManager

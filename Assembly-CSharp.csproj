@@ -65,6 +65,7 @@
     <Compile Include="Assets/Scripts/EntityManagers/StructureManager.cs" />
     <Compile Include="Assets/Scripts/UI/EntityAction.cs" />
     <Compile Include="Assets/Scripts/UI/SelectionMenuManager.cs" />
+    <Compile Include="Assets/Scripts/PrefabAutoLogic/AutoSquareColliderManager.cs" />
     <Compile Include="Assets/Scripts/Input/InputManager.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/PrefabManager.cs" />
     <Compile Include="Assets/Scripts/UI/SelectionBoxUI.cs" />
