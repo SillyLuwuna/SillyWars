@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using RtsEngine;
 using RtsEngine.EntityProperties;
+using RtsEngine.Structures;
 using RtsEngine.Units;
 using TMPro;
 using UnityEngine;
@@ -25,6 +27,7 @@ public class SelectionMenuManager : MonoBehaviour
 
 	[Header("General")]
 	[SerializeField] private GameObject _selectionMenu;
+	[SerializeField] private PlayerActionController _playerActionController;
 
 	[Header("EntityActions")]
 	[SerializeField] private Transform _actionContainer;
@@ -35,22 +38,75 @@ public class SelectionMenuManager : MonoBehaviour
 	[SerializeField] private TMP_Text _unitHpText;
 	[SerializeField] private Image _unitSelectionPortrait;
 
+	[Header("Build UI")]
+	[SerializeField] private Transform _buildOptionsContainer;
+	[SerializeField] private Transform _buildOptionPrefab;
+	[SerializeField] private BuildHelper _buildHelper;
 
-	private List<Entity> _currEntities;
+
+
+	private List<Entity> _currEntities = new List<Entity>();
 	private bool _isEnabled;
 
+	private bool _firstState = true;
+	private bool _firstBuild = true;
+
+	void Awake()
+	{
+		this.gameObject.SetActive(false);
+	}
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-		_currEntities = new List<Entity>();
 		WorldStateManager.Instance.NewState += OnNewState;
+		WorldStateManager.Instance.ResetState += OnReset;
 		AssetLoader.Instance.LoadAssets(_unitPortraitsPath);
-		Disable();
+		OnReset();
     }
+
+	private void OnReset()
+	{
+		_firstState = false;
+		_buildOptionsContainer.gameObject.SetActive(false);
+		_buildHelper.Close();
+		Disable();
+	}
+
+	private void InitBuildOptions()
+	{
+		if (!_firstBuild) return;
+		_firstBuild = false;
+
+		ClearBuildOptions();
+		_buildOptionsContainer.gameObject.SetActive(false);
+		foreach (StructureType structureType in Enum.GetValues(typeof(StructureType)))
+		{
+			GameObject button = Instantiate(_buildOptionPrefab.gameObject, _buildOptionsContainer);
+			BuildOption buildOption = button.GetComponent<BuildOption>();
+			buildOption.SetBuilding(structureType);
+
+			buildOption.Pressed += OnBuildOptionButtonPressed;
+		}
+	}
+
+	private void ClearBuildOptions()
+	{
+		foreach (Transform child in _buildOptionsContainer)
+		{
+			Destroy(child.gameObject);
+		}
+	}
 
 	public void OnNewState(object sender, WorldState state)
 	{
+		if (_firstState)
+		{
+			_firstState = false;
+			Debug.Log("Init");
+			InitBuildOptions();
+		}
+
 		if (_currEntities == null) return;
 
 		int offset = 0;
@@ -95,15 +151,16 @@ public class SelectionMenuManager : MonoBehaviour
 	public void Enable()
 	{
 		_isEnabled = true;
-		_selectionMenu.SetActive(true);
+		// _selectionMenu.SetActive(true);
 		_unitSpecificParts.SetActive(false);
 	}
 
 	public void Disable()
 	{
+		ClearEntityActionButtons();
 		_currEntities.Clear();
 		_isEnabled = false;
-		_selectionMenu.SetActive(false);
+		// _selectionMenu.SetActive(false);
 	}
 
 	private void OpenOne(Entity entity)
@@ -114,7 +171,10 @@ public class SelectionMenuManager : MonoBehaviour
 		}
 
 		ClearEntityActionButtons();
-		SetEntityActionButtons(GetAllowedEntityActions(entity));
+		if (entity.OwnerId == WorldStateManager.Instance.PlayerId)
+		{
+			SetEntityActionButtons(GetAllowedEntityActions(entity));
+		}
 	}
 
 	private void OpenOneUnit(BaseUnit unit)
@@ -145,7 +205,36 @@ public class SelectionMenuManager : MonoBehaviour
 		{
 			GameObject button = Instantiate(_actionButtonPrefab, _actionContainer);
 			EntityActionButton actionButton = button.GetComponent<EntityActionButton>();
-			actionButton.SetEntityAction(action);
+			actionButton.SetEntityAction(_playerActionController, action);
+			actionButton.Pressed += OnActionButtonPressed;
+		}
+	}
+
+	public void OnActionButtonPressed(object sender, EntityActionButton action)
+	{
+		if (action.Action == EntityAction.Build)
+		{
+			InitBuildOptions();
+			_buildOptionsContainer.gameObject.SetActive(true);
+		}
+		else
+		{
+			_buildOptionsContainer.gameObject.SetActive(false);
+		}
+	}
+
+	public void OnBuildOptionButtonPressed(object sender, BuildOption buildOption)
+	{
+		_buildHelper.Open(buildOption.StructureType);
+
+		switch (buildOption.StructureType)
+		{
+			case StructureType.Castle:
+				_playerActionController.BuildCastle = true;
+				break;
+			case StructureType.Barracks:
+				_playerActionController.BuildBarracks = true;
+				break;
 		}
 	}
 
@@ -166,5 +255,10 @@ public class SelectionMenuManager : MonoBehaviour
 	public void Close()
 	{
 		Disable();
+	}
+
+	public void OnEmptyClick()
+	{
+		_buildHelper.Close();
 	}
 }

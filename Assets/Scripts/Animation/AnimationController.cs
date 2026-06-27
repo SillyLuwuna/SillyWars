@@ -20,6 +20,8 @@ public abstract class AnimationController<T> : MonoBehaviour where T : Entity
 
 	private bool _quitting = false;
 
+	public Entity? Entity = null;
+
 
     void Start()
     {
@@ -28,9 +30,13 @@ public abstract class AnimationController<T> : MonoBehaviour where T : Entity
 		_animator = GetComponent<Animator>();
 		_renderer = GetComponent<SpriteRenderer>();
 
-		Entity? entity = WorldStateManager.Instance.GetEntity(this.gameObject);
-		if (entity == null) return;
-		if (!(entity is T typedEntity)) return;
+		if (Entity == null)
+		{
+			Entity = WorldStateManager.Instance.GetEntity(this.gameObject);
+		}
+
+		if (Entity == null) return;
+		if (!(Entity is T typedEntity)) return;
 		LastEntityUpdate = typedEntity;
 
 		_assetPath = GetAssetPath(typedEntity);

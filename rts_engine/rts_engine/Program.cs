@@ -53,7 +53,7 @@ public static class Program
 
 		WorldState? state = new WorldState(grid, NumPlayers);
 
-		GoldNode node = new GoldNode(new Vec2(14.5f, 1.5f), 0);
+		GoldNode node = new GoldNode(new Vec2(14.5f, 1.5f), ~0u);
 		state.AddEntity(node);
 		Entity entity = new Worker(new Vec2(4.5f, 2.5f), 2);
 		state.AddEntity(entity);

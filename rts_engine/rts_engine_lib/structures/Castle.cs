@@ -25,7 +25,7 @@ public class Castle : UnitProducer
 	public override int MaxUnitProduction { get; set; }
 	public override List<UnitType> AllowedUnitTypes { get; set; }
 
-	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 100);
+	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 90);
 
 	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
 	{

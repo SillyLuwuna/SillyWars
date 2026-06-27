@@ -4,13 +4,12 @@ using RtsEngine.EntityProperties;
 using RtsEngine.Math;
 using RtsEngine.Structures;
 using RtsEngine.Units;
-using UnityEngine;
 
-public class NetworkActionManager : MonoBehaviour
+public class NetworkActionManager
 {
 	// should validate actions not to overload server
 
-	public void Gather(List<Entity> entities, IGatherable gatherable)
+	public static void Gather(List<Entity> entities, IGatherable gatherable)
 	{
 		if (entities.Count == 0) return;
 
@@ -20,7 +19,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void Halt(List<Entity> entities)
+	public static void Halt(List<Entity> entities)
 	{
 		if (entities.Count == 0) return;
 
@@ -30,7 +29,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void SetProductionSpawn(List<Entity> entities, Vec2 spawnpoint)
+	public static void SetProductionSpawn(List<Entity> entities, Vec2 spawnpoint)
 	{
 		if (entities.Count == 0) return;
 
@@ -40,7 +39,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void EnqueueUnitProduction(List<Entity> entities, UnitType type)
+	public static void EnqueueUnitProduction(List<Entity> entities, UnitType type)
 	{
 		if (entities.Count == 0) return;
 
@@ -50,7 +49,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void BuildNew(List<Entity> entities, Vec2 pos, StructureType type)
+	public static void BuildNew(List<Entity> entities, Vec2 pos, StructureType type)
 	{
 		if (entities.Count == 0) return;
 
@@ -62,7 +61,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void Build(List<Entity> entities, Entity structure)
+	public static void Build(List<Entity> entities, Entity structure)
 	{
 		if (entities.Count == 0) return;
 
@@ -72,7 +71,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void Move(List<Entity> entities, Vec2 goal)
+	public static void Move(List<Entity> entities, Vec2 goal)
 	{
 		if (entities.Count == 0) return;
 
@@ -82,7 +81,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void Attack(List<Entity> entities, Entity entity)
+	public static void Attack(List<Entity> entities, Entity entity)
 	{
 		if (entities.Count == 0) return;
 
@@ -92,7 +91,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	public void SetAggro(List<Entity> entities, bool aggro)
+	public static void SetAggro(List<Entity> entities, bool aggro)
 	{
 		if (entities.Count == 0) return;
 
@@ -102,7 +101,7 @@ public class NetworkActionManager : MonoBehaviour
 		NetworkClient.Instance.SendCommand(command);
 	}
 
-	private List<uint> GetSelectedEntityIds(List<Entity> entities)
+	private static List<uint> GetSelectedEntityIds(List<Entity> entities)
 	{
 		List<uint> entityIds = new List<uint>();
 

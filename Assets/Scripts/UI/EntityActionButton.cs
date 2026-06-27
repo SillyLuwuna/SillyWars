@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,13 +10,14 @@ public class EntityActionButton : MonoBehaviour
 	[SerializeField] private Image _icon;
 	[SerializeField] private Image _buttonImage;
 
-	private EntityAction _action;
+	public event EventHandler<EntityActionButton> Pressed;
+
+	public EntityAction Action { get; private set; }
+	private PlayerActionController _playerActionController;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-		AssetLoader.Instance.LoadAssets(_buttonsPath);
-		AssetLoader.Instance.LoadAssets(_iconsPath);
     }
 
     // Update is called once per frame
@@ -24,9 +26,13 @@ public class EntityActionButton : MonoBehaviour
         
     }
 
-	public void SetEntityAction(EntityAction action)
+	public void SetEntityAction(PlayerActionController playerActionController, EntityAction action)
 	{
-		_action = action;
+		AssetLoader.Instance.LoadAssets(_buttonsPath);
+		AssetLoader.Instance.LoadAssets(_iconsPath);
+
+		Action = action;
+		_playerActionController = playerActionController;
 
 		string iconName = action switch
 		{
@@ -44,6 +50,23 @@ public class EntityActionButton : MonoBehaviour
 
 	public void OnPress()
 	{
-		Debug.Log($"Pressed! {_action}");
+		switch (Action)
+		{
+			case EntityAction.Halt:
+				_playerActionController.OnHaltInput();
+				break;
+			case EntityAction.Move:
+				_playerActionController.IsWalkAttack = false;
+				_playerActionController.BuildBarracks = false;
+				_playerActionController.BuildCastle = false;
+				break;
+			case EntityAction.Attack:
+				_playerActionController.IsWalkAttack = true;
+				_playerActionController.BuildBarracks = false;
+				_playerActionController.BuildCastle = false;
+				break;
+		}
+		Debug.Log($"Pressed! {Action}");
+		Pressed?.Invoke(this, this);
 	}
 }

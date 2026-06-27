@@ -9,7 +9,6 @@ using UnityEngine;
 
 public class PlayerActionController : MonoBehaviour
 {
-	[SerializeField] private NetworkActionManager _networkActionManager;
 	[SerializeField] private SelectionMenuManager _selectionMenu = null!;
 	[SerializeField] private Camera _mainCamera;
 
@@ -21,9 +20,46 @@ public class PlayerActionController : MonoBehaviour
 	private Vector3 _cameraMoveVector;
 
 	public List<Entity> SelectedEntities { get; private set; } = new List<Entity>();
+
 	private bool _isWalkAttack = false;
 	private bool _buildBarracks = false;
 	private bool _buildCastle = false;
+
+	public bool IsWalkAttack
+	{
+		get => _isWalkAttack;
+		set
+		{
+			ResetState();
+			_isWalkAttack = true;
+		}
+	}
+
+	public bool BuildBarracks
+	{
+		get => _buildBarracks;
+		set
+		{
+			ResetState();
+			_buildBarracks = true;
+		}
+	}
+
+	public bool BuildCastle
+	{
+		get => _buildCastle;
+		set
+		{
+			_buildCastle = true;
+		}
+	}
+
+	private void ResetState()
+	{
+		_isWalkAttack = false;
+		_buildBarracks = false;
+		_buildCastle = false;
+	}
 
 	void Start()
 	{
@@ -47,12 +83,12 @@ public class PlayerActionController : MonoBehaviour
 	{
 		if (unit.OwnerId != WorldStateManager.Instance.PlayerId)
 		{
-			_networkActionManager.SetAggro(SelectedEntities, false);
-			_networkActionManager.Attack(SelectedEntities, unit);
+			NetworkActionManager.SetAggro(SelectedEntities, false);
+			NetworkActionManager.Attack(SelectedEntities, unit);
 		}
 		else
 		{
-			_networkActionManager.Move(SelectedEntities, unit.Pos);
+			NetworkActionManager.Move(SelectedEntities, unit.Pos);
 		}
 	}
 
@@ -60,17 +96,17 @@ public class PlayerActionController : MonoBehaviour
 	{
 		if (structure.OwnerId == WorldStateManager.Instance.PlayerId)
 		{
-			_networkActionManager.Build(SelectedEntities, structure);
+			NetworkActionManager.Build(SelectedEntities, structure);
 		}
 		else
 		{
-			_networkActionManager.Attack(SelectedEntities, structure);
+			NetworkActionManager.Attack(SelectedEntities, structure);
 		}
 	}
 
 	public void OnRightClick(BaseResourceNode node)
 	{
-		_networkActionManager.Gather(SelectedEntities, node);
+		NetworkActionManager.Gather(SelectedEntities, node);
 	}
 
 	public void OnRightClick(Vec2 mousePos)
@@ -80,23 +116,22 @@ public class PlayerActionController : MonoBehaviour
 			Entity selected = SelectedEntities[0];
 			if (selected is BaseStructure)
 			{
-				_networkActionManager.SetProductionSpawn(SelectedEntities, mousePos);
+				NetworkActionManager.SetProductionSpawn(SelectedEntities, mousePos);
 				return;
 			}
 
 		}
 
-		if (_isWalkAttack)
+		if (IsWalkAttack)
 		{
-			_isWalkAttack = false;
-			Debug.Log($"walk attack: {_isWalkAttack}");
-			_networkActionManager.SetAggro(SelectedEntities, true);
-			_networkActionManager.Move(SelectedEntities, mousePos);
+			IsWalkAttack= false;
+			NetworkActionManager.SetAggro(SelectedEntities, true);
+			NetworkActionManager.Move(SelectedEntities, mousePos);
 		}
 		else
 		{
-			_networkActionManager.SetAggro(SelectedEntities, false);
-			_networkActionManager.Move(SelectedEntities, mousePos);
+			NetworkActionManager.SetAggro(SelectedEntities, false);
+			NetworkActionManager.Move(SelectedEntities, mousePos);
 		}
 	}
 
@@ -120,17 +155,16 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnLeftClick(Vec2 mousePos)
 	{
-		if (_buildBarracks)
+		_selectionMenu.OnEmptyClick();
+		if (BuildBarracks)
 		{
-			_buildBarracks = false;
-			_networkActionManager.BuildNew(SelectedEntities, mousePos, StructureType.Barracks);
-			Debug.Log($"build barracks: {_buildBarracks}");
+			BuildBarracks = false;
+			NetworkActionManager.BuildNew(SelectedEntities, mousePos, StructureType.Barracks);
 		}
-		else if (_buildCastle)
+		else if (BuildCastle)
 		{
-			_buildCastle = false;
-			_networkActionManager.BuildNew(SelectedEntities, mousePos, StructureType.Castle);
-			Debug.Log($"build castle: {_buildCastle}");
+			BuildCastle = false;
+			NetworkActionManager.BuildNew(SelectedEntities, mousePos, StructureType.Castle);
 		}
 		else
 		{
@@ -140,22 +174,17 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnBuildBarracksInput()
 	{
-		_buildCastle = false;
-		_buildBarracks = !_buildBarracks;
-		Debug.Log($"build barracks: {_buildBarracks}");
+		BuildBarracks = true;
 	}
 
 	public void OnBuildCastleInput()
 	{
-		_buildBarracks = false;
-		_buildCastle = !_buildCastle;
-		Debug.Log($"build castle: {_buildCastle}");
+		BuildCastle = true;
 	}
 
 	public void OnWalkAttackInput()
 	{
-		_isWalkAttack = !_isWalkAttack;
-		Debug.Log($"walk attack: {_isWalkAttack}");
+		IsWalkAttack = true;
 	}
 
 	public void OnEnqueueKnightInput()
@@ -165,7 +194,7 @@ public class PlayerActionController : MonoBehaviour
 
 		if (!(selected is BaseStructure)) return;
 
-		_networkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Knight);
+		NetworkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Knight);
 	}
 
 	public void OnEnqueueWorkerInput()
@@ -175,7 +204,7 @@ public class PlayerActionController : MonoBehaviour
 
 		if (!(selected is BaseStructure)) return;
 
-		_networkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Worker);
+		NetworkActionManager.EnqueueUnitProduction(SelectedEntities, UnitType.Worker);
 	}
 
 	public void OnHaltInput()
@@ -183,7 +212,7 @@ public class PlayerActionController : MonoBehaviour
 		if (SelectedEntities.Count != 1) return;
 		Entity selected = SelectedEntities[0];
 
-		_networkActionManager.Halt(SelectedEntities);
+		NetworkActionManager.Halt(SelectedEntities);
 	}
 
 	public void OnDrag(List<Entity> selectedEntities)
@@ -196,9 +225,7 @@ public class PlayerActionController : MonoBehaviour
 	{
 		_selectionMenu.Close();
 		SelectedEntities = new List<Entity>();
-		_isWalkAttack = false;
-		_buildBarracks = false;
-		_buildCastle = false;
+		ResetState();
 	}
 
 	private List<uint> GetSelectedUnitIds(List<Entity> entities)

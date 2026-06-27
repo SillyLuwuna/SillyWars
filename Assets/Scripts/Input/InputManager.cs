@@ -81,13 +81,18 @@ public class InputManager : MonoBehaviour
 
 	public void SetCorrespondingMouse(Entity target)
 	{
+		if (_playerController.SelectedEntities.Count <= 0)
+		{
+			if (target.OwnerId == WorldStateManager.Instance.PlayerId)
+			{
+				SetSelectMouse();
+			}
+			return;
+		}
+
 		if ((target is IDestroyable) && (target.OwnerId != WorldStateManager.Instance.PlayerId))
 		{
 			SetAttackMouse();
-		}
-		else if (target is BaseUnit)
-		{
-			SetSelectMouse();
 		}
 		else if (target is BaseStructure)
 		{
