@@ -26,7 +26,6 @@ public class BuildHelper : MonoBehaviour
 
 	public void Open(StructureType structureType)
 	{
-		Debug.Log("Opened build helper");
 		_structureType = structureType;
 
 		BaseStructure dummyStructure = GetDummyStructureAtMousePos();
@@ -35,9 +34,6 @@ public class BuildHelper : MonoBehaviour
 		StructureAnimationController animationController = _dummyStructure.GetComponent<StructureAnimationController>();
 		animationController.Entity = dummyStructure;
 		animationController.DisableDestroyAnimations = true;
-
-		Debug.Log("instantiated");
-		Debug.Log(_dummyStructure);
 
 		SetTransparent(_dummyStructure);
 	}

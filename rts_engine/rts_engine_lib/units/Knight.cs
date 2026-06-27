@@ -19,7 +19,7 @@ public class Knight : BaseUnit
 	public const float BaseAggroRange = 3.0f;
 	public const float BaseMoveSpeed = 0.11f;
 
-	public const int BaseProductionTime = 10 * 10;
+	public const int BaseProductionTime = 20 * 5;
 
 	public override int MaxHitPoints => 10;
 	public override int HitPoints { get; set; }

@@ -121,10 +121,6 @@ public abstract class UnitProducer : BaseStructure
 		}
 	}
 
-	public bool IsProducingUnits { get => _productionUnit != null; }
-
-	public int QueuedUnitsCount { get => IsProducingUnits ? _productionQueue.Count + 1 : _productionQueue.Count; }
-
 	private void UpdateSpawnLocation()
 	{
 		Grid<Cell> map = RtsEngine.Instance.State.Map;
@@ -158,6 +154,16 @@ public abstract class UnitProducer : BaseStructure
 		_productionUnit = _productionQueue.Dequeue();
 		_productionCooldown = BaseUnit.FromUnitType(_productionUnit.Value, this.OwnerId, Vec2.Zero).ProductionTime; // inefficient
 	}
+
+	public bool IsProducingUnits { get => _productionUnit != null; }
+
+	public int QueuedUnitsCount { get => IsProducingUnits ? _productionQueue.Count + 1 : _productionQueue.Count; }
+
+	public UnitType? ProductionQueueHead { get => _productionUnit; }
+
+	public Queue<UnitType> ProductionQueue { get => new Queue<UnitType>(_productionQueue); }
+
+	public int TicksLeftForProduction { get => _productionCooldown; }
 }
 
 }

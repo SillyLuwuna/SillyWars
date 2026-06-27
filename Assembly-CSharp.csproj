@@ -48,11 +48,13 @@
     <Analyzer Include="/home/luna/Unity/Hub/Editor/6000.3.6f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Scripts/UI/BuildHelper.cs" />
     <Compile Include="Assets/Scripts/Network/WorldStateManager.cs" />
-    <Compile Include="Assets/Scripts/UI/EntityActionButton.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/StructureSelect/TrainQueueItem.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/StructureSelect/TrainQueueManager.cs" />
     <Compile Include="Assets/Scripts/Network/NetworkActionManager.cs" />
     <Compile Include="Assets/Scripts/Map/GridManager.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/SelectActions/EntityActionButton.cs" />
+    <Compile Include="Assets/Scripts/UI/Building/BuildOption.cs" />
     <Compile Include="Assets/Scripts/Particles/ParticleFx.cs" />
     <Compile Include="Assets/Scripts/Network/NetworkClient.cs" />
     <Compile Include="Assets/Scripts/Input/PlayerActionController.cs" />
@@ -61,17 +63,18 @@
     <Compile Include="Assets/Scripts/EntityManagers/ResourceManager.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/UnitManager.cs" />
     <Compile Include="Assets/Scripts/Animation/AnimationController.cs" />
-    <Compile Include="Assets/Scripts/UI/BuildOption.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/StructureManager.cs" />
-    <Compile Include="Assets/Scripts/UI/EntityAction.cs" />
-    <Compile Include="Assets/Scripts/UI/SelectionMenuManager.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/StructureSelect/TrainQueueHead.cs" />
     <Compile Include="Assets/Scripts/PrefabAutoLogic/AutoSquareColliderManager.cs" />
+    <Compile Include="Assets/Scripts/UI/Building/BuildHelper.cs" />
     <Compile Include="Assets/Scripts/Input/InputManager.cs" />
     <Compile Include="Assets/Scripts/EntityManagers/PrefabManager.cs" />
-    <Compile Include="Assets/Scripts/UI/SelectionBoxUI.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/SelectionBoxUI.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/SelectActions/EntityAction.cs" />
     <Compile Include="Assets/Scripts/Animation/NodeAnimationController.cs" />
     <Compile Include="Assets/Scripts/Animation/UnitAnimationController.cs" />
     <Compile Include="Assets/Scripts/Animation/StructureAnimationController.cs" />
+    <Compile Include="Assets/Scripts/UI/Selection/SelectionMenuManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />

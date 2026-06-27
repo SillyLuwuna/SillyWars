@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public class SelectionMenuManager : MonoBehaviour
 {
 	private const string _unitPortraitsPath = "Tiny Swords/UI Elements/Human Avatars";
+	private const string _structurePath = "Tiny Swords/Buildings";
+
 	private static readonly List<EntityAction> _workerAllowedActions = new List<EntityAction>() {
 		EntityAction.Halt,
 		EntityAction.Move,
@@ -19,6 +21,7 @@ public class SelectionMenuManager : MonoBehaviour
 		// EntityAction.Repair,
 		// EntityAction.Mine
 	};
+
 	private static readonly List<EntityAction> _knightAllowedActions = new List<EntityAction>() {
 		EntityAction.Halt,
 		EntityAction.Move,
@@ -42,6 +45,9 @@ public class SelectionMenuManager : MonoBehaviour
 	[SerializeField] private Transform _buildOptionsContainer;
 	[SerializeField] private Transform _buildOptionPrefab;
 	[SerializeField] private BuildHelper _buildHelper;
+
+	[Header("Structure UI")]
+	[SerializeField] private TrainQueueManager _trainQueueManager;
 
 
 
@@ -137,15 +143,15 @@ public class SelectionMenuManager : MonoBehaviour
 
 	private void UpdateOne(Entity entity)
 	{
-		if (entity is BaseUnit unit)
+		if (entity is IDestroyable destroyable)
 		{
-			UpdateOneUnit(unit);
+			UpdateHPText(destroyable);
 		}
 	}
 
-	private void UpdateOneUnit(BaseUnit unit)
+	private void UpdateHPText(IDestroyable destroyable)
 	{
-		_unitHpText.text = $"{unit.HitPoints}/{unit.MaxHitPoints}";
+		_unitHpText.text = $"{destroyable.HitPoints}/{destroyable.MaxHitPoints}";
 	}
 
 	public void Enable()
@@ -153,6 +159,9 @@ public class SelectionMenuManager : MonoBehaviour
 		_isEnabled = true;
 		// _selectionMenu.SetActive(true);
 		_unitSpecificParts.SetActive(false);
+		_buildOptionsContainer.gameObject.SetActive(false);
+		_trainQueueManager.Close();
+		_buildHelper.Close();
 	}
 
 	public void Disable()
@@ -168,23 +177,61 @@ public class SelectionMenuManager : MonoBehaviour
 
 	private void OpenOne(Entity entity)
 	{
+		_unitSpecificParts.SetActive(true);
+		uint playerId = WorldStateManager.Instance.PlayerId;
+
 		if (entity is BaseUnit unit)
 		{
-			OpenOneUnit(unit);
+			SetUnitPortrait(unit);
+			if (entity.OwnerId == playerId)
+			{
+				OpenOneUnit(unit);
+			}
+		}
+		else if (entity is UnitProducer structure)
+		{
+			SetStructurePortrait(structure);
+			if (entity.OwnerId == playerId)
+			{
+				OpenOneStructure(structure);
+			}
 		}
 
 		ClearEntityActionButtons();
-		if (entity.OwnerId == WorldStateManager.Instance.PlayerId)
+		if (entity.OwnerId == playerId)
 		{
 			SetEntityActionButtons(GetAllowedEntityActions(entity));
 		}
 	}
 
+	private void SetPortrait(Sprite sprite)
+	{
+		_unitSelectionPortrait.sprite = sprite;
+	}
+
+	private void SetUnitPortrait(BaseUnit unit)
+	{
+		ColorVariant color = WorldStateManager.GetColorVariant(unit.OwnerId);
+		SetPortrait(AssetLoader.Instance.GetSprite($"{_unitPortraitsPath}/{color} {unit.UnitType}"));
+	}
+
 	private void OpenOneUnit(BaseUnit unit)
 	{
-		_unitSpecificParts.SetActive(true);
-		ColorVariant color = WorldStateManager.GetColorVariant(unit.OwnerId);
-		_unitSelectionPortrait.sprite = AssetLoader.Instance.GetSprite($"{_unitPortraitsPath}/{color} {unit.UnitType}");
+
+	}
+
+	private void SetStructurePortrait(BaseStructure structure)
+	{
+		ColorVariant color = WorldStateManager.GetColorVariant(structure.OwnerId);
+
+		AssetLoader.Instance.LoadAssets($"{_structurePath}/{color}");
+
+		SetPortrait(AssetLoader.Instance.GetSprite($"{_structurePath}/{color}/{structure.StructureType}"));
+	}
+
+	private void OpenOneStructure(UnitProducer structure)
+	{
+		_trainQueueManager.Open(structure);
 	}
 
 	private List<EntityAction> GetAllowedEntityActions(Entity entity) => entity switch
@@ -228,6 +275,7 @@ public class SelectionMenuManager : MonoBehaviour
 
 	public void OnBuildOptionButtonPressed(object sender, BuildOption buildOption)
 	{
+		_buildHelper.Close();
 		_buildHelper.Open(buildOption.StructureType);
 
 		switch (buildOption.StructureType)

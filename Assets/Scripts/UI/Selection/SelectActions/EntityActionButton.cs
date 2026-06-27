@@ -66,7 +66,6 @@ public class EntityActionButton : MonoBehaviour
 				_playerActionController.BuildCastle = false;
 				break;
 		}
-		Debug.Log($"Pressed! {Action}");
 		Pressed?.Invoke(this, this);
 	}
 }
