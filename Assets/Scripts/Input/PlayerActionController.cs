@@ -9,6 +9,7 @@ using UnityEngine;
 
 public class PlayerActionController : MonoBehaviour
 {
+	[SerializeField] private GameplayMenu _gameplayMenu = null!;
 	[SerializeField] private SelectionMenuManager _selectionMenu = null!;
 	[SerializeField] private Camera _mainCamera;
 
@@ -299,6 +300,19 @@ public class PlayerActionController : MonoBehaviour
 
 	public void OnCancel()
 	{
+		if (SelectedEntities.Count <= 0)
+		{
+			if (_gameplayMenu.IsOpen)
+			{
+				_gameplayMenu.Close();
+			}
+			else
+			{
+				_gameplayMenu.Open();
+			}
+			return;
+		}
+
 		OnReset();
 	}
 }

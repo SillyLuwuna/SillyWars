@@ -75,16 +75,20 @@ public abstract class BaseResourceNode: PhysicsObject, ISerializable, IGatherabl
 			if (_gatherersWorkDone.Count >= MaxGatherers) return new ResourceStack(Resource.None, -1);
 			_gatherersWorkDone[gatherer] = RequiredWork;
 			_activeGatherers.Add(gatherer);
+			CurrGathererCount = _gatherersWorkDone.Count;
 			return new ResourceStack(this.Resource, 0);
 		}
 
+
 		_gatherersWorkDone[gatherer] -= gatherer.WorkPerGather;
 		_activeGatherers.Add(gatherer);
+		CurrGathererCount = _gatherersWorkDone.Count;
 		if (_gatherersWorkDone[gatherer] > 0) return new ResourceStack(this.Resource, 0);
 
 		_gatherersWorkDone[gatherer] = RequiredWork;
 		_gatherersWorkDone.Remove(gatherer);
 		_activeGatherers.Remove(gatherer);
+		CurrGathererCount = _gatherersWorkDone.Count;
 
 		Remaining -= GatherAmount;
 
@@ -119,6 +123,7 @@ public abstract class BaseResourceNode: PhysicsObject, ISerializable, IGatherabl
 		}
 
 		_activeGatherers.Clear();
+		CurrGathererCount = _gatherersWorkDone.Count;
 	}
 }
 

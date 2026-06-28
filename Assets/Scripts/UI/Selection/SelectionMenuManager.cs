@@ -71,7 +71,7 @@ public class SelectionMenuManager : MonoBehaviour
 
 	void Awake()
 	{
-		this.gameObject.SetActive(false);
+		// this.gameObject.SetActive(false);
 	}
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

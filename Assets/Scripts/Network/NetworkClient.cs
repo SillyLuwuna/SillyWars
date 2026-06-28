@@ -84,8 +84,10 @@ public class NetworkClient : MonoBehaviour
 		if (this != _instance) return;
     }
 
-	public void TryConnect()
+	public void TryConnect(string ip, int port)
 	{
+		Ip = ip;
+		Port = port;
 		StartCoroutine(ConnectToServer());
 	}
 
@@ -187,10 +189,7 @@ public class NetworkClient : MonoBehaviour
 		ConnectionEstablished?.Invoke();
 	}
 
-	public bool IsConnected()
-	{
-		return _client.IsConnected;
-	}
+	public bool IsConnected => _client.IsConnected;
 
 	public void Disconnect()
 	{
