@@ -31,6 +31,8 @@ public class InputManager : MonoBehaviour
 	private bool _isDragging = false;
 	private bool _isMouseClick = true;
 
+	private bool _enabled = false;
+
 
 	public void SetDefaultMouse() => Cursor.SetCursor(_defaultMouse, _normalMouseOffset, CursorMode.Auto);
 	public void SetSelectMouse() => Cursor.SetCursor(_selectMouse, _normalMouseOffset, CursorMode.Auto);
@@ -52,6 +54,12 @@ public class InputManager : MonoBehaviour
 
 	void Update()
 	{
+		if (!_enabled)
+		{
+			SetDefaultMouse();
+			return;
+		}
+
 		if (_isDragging)
 		{
 			_dragEnd = Mouse.current.position.ReadValue();
@@ -137,6 +145,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnRightClick(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		Vector2 screenMousePos = Mouse.current.position.ReadValue();
@@ -166,6 +175,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnLeftClick(Vector2 screenMousePos)
 	{
+		if (!_enabled) return;
 		if (IsPointerOverUI(screenMousePos)) return;
 
 		Vector2 mousePos = Camera.main.ScreenToWorldPoint(screenMousePos);
@@ -192,6 +202,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnBuildCastleInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnBuildCastleInput();
@@ -199,6 +210,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnBuildBarracksInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnBuildBarracksInput();
@@ -206,6 +218,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnWalkAttackInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnWalkAttackInput();
@@ -213,6 +226,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnEnqueueKnightInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnEnqueueKnightInput();
@@ -220,6 +234,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnEnqueueWorkerInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnEnqueueWorkerInput();
@@ -227,6 +242,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnHaltInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnHaltInput();
@@ -234,6 +250,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnDrag(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		switch (context.phase)
 		{
 			case InputActionPhase.Started:
@@ -327,16 +344,19 @@ public class InputManager : MonoBehaviour
 
 	public void OnCameraMoveInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		_playerController.OnCameraMoveInput(context.ReadValue<Vector2>());
 	}
 
 	public void OnScrollInput(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		_playerController.OnScrollInput(context.ReadValue<Vector2>().y);
 	}
 
 	public void OnCancel(InputAction.CallbackContext context)
 	{
+		if (!_enabled) return;
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnCancel();
