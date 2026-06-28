@@ -1,14 +1,13 @@
 using UnityEngine;
 
-public class GameplayUI : MonoBehaviour
+public class OutcomeScreen : MonoBehaviour
 {
-	[SerializeField] private OutcomeScreen _winScreen;
-	[SerializeField] private OutcomeScreen _loseScreen;
+	[SerializeField] private GameplayMenu _gameplayMenu;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-		WorldStateManager.Instance.GameOver += OnGameOver;
+        
     }
 
     // Update is called once per frame
@@ -29,16 +28,9 @@ public class GameplayUI : MonoBehaviour
 
 	public bool IsOpen => this.gameObject.activeSelf;
 
-	private void OnGameOver()
+	public void OnExitButtonPressed()
 	{
-		uint playerId = WorldStateManager.Instance.PlayerId;
-		if (WorldStateManager.Instance.LatestState.PlayerWon(playerId))
-		{
-			_winScreen.Open();
-		}
-		else
-		{
-			_loseScreen.Open();
-		}
+		_gameplayMenu.ReturnToMainMenu();
+		this.Close();
 	}
 }

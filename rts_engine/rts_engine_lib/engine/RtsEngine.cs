@@ -149,6 +149,7 @@ public class RtsEngine
 		ExecutePlayerCommands();
 		UpdateWorldState();
 		UpdatePhysics();
+		CheckWinCondition();
 		if (_isServer)
 		{
 			_currentBroadcastTask = BroadcastWorldState();
@@ -197,6 +198,11 @@ public class RtsEngine
 		_physicsEngine.ProcessCollisions(physicsObjects);
 		_physicsEngine.PhysicsTick(physicsObjects);
 		_physicsEngine.LimitToMapBoundaries(physicsObjects, _state.Map);
+	}
+
+	private void CheckWinCondition()
+	{
+		_state.CheckWinCondition();
 	}
 
 	private async Task BroadcastWorldState()
@@ -256,6 +262,8 @@ public class RtsEngine
 
 	public void EnqueueCommand(ICommand command)
 	{
+		if (_state.PlayerLost(command.PlayerId)) return;
+
 		lock (_commandQueueLock)
 		{
 			_commandQueue.Enqueue(command);

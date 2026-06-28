@@ -51,6 +51,7 @@ public class WorldStateManager : MonoBehaviour
 	public event EventHandler<EntityEventArgs>? EntityDestroy;
 	public event EventHandler<WorldState>? NewState;
 	public event Action? ResetState;
+	public event Action? GameOver;
 
 	private WorldStateManager() { }
 
@@ -106,8 +107,22 @@ public class WorldStateManager : MonoBehaviour
 			OnNewState(_latestState!);
 			UpdateEntities(_latestState!.Entities);
 			RemoveEntities(_latestState!.RemovedEntities);
+			CheckWinCondition();
 		}
     }
+
+	private void CheckWinCondition()
+	{
+		if (_latestState!.IsGameOver)
+		{
+			OnGameOver();
+		}
+	}
+
+	private void OnGameOver()
+	{
+		GameOver?.Invoke();
+	}
 
 	private void Tick(object? sender, WorldState state)
 	{

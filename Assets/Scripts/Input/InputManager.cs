@@ -43,6 +43,7 @@ public class InputManager : MonoBehaviour
 	void Start()
 	{
 		WorldStateManager.Instance.ResetState += OnReset;
+		WorldStateManager.Instance.GameOver += OnGameOver;
 		AssetLoader.Instance.LoadAssets(_cursorsPath);
 		_defaultMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Cursor_01")!;
 		_selectMouse = AssetLoader.Instance.GetTexture($"{_cursorsPath}/Cursor_02")!;
@@ -360,5 +361,10 @@ public class InputManager : MonoBehaviour
 		if (context.phase != InputActionPhase.Started) return;
 
 		_playerController.OnCancel();
+	}
+
+	private void OnGameOver()
+	{
+		InGameInputs = false;
 	}
 }

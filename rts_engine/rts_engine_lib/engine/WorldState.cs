@@ -43,6 +43,9 @@ public class WorldState : ISerializable
 	public List<uint> AddedEntities { get; private set; } = null!;
 	public List<uint> RemovedEntities { get; private set; } = null!;
 
+	private HashSet<uint> PlayersLost = null!;
+	private bool _winConditionMet;
+
 	public WorldState(Grid<Cell> map, int numPlayers)
 	{
 		Init(map, numPlayers);
@@ -79,6 +82,9 @@ public class WorldState : ISerializable
 
 		AddedEntities = new List<uint>();
 		RemovedEntities = new List<uint>();
+
+		PlayersLost = new HashSet<uint>();
+		_winConditionMet = false;
 	}
 
 	public void SerializeFields(SerializerWriter writer)
@@ -98,6 +104,14 @@ public class WorldState : ISerializable
 
 		writer.Write(AddedEntities);
 		writer.Write(RemovedEntities);
+
+		writer.Write(PlayersLost.Count);
+		foreach (uint player in PlayersLost)
+		{
+			writer.Write(player);
+		}
+
+		writer.Write(_winConditionMet);
 	}
 
 	public void DeserializeFields(SerializerReader reader)
@@ -120,6 +134,14 @@ public class WorldState : ISerializable
 
 		AddedEntities = reader.Read<List<uint>>();
 		RemovedEntities = reader.Read<List<uint>>();
+
+		int playerLostCount = reader.Read<int>();
+		for (int i = 0; i < playerLostCount; i++)
+		{
+			PlayersLost.Add(reader.Read<uint>());
+		}
+
+		_winConditionMet = reader.Read<bool>();
 	}
 
 	public void AddEntity(Entity entity)
@@ -174,19 +196,16 @@ public class WorldState : ISerializable
 	public void GiveResource(ResourceStack resourceStack, uint playerId)
 	{
 		_playerResources[playerId * ResourceNum + (int)resourceStack.Resource] += resourceStack.Amount;
-		Console.WriteLine($"{playerId}: (+{resourceStack.Amount}) {GetResource(playerId, resourceStack.Resource)}");
 	}
 
 	public bool TryTakeResource(ResourceStack resourceStack, uint playerId)
 	{
 		if (!HasEnoughResources(resourceStack, playerId))
 		{
-			Console.WriteLine($"{playerId}: not enough {resourceStack.Resource} ({resourceStack.Amount})");
 			return false;
 		}
 
 		_playerResources[playerId * ResourceNum + (int)resourceStack.Resource] -= resourceStack.Amount;
-		Console.WriteLine($"{playerId}: (-{resourceStack.Amount}) {GetResource(playerId, resourceStack.Resource)}");
 		return true;
 	}
 
@@ -367,5 +386,41 @@ public class WorldState : ISerializable
 	{
 		PlayerVersion = playerId;
 	}
+
+	public void CheckWinCondition()
+	{
+		if (_winConditionMet) return;
+
+		HashSet<uint> PlayersWithStructures = new HashSet<uint>();
+		foreach (BaseStructure structure in _structures)
+		{
+			PlayersWithStructures.Add(structure.OwnerId);
+		}
+
+		for (uint i = 0; i < NumPlayers; i++)
+		{
+			if (!PlayersWithStructures.Contains(i))
+			{
+				PlayersLost.Add(i);
+			}
+		}
+
+		if (PlayersLost.Count >= (NumPlayers - 1))
+		{
+			_winConditionMet = true;
+		}
+	}
+
+	public bool PlayerLost(uint playerId)
+	{
+		return PlayersLost.Contains(playerId);
+	}
+
+	public bool PlayerWon(uint playerId)
+	{
+		return !PlayerLost(playerId);
+	}
+
+	public bool IsGameOver => _winConditionMet;
 }
 }

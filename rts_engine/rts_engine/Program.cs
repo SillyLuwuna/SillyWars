@@ -84,7 +84,7 @@ public static class Program
 
 		Barracks barracks1 = Barracks.CreateBuilt(1, new Vec2Int(20, 5));
 		Barracks barracks2 = Barracks.CreateBuilt(1, new Vec2Int(20, 8));
-		Barracks barracks3 = Barracks.CreateBuilt(1, new Vec2Int(20, 11));
+		Barracks barracks3 = Barracks.CreateBuilt(0, new Vec2Int(20, 11));
 		state.AddEntity(barracks1);
 		state.AddEntity(barracks2);
 		state.AddEntity(barracks3);

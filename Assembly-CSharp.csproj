@@ -82,6 +82,7 @@
     <Compile Include="Assets/Scripts/Animation/StructureAnimationController.cs" />
     <Compile Include="Assets/Scripts/Network/LocalEngine.cs" />
     <Compile Include="Assets/Scripts/UI/Menus/GameplayUI.cs" />
+    <Compile Include="Assets/Scripts/UI/Menus/OutcomeScreen.cs" />
     <Compile Include="Assets/Scripts/UI/Menus/PlayMenu.cs" />
     <Compile Include="Assets/Scripts/UI/Selection/SelectionMenuManager.cs" />
   </ItemGroup>

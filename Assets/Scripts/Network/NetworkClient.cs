@@ -100,7 +100,7 @@ public class NetworkClient : MonoBehaviour
 		// Debug.Log($"{LocalEngine.Instance.Engine?.TPS}");
 		// byte[] stateData = Serializer.ToBytes(state);
 		// WorldState copy = Serializer.FromBytes<WorldState>(stateData);
-
+		state.SetPlayerVersion(0);
 		UpdateState(state);
 	}
 

@@ -36,6 +36,11 @@ public class GameplayMenu : MonoBehaviour
 
 	public void OnExitButtonPressed()
 	{
+		ReturnToMainMenu();
+	}
+
+	public void ReturnToMainMenu()
+	{
 		if (NetworkClient.Instance.IsConnected)
 		{
 			NetworkClient.Instance.Disconnect();
@@ -46,11 +51,6 @@ public class GameplayMenu : MonoBehaviour
 			LocalEngine.Instance.StopEngine();
 		}
 
-		ReturnToMainMenu();
-	}
-
-	private void ReturnToMainMenu()
-	{
 		_inputManager.InGameInputs = false;
 		_mainMenu.Open();
 
