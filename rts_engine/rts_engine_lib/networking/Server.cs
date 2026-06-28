@@ -242,6 +242,8 @@ public class Server
 
 	public void Stop()
 	{
+		if (!_isRunning) return;
+
 		_isRunning = false;
 
 		_clientsSemaphore.Wait();

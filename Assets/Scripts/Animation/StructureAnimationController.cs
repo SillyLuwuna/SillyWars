@@ -7,6 +7,7 @@ using UnityEngine;
 public class StructureAnimationController : AnimationController<BaseStructure>
 {
 	private ColorVariant _color;
+	private int _lastHp = -1;
 
 	protected override string GetAssetPath(BaseStructure structure)
 	{
@@ -37,13 +38,20 @@ public class StructureAnimationController : AnimationController<BaseStructure>
 
     protected override void UpdateStateOverride(BaseStructure structure)
     {
-		BaseStructure? oldStructure = (BaseStructure?)WorldStateManager.Instance.GetEntityOld(structure);
+		int _currHp = structure.HitPoints;
 
-		if (TookDamage(structure, oldStructure))
+		if (_lastHp == -1)
+		{
+			_lastHp = _currHp;
+			return;
+		}
+
+		if (_currHp < _lastHp)
 		{
 			StartCoroutine(FlashRed());
 		}
 
+		_lastHp = _currHp;
     }
 
 	protected override void UpdateState(BaseStructure structure)

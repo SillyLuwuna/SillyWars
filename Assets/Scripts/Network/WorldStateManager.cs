@@ -35,7 +35,7 @@ public class WorldStateManager : MonoBehaviour
 	[SerializeField]
 	private PrefabManager _prefabManager = null!;
 
-	private Dictionary<Entity, Entity> _previousVersion = null!;
+	// private Dictionary<Entity, Entity> _previousVersion = null!;
 	private Dictionary<uint, Entity> _entitiesId = null!;
 	private Dictionary<Entity, GameObject> _entityInstances = null!;
 	private Dictionary<int, Entity> _objectEntities = null!;
@@ -77,7 +77,7 @@ public class WorldStateManager : MonoBehaviour
     void Start()
     {
 		_newConnection = true;
-		_previousVersion = new Dictionary<Entity, Entity>();
+		// _previousVersion = new Dictionary<Entity, Entity>();
 		_entitiesId = new Dictionary<uint, Entity>();
 		_entityInstances = new Dictionary<Entity, GameObject>();
 		_objectEntities = new Dictionary<int, Entity>();
@@ -124,7 +124,7 @@ public class WorldStateManager : MonoBehaviour
 		{
 			Destroy(obj);
 		}
-		_previousVersion.Clear();
+		// _previousVersion.Clear();
 		_entitiesId.Clear();
 		_entityInstances.Clear();
 		_objectEntities.Clear();
@@ -140,20 +140,20 @@ public class WorldStateManager : MonoBehaviour
 			if (!_entityInstances.ContainsKey(entity)) continue;
 			int gameObj = _entityInstances[entity].GetInstanceID();
 
-			if (_entitiesId.ContainsKey(entity.Id))
-			{
-				_previousVersion[entity] = _entitiesId[entity.Id];
-			}
+			// if (_entitiesId.ContainsKey(entity.Id))
+			// {
+			// 	_previousVersion[entity] = _entitiesId[entity.Id];
+			// }
 
 			_entitiesId[entity.Id] = entity;
 			_objectEntities[gameObj] = entity;
 		}
 	}
 
-	public Entity? GetEntityOld(Entity entity)
-	{
-		return _previousVersion.TryGetValue(entity, out Entity previous) ? previous : null;
-	}
+	// public Entity? GetEntityOld(Entity entity)
+	// {
+	// 	return _previousVersion.TryGetValue(entity, out Entity previous) ? previous : null;
+	// }
 
 	public Entity? GetEntity(GameObject obj)
 	{

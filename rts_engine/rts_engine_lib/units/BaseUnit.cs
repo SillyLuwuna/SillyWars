@@ -101,6 +101,12 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		base.Tick();
 
+
+		NextWaypoint = null;
+		if (!(CurrWalkPath == null) && CurrWalkPathCheckpoint < CurrWalkPath.Count )
+		{
+			NextWaypoint = CurrWalkPath[CurrWalkPathCheckpoint];
+		}
 		_attacked = false;
 
 		DecreaseCooldowns();
@@ -150,13 +156,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		writer.Write(MoveSpeed);
 		writer.Write(ProductionTime);
 		writer.Write(State);
-		writer.Write(_attacked);
 
-		NextWaypoint = null;
-		if (!(CurrWalkPath == null) && CurrWalkPathCheckpoint < CurrWalkPath.Count )
-		{
-			NextWaypoint = CurrWalkPath[CurrWalkPathCheckpoint];
-		}
+		writer.Write(_attacked);
 		writer.Write(NextWaypoint);
 	}
 

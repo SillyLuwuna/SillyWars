@@ -28,6 +28,7 @@ public class Clock
 	private long _totalElapsedMs;
 	private int _deltaTime;
 	private float _load;
+	private long _deltaTicks;
 
 	public event EventHandler<ClockEventArgs>? Tick;
 	public bool IsRunning { get; private set; }
@@ -42,6 +43,7 @@ public class Clock
 		_totalElapsedMs = 0;
 		_deltaTime = 0;
 		_load = 0.0f;
+		_deltaTicks = 0;
 
 		IsRunning = false;
 	}
@@ -56,6 +58,7 @@ public class Clock
 		_totalElapsedMs = 0;
 		_deltaTime = 0;
 		_load = 0.0f;
+		_deltaTicks = 0;
 
 		_clockTask = RunClockAsync(_cancellationTokenSource.Token);
 	}
@@ -88,7 +91,13 @@ public class Clock
 
 			while (!cancellationToken.IsCancellationRequested)
 			{
-				int delay = _msPerTick;
+				// int delay = _msPerTick - (int)((float)_msPerTick * _load);
+				long delayTicks = (_msPerTick * TimeSpan.TicksPerMillisecond) - _deltaTicks;
+				int delay = (int)(delayTicks / TimeSpan.TicksPerMillisecond);
+				if (delay < 0)
+				{
+					delay = 0;
+				}
 
 				await Task.Delay(delay, cancellationToken);
 
@@ -96,12 +105,12 @@ public class Clock
 
 				_deltaTime = (int)((currTicks - lastTicks) / TimeSpan.TicksPerMillisecond);
 				_totalElapsedMs += _deltaTime;
-				// _load = (float)(_msPerTick * TimeSpan.TicksPerMillisecond) / (float)(currTicks - lastTicks);
 
 				OnTick(new ClockEventArgs(_totalElapsedMs, _deltaTime, _load));
 
 				long ticksAfter = DateTime.Now.Ticks;
 				_load = (ticksAfter - currTicks) / (float)(_msPerTick * TimeSpan.TicksPerMillisecond);
+				_deltaTicks = (ticksAfter - currTicks);
 
 				lastTicks = currTicks;
 

@@ -9003,6 +9003,51 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4024410807491309968, guid: 6fa18de93d8cdbcd5b29bcf8f0be928c, type: 3}
   m_PrefabInstance: {fileID: 4461986729941496985}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1125528163
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1125528165}
+  - component: {fileID: 1125528164}
+  m_Layer: 0
+  m_Name: LocalEngine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1125528164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125528163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a99bb51b56d6c4dbe848dec9034d28c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalEngine
+  ServerTps: 20
+--- !u!4 &1125528165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125528163}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 747.7649, y: 408.80087, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1130380787
 GameObject:
   m_ObjectHideFlags: 0
@@ -9826,6 +9871,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayMenu
   _mainMenu: {fileID: 156431915}
+  _gameplayUI: {fileID: 726201983}
+  _inputManager: {fileID: 251422743}
 --- !u!1 &1215539301
 GameObject:
   m_ObjectHideFlags: 0
@@ -17104,6 +17151,7 @@ SceneRoots:
   - {fileID: 1728826411}
   - {fileID: 1302719322}
   - {fileID: 1862332307}
+  - {fileID: 1125528165}
   - {fileID: 1117320221}
   - {fileID: 1168736684}
   - {fileID: 2087673922}

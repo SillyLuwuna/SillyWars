@@ -14,7 +14,7 @@ using RtsEngine.Commands;
 
 public class NetworkClient : MonoBehaviour
 {
-	public static int SERVER_TPS = 20;
+	public static int SERVER_TPS = 20; // value should be obtained from the server
 
 	private static NetworkClient? _instance = null;
 	private static bool _awoken = false;
@@ -82,6 +82,10 @@ public class NetworkClient : MonoBehaviour
     void Start()
     {
 		if (this != _instance) return;
+
+		LocalEngine.Instance.Started += OnLocalStart;
+		LocalEngine.Instance.TickEnded += OnLocalStateUpdate;
+		LocalEngine.Instance.Stopped += OnLocalStop;
     }
 
 	public void TryConnect(string ip, int port)
@@ -89,6 +93,25 @@ public class NetworkClient : MonoBehaviour
 		Ip = ip;
 		Port = port;
 		StartCoroutine(ConnectToServer());
+	}
+
+	private void OnLocalStateUpdate(object? sender, WorldState state)
+	{
+		// Debug.Log($"{LocalEngine.Instance.Engine?.TPS}");
+		// byte[] stateData = Serializer.ToBytes(state);
+		// WorldState copy = Serializer.FromBytes<WorldState>(stateData);
+
+		UpdateState(state);
+	}
+
+	private void OnLocalStart()
+	{
+		OnConnectionEstablished(); // error prone when classes think they are subscribing to connections
+	}
+
+	private void OnLocalStop()
+	{
+		OnConnectionLost(); // error prone when classes think they are subscribing to connections
 	}
 
 	private class UnityTextWriter : TextWriter
@@ -129,7 +152,7 @@ public class NetworkClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (!_client.IsConnected) return;
+		if (!_client.IsConnected && !IsLocalInstance) return;
 
 		lock (_stateLock)
 		{
@@ -140,8 +163,16 @@ public class NetworkClient : MonoBehaviour
 		}
     }
 
+	private bool IsLocalInstance => LocalEngine.Instance.IsRunning;
+
 	public void SendCommand(ICommand command)
 	{
+		if (IsLocalInstance)
+		{
+			LocalEngine.Instance.Engine?.EnqueueCommand(command);
+			return;
+		}
+
 		byte[] data = Serializer.ToBytes(command);
 		byte[] compressedData = DataCompressor.CompressData(data);
 		// TODO dangerous
@@ -154,19 +185,23 @@ public class NetworkClient : MonoBehaviour
 		{
 			byte[] decompressedData = DataCompressor.DecompressData(data);
 			WorldState state = Serializer.FromBytes<WorldState>(decompressedData);
-
-			lock (_stateLock)
-			{
-				_currState = state;
-
-				_update = true;
-			}
+			UpdateState(state);
 		}
 		catch (Exception ex)
 		{
 			Debug.Log($"error reading data: {ex.Message}\n{ex.StackTrace}");
 		}
 
+	}
+
+	private void UpdateState(WorldState state)
+	{
+		lock (_stateLock)
+		{
+			_currState = state;
+
+			_update = true;
+		}
 	}
 
 	void OnDestroy()

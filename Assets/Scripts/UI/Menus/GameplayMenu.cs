@@ -9,7 +9,6 @@ public class GameplayMenu : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-		NetworkClient.Instance.ConnectionLost += OnConnectionLost;
     }
 
     // Update is called once per frame
@@ -40,7 +39,11 @@ public class GameplayMenu : MonoBehaviour
 		if (NetworkClient.Instance.IsConnected)
 		{
 			NetworkClient.Instance.Disconnect();
-			return;
+		}
+
+		if (LocalEngine.Instance.IsRunning)
+		{
+			LocalEngine.Instance.StopEngine();
 		}
 
 		ReturnToMainMenu();
@@ -53,12 +56,5 @@ public class GameplayMenu : MonoBehaviour
 
 		_gameplayUI.Close();
 		this.Close();
-	}
-
-	public void OnConnectionLost()
-	{
-		if (!this.gameObject.activeSelf) return;
-
-		ReturnToMainMenu();
 	}
 }

@@ -14,8 +14,7 @@ public class RtsEngine
 {
 	private static RtsEngine? _instance;
 
-	public const int TPS = 20;
-	private const int IntervalMs = 1000 / TPS;
+	public int TPS { get; private set; }
 	private const int Port = 13774;
 
 	private const int StatIntervalMs = 1000;
@@ -47,9 +46,19 @@ public class RtsEngine
 	private Task? _currentBroadcastTask;
 	private readonly object _broadcastLock;
 
-	public static RtsEngine StartInstance(WorldState state)
+	private bool _isServer;
+	private bool _useInternalClock;
+
+	public event EventHandler<WorldState>? TickEnded;
+
+	public static RtsEngine StartInstance(WorldState state, int tps = 20)
 	{
-		_instance = new RtsEngine(state);
+		if (_instance != null)
+		{
+			_instance.Stop();
+		}
+
+		_instance = new RtsEngine(state, tps);
 		return _instance;
 	}
 
@@ -58,8 +67,9 @@ public class RtsEngine
 		get => _instance!;
 	}
 
-	private RtsEngine(WorldState state)
+	private RtsEngine(WorldState state, int tps)
 	{
+		TPS = tps;
 		_rng = new Random();
 		_physicsEngine = new PhysicsEngine();
 		_currentBroadcastTask = null;
@@ -70,7 +80,7 @@ public class RtsEngine
 		_commandQueueLock = new object();
 		IsRunning = false;
 		_state = state;
-		_clock = new Clock(IntervalMs);
+		_clock = new Clock(1000 / tps);
 		_clock.Tick += TickSubscriber;
 		_server = new Server(Port, _state.NumPlayers);
 		_server.MessageReceived += OnDataReceived;
@@ -93,6 +103,8 @@ public class RtsEngine
 		_statPacketsSent = 0;
 		_playerEndpoints.Clear();
 		_playerIds.Clear();
+		_isServer = false;
+		_useInternalClock = false;
 
 		lock(_commandQueueLock)
 		{
@@ -100,12 +112,20 @@ public class RtsEngine
 		}
 	}
 
-	public async Task Start()
+	public async Task Start(bool isServer = true, bool useInternalClock = true)
 	{
 		Console.WriteLine("Starting engine...");
 		IsRunning = true;
-		_ = _server.StartAsync();
-		_clock.Start();
+		_isServer = isServer;
+		_useInternalClock = useInternalClock;
+		if (_isServer)
+		{
+			_ = _server.StartAsync();
+		}
+		if (_useInternalClock)
+		{
+			_clock.Start();
+		}
 		Console.WriteLine("Engine started.");
 	}
 
@@ -129,8 +149,11 @@ public class RtsEngine
 		ExecutePlayerCommands();
 		UpdateWorldState();
 		UpdatePhysics();
-		_currentBroadcastTask = BroadcastWorldState();
-		// BroadcastWorldState();
+		if (_isServer)
+		{
+			_currentBroadcastTask = BroadcastWorldState();
+		}
+		OnTickEnded();
 	}
 
 	private void WaitForPreviousTickBroadcast()
@@ -205,7 +228,6 @@ public class RtsEngine
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"Error during tick: {ex.Message}");
 			#pragma warning disable CS0162
 			if (DEBUG) Console.WriteLine(ex.StackTrace);
 			#pragma warning restore CS0162
@@ -224,15 +246,19 @@ public class RtsEngine
 			byte[] decompressedData = DataCompressor.DecompressData(args.Data);
 			ICommand command = Serializer.FromBytes<ICommand>(decompressedData);
 			command.PlayerId = playerId;
-
-			lock (_commandQueueLock)
-			{
-				_commandQueue.Enqueue(command);
-			}
+			EnqueueCommand(command);
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Invalid data received: {ex.Message}");
+		}
+	}
+
+	public void EnqueueCommand(ICommand command)
+	{
+		lock (_commandQueueLock)
+		{
+			_commandQueue.Enqueue(command);
 		}
 	}
 
@@ -324,6 +350,11 @@ public class RtsEngine
 	public int RngInterval(int max)
 	{
 		return _rng.Next() % (max + 1);
+	}
+
+	private void OnTickEnded()
+	{
+		TickEnded?.Invoke(this, _state);
 	}
 }
 }

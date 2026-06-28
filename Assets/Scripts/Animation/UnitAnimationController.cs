@@ -36,6 +36,8 @@ public class UnitAnimationController : AnimationController<BaseUnit>
 	private string _prefix = null!;
 	private string _suffix = null!;
 
+	private int _lastHp = -1;
+
 	protected override string GetAssetPath(BaseUnit unit)
 	{
 		_color = WorldStateManager.GetColorVariant(unit.OwnerId);
@@ -68,11 +70,20 @@ public class UnitAnimationController : AnimationController<BaseUnit>
 
 	protected override void UpdateStateOverride(BaseUnit unit)
 	{
-		BaseUnit? oldUnit = (BaseUnit?)WorldStateManager.Instance.GetEntityOld(unit);
+		int _currHp = unit.HitPoints;
 
-		if (TookDamage(unit, oldUnit))
+		if (_lastHp == -1)
 		{
-			StartCoroutine(FlashRed());
+			_lastHp = _currHp;
+		}
+		else
+		{
+			if (_currHp < _lastHp)
+			{
+				StartCoroutine(FlashRed());
+			}
+
+			_lastHp = _currHp;
 		}
 
 		Vec2? goal = unit.NextWaypoint;
