@@ -36,12 +36,15 @@ public class WorldState : ISerializable
 
 	private PathFinder _pathFinder = null!;
 
-	// public List<List<int>> PlayerResources { get; private set; } = null!;
 	public int[] _playerResources = null!; // should be private
+	private int[] _playerUnitsCount = null!;
+	public int[] _playerTotalEnqueuedUnits = null!; // SHOULD NOT EXIST! PUBLIC GLOBAL STATE
 
 	public int PlayerVersion { get; private set; }
 	public List<uint> AddedEntities { get; private set; } = null!;
 	public List<uint> RemovedEntities { get; private set; } = null!;
+
+	public int MaxPlayerUnits => 50;
 
 	private HashSet<uint> PlayersLost = null!;
 	private bool _winConditionMet;
@@ -57,15 +60,8 @@ public class WorldState : ISerializable
 		NumPlayers = numPlayers;
 
 		_playerResources = new int[numPlayers * ResourceNum];
-		// PlayerResources = new List<List<int>>();
-		// for (int i = 0; i < numPlayers; i++)
-		// {
-		// 	PlayerResources.Add(new List<int>());
-		// 	for (int j = 0; j < ResourceNum; j++)
-		// 	{
-		// 		PlayerResources[i].Add(0);
-		// 	}
-		// }
+		_playerUnitsCount = new int[numPlayers];
+		_playerTotalEnqueuedUnits = new int[numPlayers];
 
 		_entitiesId = new Dictionary<uint, Entity>();
 		_entities = new List<Entity>();
@@ -123,7 +119,6 @@ public class WorldState : ISerializable
 		int numPlayers = reader.Read<int>();
 		Init(map, numPlayers);
 
-		// PlayerResources = reader.Read<List<List<int>>>();
 		_playerResources = reader.Read<int[]>();
 
 		int entitiesNum = reader.Read<int>();
@@ -153,14 +148,21 @@ public class WorldState : ISerializable
 			return;
 		}
 
+		if (entity is BaseUnit currUnit)
+		{
+			if (entity.OwnerId < _playerUnitsCount.Length)
+			{
+				if (HasMaximumUnits(entity.OwnerId)) return;
+
+				_playerUnitsCount[entity.OwnerId]++;
+			}
+			_units.Add(currUnit);
+		}
+
 		AddedEntities.Add(entity.Id);
 		_entities.Add(entity);
 		_entitiesId.Add(entity.Id, entity);
 
-		if (entity is BaseUnit currUnit)
-		{
-			_units.Add(currUnit);
-		}
 
 		if (entity is PhysicsObject currPhysics)
 		{
@@ -178,6 +180,8 @@ public class WorldState : ISerializable
 			UpdateMapStructure(currStructure);
 		}
 	}
+
+	public bool HasMaximumUnits(uint playerId) => _playerUnitsCount[playerId] >= MaxPlayerUnits;
 
 	private void UpdateMapStructure(BaseStructure structure)
 	{
@@ -315,11 +319,17 @@ public class WorldState : ISerializable
 			return;
 		}
 
+		if (!_entities.Contains(entity)) return;
+
 		RemovedEntities.Add(entity.Id);
 		_entities.Remove(entity);
 		_entitiesId.Remove(entity.Id);
 		if (entity is BaseUnit currUnit)
 		{
+			if (entity.OwnerId < _playerUnitsCount.Length)
+			{
+				_playerUnitsCount[entity.OwnerId]--;
+			}
 			_units.Remove(currUnit);
 		}
 
@@ -423,5 +433,7 @@ public class WorldState : ISerializable
 	}
 
 	public bool IsGameOver => _winConditionMet;
+
+	public int PlayerUnitsCount(uint playerId) => _playerUnitsCount[playerId];
 }
 }

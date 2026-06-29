@@ -85,8 +85,14 @@ public abstract class UnitProducer : BaseStructure
 		if (!CanProduce(unitType)) return;
 		if (QueuedUnitsCount >= MaxUnitProduction) return;
 
-		if (!RtsEngine.Instance.State.TryTakeResource(BaseUnit.Dummy(unitType).Cost, this.OwnerId)) return;
+		WorldState state = RtsEngine.Instance.State;
 
+		if (state.HasMaximumUnits(this.OwnerId)) return;
+		int currExpectedUnits = state.PlayerUnitsCount(this.OwnerId) + state._playerTotalEnqueuedUnits[this.OwnerId];
+		if (currExpectedUnits >= state.MaxPlayerUnits) return;
+		if (!state.TryTakeResource(BaseUnit.Dummy(unitType).Cost, this.OwnerId)) return;
+
+		RtsEngine.Instance.State._playerTotalEnqueuedUnits[this.OwnerId]++;
 		_productionQueue.Enqueue(unitType);
 	}
 
@@ -146,6 +152,7 @@ public abstract class UnitProducer : BaseStructure
 			unit.SetGoal(SpawnTarget.Value);
 		}
 
+		RtsEngine.Instance.State._playerTotalEnqueuedUnits[this.OwnerId]--;
 		RtsEngine.Instance.State.AddEntity(unit);
 	}
 

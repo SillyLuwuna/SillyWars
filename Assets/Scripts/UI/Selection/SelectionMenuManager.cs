@@ -419,5 +419,6 @@ public class SelectionMenuManager : MonoBehaviour
 	public void OnEmptyClick()
 	{
 		_buildHelper.Close();
+		_trainQueueManager.Close();
 	}
 }
