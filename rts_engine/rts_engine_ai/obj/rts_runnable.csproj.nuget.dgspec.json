@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_runnable.csproj": {}
+    "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/rts_runnable.csproj": {}
   },
   "projects": {
-    "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_runnable.csproj": {
+    "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/rts_runnable.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_runnable.csproj",
-        "projectName": "Runnable",
-        "projectPath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_runnable.csproj",
+        "projectUniqueName": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/rts_runnable.csproj",
+        "projectName": "rts_engine_ai",
+        "projectPath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/rts_runnable.csproj",
         "packagesPath": "/home/luna/.nuget/packages/",
-        "outputPath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/",
+        "outputPath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/luna/.nuget/NuGet/NuGet.Config"
@@ -51,6 +51,14 @@
             "System.CommandLine": {
               "target": "Package",
               "version": "[2.0.9, )"
+            },
+            "TensorFlow.Keras": {
+              "target": "Package",
+              "version": "[0.15.0, )"
+            },
+            "TensorFlow.NET": {
+              "target": "Package",
+              "version": "[0.150.0, )"
             }
           },
           "imports": [
@@ -137,6 +145,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "NETStandard.Library.Ref",
+              "version": "[2.1.0, 2.1.0]"
+            }
+          ],
           "frameworkReferences": {
             "NETStandard.Library": {
               "privateAssets": "all"

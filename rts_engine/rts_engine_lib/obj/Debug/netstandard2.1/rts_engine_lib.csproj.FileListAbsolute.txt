@@ -8,4 +8,3 @@
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.sourcelink.json
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/SillyWars.Engine.dll
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/SillyWars.Engine.pdb
-/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_lib/obj/Debug/netstandard2.1/rts_engine_lib.csproj.AssemblyReference.cache

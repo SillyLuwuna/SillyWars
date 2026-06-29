@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="2.0.9" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
+    <PackageReference Include="TensorFlow.NET" Version="0.150.0" />
   </ItemGroup>
 
 </Project>

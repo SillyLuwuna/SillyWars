@@ -26,7 +26,7 @@ public class Trainer
 
 		for (int i = 0; i < initialState.NumPlayers; i++)
 		{
-			_players.Add(new AIPlayer());
+			_players.Add(new RtsAI());
 		}
 
 		_statTickStopwatch = new Stopwatch();
@@ -41,7 +41,12 @@ public class Trainer
 
 	private void RestartEngine()
 	{
-		_engine = RtsEngine.StartInstance(_currState, tps: 100);
+		if (_engine != null)
+		{
+			_engine.Stop();
+		}
+
+		_engine = new RtsEngine(_currState);
 	}
 
 	public void RunGame()
