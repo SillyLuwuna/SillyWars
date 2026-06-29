@@ -11,7 +11,7 @@ public interface IValuable : IEntity
 	public bool TryPay()
 	{
 		if (IsPaid) return true;
-		IsPaid = RtsEngine.Instance.State.TryTakeResource(Cost, this.OwnerId);
+		IsPaid = World.TryTakeResource(Cost, this.OwnerId);
 		return IsPaid;
 	}
 }

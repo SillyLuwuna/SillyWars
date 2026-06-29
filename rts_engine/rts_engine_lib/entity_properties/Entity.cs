@@ -7,14 +7,16 @@ public abstract class Entity : IEntity
 {
 	private static uint _CURR_ID = 0;
 
+	public WorldState World { get; set; }
 	public uint Id { get; private set; }
 	public uint OwnerId { get; set; }
 
-	public Entity(uint ownerId)
+	public Entity(uint ownerId, WorldState world)
 	{
 		Id = _CURR_ID;
 		_CURR_ID++;
 		OwnerId = ownerId;
+		World = world;
 	}
 
 	public virtual void SerializeFields(SerializerWriter writer)

@@ -12,10 +12,12 @@ namespace RtsEngine
 
 public class RtsEngine
 {
-	private static RtsEngine? _instance;
-
+	// private static RtsEngine? _instance;
+	//
 	public int TPS { get; private set; }
 	private const int Port = 13774;
+
+	private static Random _rng = new Random();
 
 	private const int StatIntervalMs = 1000;
 	private const bool ShowStats = true;
@@ -34,7 +36,6 @@ public class RtsEngine
 	private object _commandQueueLock;
 	private Queue<ICommand> _commandQueue;
 
-	private Random _rng;
 
 	private ulong _totalTicks;
 	private int _statInterval;
@@ -53,23 +54,24 @@ public class RtsEngine
 
 	public event EventHandler<WorldState>? TickEnded;
 
-	public static RtsEngine StartInstance(WorldState state, int tps = 20)
-	{
-		if (_instance != null)
-		{
-			_instance.Stop();
-		}
+	// public static RtsEngine StartInstance(WorldState state, int tps = 20)
+	// {
+	// 	if (_instance != null)
+	// 	{
+	// 		_instance.Stop();
+	// 	}
+	//
+	// 	_instance = new RtsEngine(state, tps);
+	// 	return _instance;
+	// }
+	//
+	// public static RtsEngine Instance
+	// {
+	// 	get => _instance!;
+	// }
 
-		_instance = new RtsEngine(state, tps);
-		return _instance;
-	}
-
-	public static RtsEngine Instance
-	{
-		get => _instance!;
-	}
-
-	private RtsEngine(WorldState state, int tps)
+	// private RtsEngine(WorldState state, int tps)
+	public RtsEngine(WorldState state, int tps = 20)
 	{
 		TPS = tps;
 		_tickLock = new object();
@@ -115,7 +117,7 @@ public class RtsEngine
 		}
 	}
 
-	public async Task Start(bool isServer = true, bool useInternalClock = true)
+	public void Start(bool isServer = true, bool useInternalClock = true)
 	{
 		Console.WriteLine("Starting engine...");
 		IsRunning = true;
@@ -359,10 +361,10 @@ public class RtsEngine
 	}
 
 	// random value between 0 and 1;
-	public double Rng => _rng.NextDouble();
+	public static double Rng => _rng.NextDouble();
 
 	// random integer between 0 and max (inclusive);
-	public int RngInterval(int max)
+	public static int RngInterval(int max)
 	{
 		return _rng.Next() % (max + 1);
 	}

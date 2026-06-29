@@ -98,35 +98,35 @@ public static class Program
 		return grid;
 	}
 
-	public static void GenerateStructures(WorldState state)
+	public static void GenerateStructures(WorldState world)
 	{
-		Castle castle0 = Castle.CreateBuilt(0, new Vec2Int(0, 9));
-		Castle castle1 = Castle.CreateBuilt(1, new Vec2Int(45, 9));
+		Castle castle0 = Castle.CreateBuilt(0, world, new Vec2Int(0, 9));
+		Castle castle1 = Castle.CreateBuilt(1, world, new Vec2Int(45, 9));
 
-		state.AddEntity(castle0);
-		state.AddEntity(castle1);
+		world.AddEntity(castle0);
+		world.AddEntity(castle1);
 	}
 
-	public static void GenerateResources(WorldState state)
+	public static void GenerateResources(WorldState world)
 	{
 		Random rng = new Random();
 		int numNodes = 20;
 		for (int i = 0; i < numNodes; i++)
 		{
-			int x = (int)(rng.Next() % (state.Map.Width / 2 - 4));
-			int y = (int)(rng.Next() % state.Map.Height);
+			int x = (int)(rng.Next() % (world.Map.Width / 2 - 4));
+			int y = (int)(rng.Next() % world.Map.Height);
 			Vec2 pos0 = new Vec2(x + 0.5f, y + 0.5f);
-			Vec2 pos1 = new Vec2((state.Map.Width - x - 1) + 0.5f, (y + 0.5f));
-			if (state.IsTileOccupied(state.Map.CellPosFromWorldSpace(pos0)))
+			Vec2 pos1 = new Vec2((world.Map.Width - x - 1) + 0.5f, (y + 0.5f));
+			if (world.IsTileOccupied(world.Map.CellPosFromWorldSpace(pos0)))
 			{
 				i--;
 				continue;
 			}
-			state.AddEntity(new GoldNode(pos0, ~0u));
-			state.AddEntity(new GoldNode(pos1, ~0u));
+			world.AddEntity(new GoldNode(pos0, world, ~0u));
+			world.AddEntity(new GoldNode(pos1, world, ~0u));
 		}
 
-		Grid<Cell> grid = state.Map;
+		Grid<Cell> grid = world.Map;
 		for (int x = 0; x < grid.Width; x++)
 		{
 			for (int y = 0; y < grid.Height; y++)
@@ -136,7 +136,7 @@ public static class Program
 					if (y >= 27 || y < 3)
 					{
 						Vec2 pos = new Vec2(x + 0.5f, y + 0.5f);
-						state.AddEntity(new GoldNode(pos, ~0u));
+						world.AddEntity(new GoldNode(pos, world, ~0u));
 						continue;
 					}
 				}
@@ -144,34 +144,34 @@ public static class Program
 		}
 	}
 
-	public static void GenerateUnits(WorldState state)
+	public static void GenerateUnits(WorldState world)
 	{
-		Worker worker0 = new Worker(new Vec2(2.5f, 8.5f), 0);
-		Worker worker1 = new Worker(new Vec2(47.5f, 8.5f), 1);
+		Worker worker0 = new Worker(new Vec2(2.5f, 8.5f), world, 0);
+		Worker worker1 = new Worker(new Vec2(47.5f, 8.5f), world, 1);
 
-		state.AddEntity(worker0);
-		state.AddEntity(worker1);
+		world.AddEntity(worker0);
+		world.AddEntity(worker1);
 	}
 
-	public static void GenerateInitialResources(WorldState state)
+	public static void GenerateInitialResources(WorldState world)
 	{
 		ResourceStack initialResources = new ResourceStack(Resource.Gold, 100);
 
-		for (uint i = 0; i < state.NumPlayers; i++)
+		for (uint i = 0; i < world.NumPlayers; i++)
 		{
-			state.GiveResource(initialResources, i);
+			world.GiveResource(initialResources, i);
 		}
 	}
 
 	public static void GenerateState()
 	{
-		WorldState state = new WorldState(GenerateMap(), 2);
-		GenerateStructures(state);
-		GenerateUnits(state);
-		GenerateResources(state);
-		GenerateInitialResources(state);
-		state.Save("generated.sstate");
-		Console.WriteLine($"Generated map to \"generated.sstate\".");
+		WorldState world = new WorldState(GenerateMap(), 2);
+		GenerateStructures(world);
+		GenerateUnits(world);
+		GenerateResources(world);
+		GenerateInitialResources(world);
+		world.Save("generated.sworld");
+		Console.WriteLine($"Generated map to \"generated.sworld\".");
 	}
 
 	public static void Run(ParseResult result)
@@ -191,10 +191,10 @@ public static class Program
 		}
 
 
-		WorldState state;
+		WorldState world;
 		try
 		{
-			state = WorldState.Load(map);
+			world = WorldState.Load(map);
 		}
 		catch (Exception ex)
 		{
@@ -202,8 +202,11 @@ public static class Program
 			return;
 		}
 
-		RtsEngine engine = RtsEngine.StartInstance(state);
-		_ = engine.Start();
+		// RtsEngine engine = RtsEngine.StartInstance(world);
+		// RtsEngine engine = RtsEngine.StartInstance(world);
+		RtsEngine engine = new RtsEngine(world);
+		// _ = engine.Start();
+		engine.Start();
 
 		Console.ReadKey();
 		engine.Stop();

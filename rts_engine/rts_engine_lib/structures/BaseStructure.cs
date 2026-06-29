@@ -35,7 +35,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 
 	public Vec2Int Start;
 
-	public BaseStructure(uint ownerId, Vec2Int start, int height, int width) : base(ownerId)
+	public BaseStructure(uint ownerId, WorldState world, Vec2Int start, int height, int width) : base(ownerId, world)
 	{
 		Init(start, height, width);
 	}
@@ -109,7 +109,7 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 		if (IsAreaObstructed) return;
 
 		HasBuildingStarted = true;
-		RtsEngine.Instance.State.AddEntity(this);
+		World.AddEntity(this);
 	}
 
 	public void DoBuildWork()
@@ -135,10 +135,9 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 	{
 		get
 		{
-			WorldState state = RtsEngine.Instance.State;
 			foreach (Vec2Int tile in Tiles)
 			{
-				if (state.IsTileOccupied(tile)) return true;
+				if (World.IsTileOccupied(tile)) return true;
 			}
 			return false;
 		}
@@ -179,14 +178,14 @@ public abstract class BaseStructure : Entity, ISerializable, IDestroyable, IValu
 		}
 	}
 
-	public static BaseStructure FromType(StructureType type, uint ownerId, Vec2Int start)
+	public static BaseStructure FromType(StructureType type, WorldState world, uint ownerId, Vec2Int start)
 	{
 		switch (type)
 		{
 			case (StructureType.Castle):
-				return new Castle(ownerId, start);
+				return new Castle(ownerId, world, start);
 			case (StructureType.Barracks):
-				return new Barracks(ownerId, start);
+				return new Barracks(ownerId, world, start);
 			default:
 				throw new ArgumentException($"Unknown structure type {type}");
 		}

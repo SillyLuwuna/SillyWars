@@ -69,7 +69,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	public Vec2? NextWaypoint;
 	// for client
 
-	public BaseUnit(Vec2 pos, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, ownerId, mass, radius, friction)
+	public BaseUnit(Vec2 pos, WorldState world, uint ownerId, float mass=1.0f, float radius=0.2f, float friction=1.0f) : base(pos, world, ownerId, mass, radius, friction)
 	{
 		IsDestroyed = false;
 		TargetedByNum = 0;
@@ -94,7 +94,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	private void ResetScanTargetCooldown()
 	{
-		_scanTargetCooldown = ScanTargetBaseCooldown + RtsEngine.Instance.RngInterval(ScanTargetCooldownRandomRange);
+		_scanTargetCooldown = ScanTargetBaseCooldown + RtsEngine.RngInterval(ScanTargetCooldownRandomRange);
 	}
 
 	public override void Tick()
@@ -201,7 +201,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	// to make the unit move towards an immediate goal
 	private bool SetPathfinding(Vec2 goal)
 	{
-		CurrWalkPath = RtsEngine.Instance.State.PathFinder.GetPath(Pos, goal);
+		CurrWalkPath = World.PathFinder.GetPath(Pos, goal);
 		if (CurrWalkPath.Count <= 1)
 		{
 			CurrWalkPath = null;
@@ -452,7 +452,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		Vec2Int? structureTile = GetClosestReachableTileToStructure(structure);
 		if (structureTile == null) return false;
 
-		Vec2 structurePos = RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(structureTile.Value);
+		Vec2 structurePos = World.Map.WorldSpaceFromCellPos(structureTile.Value);
 
 		return IsInAggroRange(structurePos);
 	}
@@ -472,7 +472,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			}
 			if (TargetIsStructure)
 			{
-				return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(this.Pos) == _targetStructureAttackTile;
+				return World.Map.CellPosFromWorldSpace(this.Pos) == _targetStructureAttackTile;
 			}
 
 			return false;
@@ -596,7 +596,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 			return;
 		}
 
-		_targetStructureAttackPos = RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(_targetStructureAttackTile.Value);
+		_targetStructureAttackPos = World.Map.WorldSpaceFromCellPos(_targetStructureAttackTile.Value);
 		SetPathfinding(_targetStructureAttackPos.Value);
 	}
 
@@ -661,7 +661,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		IDestroyable? target = null;
 		float targetPriority = -1;
 
-		foreach (IDestroyable entity in RtsEngine.Instance.State.Destroyables)
+		foreach (IDestroyable entity in World.Destroyables)
 		{
 			float priority = TargetPriority(entity);
 			if (priority < 0) continue;
@@ -713,19 +713,19 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		return (distancePriority + attackersPriority + typePriority);
 	}
 
-	public static BaseUnit FromUnitType(UnitType type, uint ownerId, Vec2 pos)
+	public static BaseUnit FromUnitType(UnitType type, WorldState world, uint ownerId, Vec2 pos)
 	{
 		return type switch
 		{
-			UnitType.Worker => new Worker(pos, ownerId),
-			UnitType.Knight => new Knight(pos, ownerId),
+			UnitType.Worker => new Worker(pos, world, ownerId),
+			UnitType.Knight => new Knight(pos, world, ownerId),
 			_ => throw new ArgumentException($"Unknown unit type {type}")
 		};
 	}
 
 	public static BaseUnit Dummy(UnitType type)
 	{
-		return FromUnitType(type, ~0u, Vec2.Zero);
+		return FromUnitType(type, null!, ~0u, Vec2.Zero);
 	}
 
 	public abstract UnitType UnitType { get; }
@@ -745,7 +745,7 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		Map.Path? path = GetClosestReachableTile(structure.SurroundingTiles);
 		if (path == null) return null;
-		return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(path.Last);
+		return World.Map.CellPosFromWorldSpace(path.Last);
 	}
 
 	protected Map.Path? GetShortestReachablePathToStructure(BaseStructure structure)
@@ -755,8 +755,8 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected Map.Path? GetClosestReachableTile(List<Vec2Int> tiles)
 	{
-		Grid<Cell> map = RtsEngine.Instance.State.Map;
-		PathFinder pathFinder = RtsEngine.Instance.State.PathFinder;
+		Grid<Cell> map = World.Map;
+		PathFinder pathFinder = World.PathFinder;
 
 		// Vec2Int? bestTile = null;
 		Map.Path? bestPath = null;

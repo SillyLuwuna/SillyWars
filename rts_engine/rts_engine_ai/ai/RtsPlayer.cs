@@ -1,0 +1,13 @@
+using RtsEngine.Commands;
+
+namespace RtsEngine.AI
+{
+
+public interface IRtsPlayer
+{
+	public ICommand? MakePlay(WorldState state);
+	public void GameStarted(WorldState state);
+	public void GameEnded(WorldState state);
+}
+
+}

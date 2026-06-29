@@ -60,7 +60,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 	private bool _isRetrieving;
 	private bool _isBuilding;
 
-	public Worker(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
+	public Worker(Vec2 pos, WorldState world, uint ownerId) : base(pos, world, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
 		HitPoints = MaxHitPoints;
 		AttackDamage = BaseAttackDamage;
@@ -245,7 +245,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 		{
 			if (!HasClosestReachableTile) return false;
 
-			return RtsEngine.Instance.State.Map.CellPosFromWorldSpace(this.Pos) == _closestReachableTile;
+			return World.Map.CellPosFromWorldSpace(this.Pos) == _closestReachableTile;
 		}
 	}
 
@@ -257,7 +257,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 		if (hasTile)
 		{
-			SetWalkingGoal(RtsEngine.Instance.State.Map.WorldSpaceFromCellPos(_closestReachableTile!.Value));
+			SetWalkingGoal(World.Map.WorldSpaceFromCellPos(_closestReachableTile!.Value));
 		}
 
 		_goingTowardsStructure = hasTile;
@@ -359,7 +359,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 	private Vec2? GetClosestCastle()
 	{
-		List<Castle> castles = RtsEngine.Instance.State.Structures.OfType<Castle>().ToList();
+		List<Castle> castles = World.Structures.OfType<Castle>().ToList();
 
 		Vec2? shortest = null;
 		float bestDistance = float.PositiveInfinity;

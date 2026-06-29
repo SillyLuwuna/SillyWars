@@ -23,7 +23,7 @@ public abstract class UnitProducer : BaseStructure
 	private int _productionCooldown;
 
 
-	public UnitProducer(uint ownerId, Vec2Int start, int height, int width) : base(ownerId, start, height, width)
+	public UnitProducer(uint ownerId, WorldState world, Vec2Int start, int height, int width) : base(ownerId, world, start, height, width)
 	{
 		Init();
 	}
@@ -82,17 +82,16 @@ public abstract class UnitProducer : BaseStructure
 
 	public void EnqueueProduction(UnitType unitType)
 	{
+		if (!IsBuilt) return;
 		if (!CanProduce(unitType)) return;
 		if (QueuedUnitsCount >= MaxUnitProduction) return;
 
-		WorldState state = RtsEngine.Instance.State;
+		if (World.HasMaximumUnits(this.OwnerId)) return;
+		int currExpectedUnits = World.PlayerUnitsCount(this.OwnerId) + World._playerTotalEnqueuedUnits[this.OwnerId];
+		if (currExpectedUnits >= World.MaxPlayerUnits) return;
+		if (!World.TryTakeResource(BaseUnit.Dummy(unitType).Cost, this.OwnerId)) return;
 
-		if (state.HasMaximumUnits(this.OwnerId)) return;
-		int currExpectedUnits = state.PlayerUnitsCount(this.OwnerId) + state._playerTotalEnqueuedUnits[this.OwnerId];
-		if (currExpectedUnits >= state.MaxPlayerUnits) return;
-		if (!state.TryTakeResource(BaseUnit.Dummy(unitType).Cost, this.OwnerId)) return;
-
-		RtsEngine.Instance.State._playerTotalEnqueuedUnits[this.OwnerId]++;
+		World._playerTotalEnqueuedUnits[this.OwnerId]++;
 		_productionQueue.Enqueue(unitType);
 	}
 
@@ -129,7 +128,7 @@ public abstract class UnitProducer : BaseStructure
 
 	private void UpdateSpawnLocation()
 	{
-		Grid<Cell> map = RtsEngine.Instance.State.Map;
+		Grid<Cell> map = World.Map;
 		foreach (Vec2Int tile in this.SurroundingTiles)
 		{
 			if (map.ContainsPos(tile) && map[tile].IsWalkable)
@@ -144,7 +143,7 @@ public abstract class UnitProducer : BaseStructure
 
 	private void ProduceUnit()
 	{
-		BaseUnit unit = BaseUnit.FromUnitType(_productionUnit!.Value, this.OwnerId, SpawnPosition!.Value);
+		BaseUnit unit = BaseUnit.FromUnitType(_productionUnit!.Value, this.World, this.OwnerId, SpawnPosition!.Value);
 		_productionUnit = null;
 
 		if (SpawnTarget != null)
@@ -152,14 +151,14 @@ public abstract class UnitProducer : BaseStructure
 			unit.SetGoal(SpawnTarget.Value);
 		}
 
-		RtsEngine.Instance.State._playerTotalEnqueuedUnits[this.OwnerId]--;
-		RtsEngine.Instance.State.AddEntity(unit);
+		World._playerTotalEnqueuedUnits[this.OwnerId]--;
+		World.AddEntity(unit);
 	}
 
 	private void DequeueNextUnit()
 	{
 		_productionUnit = _productionQueue.Dequeue();
-		_productionCooldown = BaseUnit.FromUnitType(_productionUnit.Value, this.OwnerId, Vec2.Zero).ProductionTime; // inefficient
+		_productionCooldown = BaseUnit.FromUnitType(_productionUnit.Value, this.World, this.OwnerId, Vec2.Zero).ProductionTime; // inefficient
 	}
 
 	public bool IsProducingUnits { get => _productionUnit != null; }

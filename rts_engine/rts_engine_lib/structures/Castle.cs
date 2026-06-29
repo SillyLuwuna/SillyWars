@@ -27,7 +27,7 @@ public class Castle : UnitProducer
 
 	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 90);
 
-	public Castle(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
+	public Castle(uint ownerId, WorldState world, Vec2Int start) : base(ownerId, world, start, BaseHeight, BaseWidth)
 	{
 		BuildEffort = BaseBuildEffort;
 
@@ -39,12 +39,12 @@ public class Castle : UnitProducer
 	{
 		if (this.IsDestroyed || !this.IsBuilt) return;
 
-		RtsEngine.Instance.State.GiveResource(resourceStack, OwnerId);
+		World.GiveResource(resourceStack, OwnerId);
 	}
 
-	public static Castle CreateBuilt(uint ownerId, Vec2Int start)
+	public static Castle CreateBuilt(uint ownerId, WorldState world, Vec2Int start)
 	{
-		Castle castle = new Castle(ownerId, start);
+		Castle castle = new Castle(ownerId, world, start);
 
 		castle.HasBuildingStarted = true;
 		castle.IsBuilt = true;

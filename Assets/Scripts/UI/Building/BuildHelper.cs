@@ -53,7 +53,7 @@ public class BuildHelper : MonoBehaviour
 		Vec2 pos = WorldStateManager.Vector2ToVec2(worldMousePos);
 		Vec2Int startPos = WorldStateManager.Instance.LatestState!.Map.CellPosFromWorldSpace(pos);
 
-		return BaseStructure.FromType(_structureType, WorldStateManager.Instance.PlayerId, startPos);
+		return BaseStructure.FromType(_structureType, null!, WorldStateManager.Instance.PlayerId, startPos);
 	}
 
 	private void SetTransparent(GameObject obj)

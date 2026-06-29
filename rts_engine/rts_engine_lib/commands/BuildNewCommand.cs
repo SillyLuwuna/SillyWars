@@ -31,7 +31,7 @@ public class BuildNewCommand : EntityCommand<BuildNewCommandArgs>
 
 		if (!(entity is IBuilder)) return false;
 
-		structure = BaseStructure.FromType(_args.StructureType, PlayerId, _args.Start);
+		structure = BaseStructure.FromType(_args.StructureType, state, PlayerId, _args.Start);
 
 		return true;
 	}

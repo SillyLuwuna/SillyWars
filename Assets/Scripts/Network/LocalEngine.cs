@@ -61,9 +61,16 @@ public class LocalEngine : MonoBehaviour
 
 		WorldState state = WorldState.Load($"{Environment.CurrentDirectory}/{_mapsPath}/{stateFileName}");
 
-		_engine = RtsEngine.RtsEngine.StartInstance(state, ServerTps);
+		// _engine = RtsEngine.RtsEngine.StartInstance(state, ServerTps);
+		if (_engine != null)
+		{
+			_engine.Stop();
+		}
+
+		_engine = new RtsEngine.RtsEngine(state, ServerTps);
 		_engine.TickEnded += OnTickEnded;
-		_ = _engine.Start(isServer: false, useInternalClock: true);
+		// _ = _engine.Start(isServer: false, useInternalClock: true);
+		_engine.Start(isServer: false, useInternalClock: true);
 		OnStarted();
 	}
 

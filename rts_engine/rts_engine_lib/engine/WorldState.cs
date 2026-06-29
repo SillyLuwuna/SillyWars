@@ -159,6 +159,7 @@ public class WorldState : ISerializable
 			_units.Add(currUnit);
 		}
 
+		entity.World = this;
 		AddedEntities.Add(entity.Id);
 		_entities.Add(entity);
 		_entitiesId.Add(entity.Id, entity);

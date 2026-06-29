@@ -42,7 +42,7 @@ public class PhysicsObject : Entity, IPositionable
 
 	public bool IsStatic { get; set; }
 
-	public PhysicsObject(Vec2 pos, uint ownerId, float mass, float radius, float friction, bool isStatic = false) : base(ownerId)
+	public PhysicsObject(Vec2 pos, WorldState world, uint ownerId, float mass, float radius, float friction, bool isStatic = false) : base(ownerId, world)
 	{
 		Pos = pos;
 		_totalPushbackForce = Vec2.Zero;

@@ -38,7 +38,7 @@ public class BuildOption : MonoBehaviour
 
 		_icon.sprite = AssetLoader.Instance.GetSprite($"{_path}/{structureType}");
 		_name.text = $"{structureType}";
-		_cost.text = $"{BaseStructure.FromType(structureType, 0, Vec2Int.Zero).Cost.Amount}";
+		_cost.text = $"{BaseStructure.FromType(structureType, null!, 0, Vec2Int.Zero).Cost.Amount}";
 	}
 
 	public void OnPress()

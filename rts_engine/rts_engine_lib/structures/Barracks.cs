@@ -27,7 +27,7 @@ public class Barracks : UnitProducer
 
 	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 50);
 
-	public Barracks(uint ownerId, Vec2Int start) : base(ownerId, start, BaseHeight, BaseWidth)
+	public Barracks(uint ownerId, WorldState world, Vec2Int start) : base(ownerId, world, start, BaseHeight, BaseWidth)
 	{
 		BuildEffort = BaseBuildEffort;
 
@@ -35,9 +35,9 @@ public class Barracks : UnitProducer
 		AllowedUnitTypes = BaseAllowedUnitTypes;
 	}
 
-	public static Barracks CreateBuilt(uint ownerId, Vec2Int start)
+	public static Barracks CreateBuilt(uint ownerId, WorldState world, Vec2Int start)
 	{
-		Barracks barracks = new Barracks(ownerId, start);
+		Barracks barracks = new Barracks(ownerId, world, start);
 
 		barracks.HasBuildingStarted = true;
 		barracks.IsBuilt = true;

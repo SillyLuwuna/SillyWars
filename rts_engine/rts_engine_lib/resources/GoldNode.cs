@@ -12,7 +12,7 @@ public class GoldNode : BaseResourceNode
 	public override int GatherAmount => 1;
 	public override Resource Resource => Resource.Gold;
 
-	public GoldNode(Vec2 pos, uint ownerId) : base(pos, ownerId, 0.5f)
+	public GoldNode(Vec2 pos, WorldState world, uint ownerId) : base(pos, world, ownerId, 0.5f)
 	{
 	}
 

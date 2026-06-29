@@ -23,7 +23,7 @@ public abstract class BaseResourceNode: PhysicsObject, ISerializable, IGatherabl
 
 	public int Remaining { get; protected set; }
 
-	public BaseResourceNode(Vec2 pos, uint ownerId, float radius) : base(pos, ownerId, 1.0f, radius, 1.0f, true)
+	public BaseResourceNode(Vec2 pos, WorldState world, uint ownerId, float radius) : base(pos, world, ownerId, 1.0f, radius, 1.0f, true)
 	{
 		Init();
 
@@ -102,7 +102,7 @@ public abstract class BaseResourceNode: PhysicsObject, ISerializable, IGatherabl
 
 	private void HandleDepletion()
 	{
-		RtsEngine.Instance.State.RemoveEntity(this);
+		World.RemoveEntity(this);
 	}
 
 	public override void Tick()

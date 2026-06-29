@@ -44,7 +44,7 @@ public class TrainQueueHead : MonoBehaviour
 
 		_progressContainer.gameObject.SetActive(true);
 
-		int maxUnitProductionTicks = BaseUnit.FromUnitType(head.Value, structure.OwnerId, Vec2.Zero).ProductionTime;
+		int maxUnitProductionTicks = BaseUnit.Dummy(head.Value).ProductionTime;
 		int ticksLeft = structure.TicksLeftForProduction;
 		int ticksDone = maxUnitProductionTicks - ticksLeft;
 		float progress = (float)ticksDone / (float)maxUnitProductionTicks;

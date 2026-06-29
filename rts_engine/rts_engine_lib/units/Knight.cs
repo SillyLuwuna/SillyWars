@@ -33,7 +33,7 @@ public class Knight : BaseUnit
 
 	public override ResourceStack Cost => new ResourceStack(Resource.Gold, 10);
 
-	public Knight(Vec2 pos, uint ownerId) : base(pos, ownerId, BaseMass, BaseRadius, BaseFriction)
+	public Knight(Vec2 pos, WorldState world, uint ownerId) : base(pos, world, ownerId, BaseMass, BaseRadius, BaseFriction)
 	{
 		HitPoints = MaxHitPoints;
 		AttackDamage = BaseAttackDamage;
