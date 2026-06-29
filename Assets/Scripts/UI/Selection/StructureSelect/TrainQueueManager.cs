@@ -19,7 +19,7 @@ public class TrainQueueManager : MonoBehaviour
     void Start()
     {
 		WorldStateManager.Instance.NewState += OnNewState;
-		Close();
+		// Close();
     }
 
     void Update()

@@ -1,160 +1,224 @@
 ﻿using RtsEngine.Map;
 using RtsEngine.Units;
-using RtsEngine.Networking;
-using System.Net.Sockets;
-using System;
-using System.Threading.Tasks;
 using RtsEngine.Math;
-using RtsEngine.Data;
-using RtsEngine.EntityProperties;
 using RtsEngine.Resources;
 using RtsEngine.Structures;
+
+using System.CommandLine;
 
 namespace RtsEngine
 {
 
 public static class Program
 {
-	private static int NumPlayers = 2;
-
-	public static async Task Main()
+	public static Grid<Cell> GenerateMap()
 	{
-		// Create map
-		// Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 200, 100);
-		// int segmentationSize = 80;
+		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 50, 30);
 
-		// Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 30, 20);
-		Grid<Cell> grid = new Grid<Cell>(new Vec2(0, 0), 1, 25, 15);
-
-		int segmentationSize = 10;
-		int segmentationGridWidth = (int)grid.Width / segmentationSize;
 		for (int x = 0; x < grid.Width; x++)
 		{
 			for (int y = 0; y < grid.Height; y++)
 			{
-				grid[x, y] = new Cell(CellType.Ground);
-				// if (x < thirdGridWidth || x > thirdGridWidth * (segmentationSize - 1))
+				if (x < 10 || x >= 40)
+				{
+					grid[x, y] = new Cell(CellType.Ground);
+					continue;
+				}
+
+				if ((x >= 10 && x <= 14) || (x >= 35 && x <= 39))
+				{
+					if (y < 3 || y >= 27)
+					{
+						grid[x, y] = new Cell(CellType.Ground);
+						continue;
+					}
+				}
+
+				if ((x >= 15 && x <= 19) || (x >= 30 && x <= 34))
+				{
+					grid[x, y] = new Cell(CellType.Ground);
+					continue;
+				}
+
+				if ((x >= 20 && x <= 24) || (x >= 25 && x <= 29))
+				{
+					if (y >= 14 && y <= 16)
+					{
+						grid[x, y] = new Cell(CellType.Ground);
+						continue;
+					}
+				}
+
+				if (x >= 23 && x < 27)
+				{
+					grid[x, y] = new Cell(CellType.Ground);
+					continue;
+				}
+
+				if (x >= 21 && x <= 22)
+				{
+					if (y >= 27 || y < 3)
+					{
+						grid[x, y] = new Cell(CellType.Ground);
+						continue;
+					}
+				}
+
+				if (x >= 27 && x <= 28)
+				{
+					if (y >= 27 || y < 3)
+					{
+						grid[x, y] = new Cell(CellType.Ground);
+						continue;
+					}
+				}
+
+				// if ((x >= 10 && x <= 20) || (x >= 30 && x <= 40))
 				// {
-				// 	grid[x, y] = new Cell(CellType.Ground);
-				// }
-				// else
-				// {
-				// 	if (y == grid.Height / 2)
+				// 	if (y >= 9 && y <= 11)
 				// 	{
 				// 		grid[x, y] = new Cell(CellType.Ground);
-				// 	}
-				// 	else
-				// 	{
-				// 		grid[x, y] = new Cell(CellType.Empty);
+				// 		continue;
 				// 	}
 				// }
+				//
+				// int dx = x - 25;
+				// int dy = y - 10;
+				// int r = 8;
+				// if (((dx * dx) + (dy * dy)) <= (r * r))
+				// {
+				// 	grid[x, y] = new Cell(CellType.Ground);
+				// 	continue;
+				// }
+
+				grid[x, y] = new Cell(CellType.Empty);
 			}
 		}
 
-		WorldState? state = new WorldState(grid, NumPlayers);
+		return grid;
+	}
 
-		GoldNode node = new GoldNode(new Vec2(14.5f, 1.5f), ~0u);
-		state.AddEntity(node);
-		Entity entity = new Worker(new Vec2(4.5f, 2.5f), 2);
-		state.AddEntity(entity);
+	public static void GenerateStructures(WorldState state)
+	{
+		Castle castle0 = Castle.CreateBuilt(0, new Vec2Int(0, 9));
+		Castle castle1 = Castle.CreateBuilt(1, new Vec2Int(45, 9));
 
+		state.AddEntity(castle0);
+		state.AddEntity(castle1);
+	}
+
+	public static void GenerateResources(WorldState state)
+	{
+		Random rng = new Random();
+		int numNodes = 20;
+		for (int i = 0; i < numNodes; i++)
+		{
+			int x = (int)(rng.Next() % (state.Map.Width / 2 - 4));
+			int y = (int)(rng.Next() % state.Map.Height);
+			Vec2 pos0 = new Vec2(x + 0.5f, y + 0.5f);
+			Vec2 pos1 = new Vec2((state.Map.Width - x - 1) + 0.5f, (y + 0.5f));
+			if (state.IsTileOccupied(state.Map.CellPosFromWorldSpace(pos0)))
+			{
+				i--;
+				continue;
+			}
+			state.AddEntity(new GoldNode(pos0, ~0u));
+			state.AddEntity(new GoldNode(pos1, ~0u));
+		}
+
+		Grid<Cell> grid = state.Map;
 		for (int x = 0; x < grid.Width; x++)
 		{
 			for (int y = 0; y < grid.Height; y++)
 			{
-				Vec2 pos = new Vec2(x + 0.5f, y + 0.4f);
-				// if ((x + y) % 2 == 0)
-				// {
-				// 	continue;
-				// }
-				if (x < segmentationGridWidth)
+				if (x >= 21 && x <= 28)
 				{
-					uint owner = 1;
-					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
-					state.AddEntity(curr);
-				}
-				else if (x > grid.Width - segmentationGridWidth - 1)
-				{
-					uint owner = 0;
-					Entity curr = (x + y) % 3 == 0 ? new Worker(pos, owner) : new Knight(pos, owner);
-					state.AddEntity(curr);
+					if (y >= 27 || y < 3)
+					{
+						Vec2 pos = new Vec2(x + 0.5f, y + 0.5f);
+						state.AddEntity(new GoldNode(pos, ~0u));
+						continue;
+					}
 				}
 			}
 		}
+	}
 
-		Barracks barracks1 = Barracks.CreateBuilt(1, new Vec2Int(20, 5));
-		Barracks barracks2 = Barracks.CreateBuilt(1, new Vec2Int(20, 8));
-		Barracks barracks3 = Barracks.CreateBuilt(0, new Vec2Int(20, 11));
-		state.AddEntity(barracks1);
-		state.AddEntity(barracks2);
-		state.AddEntity(barracks3);
+	public static void GenerateUnits(WorldState state)
+	{
+		Worker worker0 = new Worker(new Vec2(2.5f, 8.5f), 0);
+		Worker worker1 = new Worker(new Vec2(47.5f, 8.5f), 1);
 
-		ResourceStack initialResources = new ResourceStack(Resource.Gold, 10000);
-		for (uint i = 0; i < NumPlayers; i++)
+		state.AddEntity(worker0);
+		state.AddEntity(worker1);
+	}
+
+	public static void GenerateInitialResources(WorldState state)
+	{
+		ResourceStack initialResources = new ResourceStack(Resource.Gold, 100);
+
+		for (uint i = 0; i < state.NumPlayers; i++)
 		{
 			state.GiveResource(initialResources, i);
 		}
+	}
 
-		// Save map
-		state.Save("test.smap");
+	public static void GenerateState()
+	{
+		WorldState state = new WorldState(GenerateMap(), 2);
+		GenerateStructures(state);
+		GenerateUnits(state);
+		GenerateResources(state);
+		GenerateInitialResources(state);
+		state.Save("generated.sstate");
+		Console.WriteLine($"Generated map to \"generated.sstate\".");
+	}
 
-		// Load
+	public static void Run(ParseResult result)
+	{
+		bool gen = result.GetValue<bool>("--gen");
+		if (gen)
+		{
+			GenerateState();
+			return;
+		}
 
-		// WorldState? state = WorldState.Load("test.smap");
-		state = WorldState.Load("test.smap");
+		string? map = result.GetValue<string>("--map");
+		if (map == null)
+		{
+			Console.WriteLine("Please provide a map with the flag --map.");
+			return;
+		}
 
-		// grid = state.Map;
-		// for (int i = 0; i < grid.Size(); i++)
-		// {
-		// 	Console.Write(grid[i].IsWalkable + " ");
-		// }
 
-		// Start engine
-
-		// Console.WriteLine(retrieved);
+		WorldState state;
+		try
+		{
+			state = WorldState.Load(map);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error opening map \"{map}\": {ex.Message}");
+			return;
+		}
 
 		RtsEngine engine = RtsEngine.StartInstance(state);
 		_ = engine.Start();
 
-		// Client client = new Client(1000);
-		// client.MessageReceived += HandleMessage;
-		// await client.ConnectAsync("localhost", 13774);
-
 		Console.ReadKey();
-
 		engine.Stop();
 	}
 
-	private static void HandleMessage(object? sender, byte[] data)
+	public static async Task Main(string[] args)
 	{
-		byte[] dd = DataCompressor.DecompressData(data);
-		WorldState state = Serializer.FromBytes<WorldState>(dd);
-		// SerializableGrid<Cell> map = state.Map;
+		RootCommand rootCommand = new RootCommand("RtsEngine runner");
 
-		// Console.WriteLine();
-		// Console.WriteLine();
-		// for (int i = 0; i < state.Map.Size(); i++)
-		// {
-		// 	Console.Write(state.Map[i].IsWalkable + " ");
-		// }
-		// Console.WriteLine();
-		//
-		// for (uint i = 0; i < 10; i++)
-		// {
-		// 	Console.Write(state.GetEntity(i)!.Pos + " ");
-		// 	Console.Write(state.GetEntity(i) is Worker);
-		// 	Console.WriteLine();
-		// }
+		rootCommand.Add(new Option<string>("--map"));
+		rootCommand.Add(new Option<bool>("--gen"));
+
+		rootCommand.SetAction(Run);
+		rootCommand.Parse(args).Invoke();
 	}
-
-	//
-	// private static async void HandleConnection(object? sender, TcpClient client)
-	// {
-	// 	Server server = (Server)sender!;
-	//
-	// 	WorldState state = WorldState.Load("test.smap");
-	// 	await server.SendData(Serializer.ToBytes(state), 0);
-	// }
 }
 
 }

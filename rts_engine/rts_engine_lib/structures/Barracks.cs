@@ -41,6 +41,7 @@ public class Barracks : UnitProducer
 
 		barracks.HasBuildingStarted = true;
 		barracks.IsBuilt = true;
+		barracks.HitPoints = barracks.MaxHitPoints;
 
 		return barracks;
 	}

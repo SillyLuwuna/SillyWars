@@ -118,6 +118,7 @@ public class WorldState : ISerializable
 	{
 		PlayerVersion = reader.Read<int>();
 
+		// Grid<Cell> map = new Grid<Cell>(new Vec2(0, 0), 1, 25, 15);
 		Grid<Cell> map = reader.Read<Grid<Cell>>();
 		int numPlayers = reader.Read<int>();
 		Init(map, numPlayers);

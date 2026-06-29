@@ -157,9 +157,11 @@ public class Server
 	{
 		await _clientsSemaphore.WaitAsync();
 
-		if (!_clientEndpoints.ContainsKey(endpoint)) return;
+		if (_clientEndpoints.ContainsKey(endpoint))
+		{
+			await TrySendData(data, _clientEndpoints[endpoint]);
+		}
 
-		await TrySendData(data, _clientEndpoints[endpoint]);
 		_clientsSemaphore.Release();
 	}
 

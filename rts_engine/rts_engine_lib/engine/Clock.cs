@@ -74,7 +74,7 @@ public class Clock
 		{
 			try
 			{
-				await _clockTask;
+				await _clockTask.ConfigureAwait(false);
 			}
 			catch (OperationCanceledException) {}
 		}
@@ -99,7 +99,7 @@ public class Clock
 					delay = 0;
 				}
 
-				await Task.Delay(delay, cancellationToken);
+				await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
 
 				long currTicks = DateTime.Now.Ticks;
 

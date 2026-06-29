@@ -29,6 +29,8 @@ public class TrainQueueHead : MonoBehaviour
 
 	public void UpdateUI(UnitProducer structure)
 	{
+		AssetLoader.Instance.LoadAssets(_unitPortraitsPath);
+
 		UnitType? head = structure.ProductionQueueHead;
 		if (head == null)
 		{

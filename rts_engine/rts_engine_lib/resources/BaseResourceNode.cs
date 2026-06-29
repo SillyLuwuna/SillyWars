@@ -114,12 +114,18 @@ public abstract class BaseResourceNode: PhysicsObject, ISerializable, IGatherabl
 
 	private void ClearInactiveGatherers()
 	{
+		List<IGatherer> inactiveGatherers = new List<IGatherer>();
 		foreach (IGatherer gatherer in _gatherersWorkDone.Keys)
 		{
 			if (!_activeGatherers.Contains(gatherer))
 			{
-				_gatherersWorkDone.Remove(gatherer);
+				inactiveGatherers.Add(gatherer);
 			}
+		}
+
+		foreach (IGatherer gatherer in inactiveGatherers)
+		{
+			_gatherersWorkDone.Remove(gatherer);
 		}
 
 		_activeGatherers.Clear();

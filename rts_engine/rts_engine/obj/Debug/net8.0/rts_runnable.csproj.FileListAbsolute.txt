@@ -36,3 +36,17 @@
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net8.0/Runnable.pdb
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net8.0/rts_runnable.genruntimeconfig.cache
 /home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/obj/Debug/net8.0/ref/Runnable.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/System.CommandLine.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/cs/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/de/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/es/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/fr/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/it/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/ja/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/ko/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/pl/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/pt-BR/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/ru/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/tr/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/zh-Hans/System.CommandLine.resources.dll
+/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/bin/Debug/net8.0/zh-Hant/System.CommandLine.resources.dll

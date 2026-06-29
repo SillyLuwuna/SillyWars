@@ -48,6 +48,7 @@ public class Castle : UnitProducer
 
 		castle.HasBuildingStarted = true;
 		castle.IsBuilt = true;
+		castle.HitPoints = castle.MaxHitPoints;
 
 		return castle;
 	}

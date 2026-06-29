@@ -21,6 +21,8 @@ public class RtsEngine
 	private const bool ShowStats = true;
 	private const bool DEBUG = true;
 	
+	private object _tickLock;
+
 	public bool IsRunning { get; private set; }
 	private PhysicsEngine _physicsEngine;
 	private WorldState _state;
@@ -70,6 +72,7 @@ public class RtsEngine
 	private RtsEngine(WorldState state, int tps)
 	{
 		TPS = tps;
+		_tickLock = new object();
 		_rng = new Random();
 		_physicsEngine = new PhysicsEngine();
 		_currentBroadcastTask = null;
@@ -142,19 +145,23 @@ public class RtsEngine
 	public void Tick()
 	{
 		if (!IsRunning) throw new InvalidOperationException("cannot tick when the engine is not running.");
-		_totalTicks++;
 
-		WaitForPreviousTickBroadcast();
-		CleanupDestroyedEntities();
-		ExecutePlayerCommands();
-		UpdateWorldState();
-		UpdatePhysics();
-		CheckWinCondition();
-		if (_isServer)
+		lock (_tickLock)
 		{
-			_currentBroadcastTask = BroadcastWorldState();
+			_totalTicks++;
+
+			WaitForPreviousTickBroadcast();
+			CleanupDestroyedEntities();
+			ExecutePlayerCommands();
+			UpdateWorldState();
+			UpdatePhysics();
+			CheckWinCondition();
+			if (_isServer)
+			{
+				_currentBroadcastTask = BroadcastWorldState();
+			}
+			OnTickEnded();
 		}
-		OnTickEnded();
 	}
 
 	private void WaitForPreviousTickBroadcast()

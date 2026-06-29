@@ -44,7 +44,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnMediumButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_easyMap);
+		LocalEngine.Instance.StartEngine(_mediumMap);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 
@@ -53,7 +53,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnHardButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_easyMap);
+		LocalEngine.Instance.StartEngine(_hardMap);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 

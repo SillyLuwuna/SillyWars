@@ -12,4 +12,8 @@
 	  <ProjectReference Include="../rts_engine_lib/rts_engine_lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.9" />
+  </ItemGroup>
+
 </Project>
