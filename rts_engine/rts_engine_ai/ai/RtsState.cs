@@ -17,11 +17,13 @@ public enum StateEntry
 	Knights,
 	TotalUnits,
 
-	// units lost
-	// enemy units lost
+	// idle knights
+	// defending knights
 
 	// workersBuilding
 	// unfinishedStructures
+
+	// last command
 
 	EnemyWorkers,
 	EnemyKnights,
@@ -59,22 +61,22 @@ public struct RtsState
 
 	private float[] _state;
 
-	private uint _playerId;
-	private Vec2 _basePos;
-	private float _baseRadius;
+	public uint PlayerId;
+	public Vec2 BasePos;
+	public float BaseRadius;
 
-	private uint _enemyId;
-	private Vec2 _enemyBasePos;
-	private float _enemyBaseRadius;
+	public uint EnemyId;
+	public Vec2 EnemyBasePos;
+	public float EnemyBaseRadius;
 
 	public RtsState(RtsState? previousState, WorldState state, uint playerId, ulong elapsedTicks)
 	{
 		_state = new float[Size];
-		_enemyId = playerId == 0 ? 1u : 0u;
-		_basePos = GetBasePos(state, playerId);
-		_baseRadius = GetBaseRadius(_basePos, state, playerId);
-		_enemyBasePos = GetBasePos(state, _enemyId);
-		_enemyBaseRadius = GetBaseRadius(_enemyBasePos, state, _enemyId);
+		EnemyId = playerId == 0 ? 1u : 0u;
+		BasePos = GetBasePos(previousState == null ? null : previousState.Value.BasePos, state, playerId);
+		BaseRadius = GetBaseRadius(BasePos, state, playerId);
+		EnemyBasePos = GetBasePos(previousState == null ? null : previousState.Value.EnemyBasePos, state, EnemyId);
+		EnemyBaseRadius = GetBaseRadius(EnemyBasePos, state, EnemyId);
 
 		SetGoldInfo(previousState, state);
 		SetUnitInfo(state);
@@ -85,7 +87,7 @@ public struct RtsState
 		SetGameTime(elapsedTicks);
 	}
 
-	private Vec2 GetBasePos(WorldState worldState, uint playerId)
+	private Vec2 GetBasePos(Vec2? previousPos, WorldState worldState, uint playerId)
 	{
 		Vec2 centroid = Vec2.Zero;
 		int count = 0;
@@ -99,6 +101,13 @@ public struct RtsState
 
 				count++;
 			}
+		}
+
+		if (count == 0)
+		{
+			if (previousPos == null) throw new ArgumentException("Invalid state: no structures nor previous state");
+
+			return previousPos.Value;
 		}
 		
 		return centroid / (float)count;
@@ -126,7 +135,7 @@ public struct RtsState
 
 	private void SetGoldInfo(RtsState? previousState, WorldState worldState)
 	{
-		Set(StateEntry.Gold, worldState.GetResource(_playerId, Resource.Gold) / 1000f);
+		Set(StateEntry.Gold, worldState.GetResource(PlayerId, Resource.Gold) / 1000f);
 		Set(StateEntry.GoldIncome, previousState == null ? 0 : previousState.Value.Get(StateEntry.Gold) / 50f);
 	}
 
@@ -147,7 +156,7 @@ public struct RtsState
 		{
 			if (unit is Worker worker)
 			{
-				if (unit.OwnerId == _playerId)
+				if (unit.OwnerId == PlayerId)
 				{
 					if (worker.State.Goal == Goal.None)
 					{
@@ -164,7 +173,7 @@ public struct RtsState
 			}
 			else if (unit is Knight)
 			{
-				if (unit.OwnerId == _playerId)
+				if (unit.OwnerId == PlayerId)
 				{
 					knightCount++;
 					totalUnits++;
@@ -215,7 +224,7 @@ public struct RtsState
 		{
 			if (structure is Barracks)
 			{
-				if (structure.OwnerId == _playerId)
+				if (structure.OwnerId == PlayerId)
 				{
 					barracksCount++;
 				}
@@ -226,7 +235,7 @@ public struct RtsState
 			}
 			else if (structure is Castle)
 			{
-				if (structure.OwnerId == _playerId)
+				if (structure.OwnerId == PlayerId)
 				{
 					castleCount++;
 				}
@@ -238,7 +247,7 @@ public struct RtsState
 
 			if (structure is UnitProducer producer)
 			{
-				if (producer.OwnerId != _playerId) continue;
+				if (producer.OwnerId != PlayerId) continue;
 				if (!producer.IsProducingUnits) continue;
 
 				UnitType head = producer.ProductionQueueHead!.Value;
@@ -277,10 +286,10 @@ public struct RtsState
 		float closestDistance = maxDistance;
 		foreach (BaseStructure structure in worldState.Structures)
 		{
-			if (structure.OwnerId != _playerId)
+			if (structure.OwnerId != PlayerId)
 			{
 				Vec2 pos = worldState.Map.WorldSpaceFromCellPos(structure.Start); 
-				float distance = _basePos.Distance(pos);
+				float distance = BasePos.Distance(pos);
 
 				if (distance < closestDistance)
 				{
@@ -299,7 +308,7 @@ public struct RtsState
 
 		foreach (Worker worker in worldState.Units)
 		{
-			if (worker.OwnerId != _playerId) continue;
+			if (worker.OwnerId != PlayerId) continue;
 			if (worker.State.Goal != Goal.Gather) continue;
 			IGatherable? gatherable = worker.GatherableGoal;
 			if (gatherable == null) continue;
@@ -316,7 +325,7 @@ public struct RtsState
 			totalGoldNodes++;
 			if (!controlledNodes.Contains(node))
 			{
-				closestUnclaimedNodeDistance = _basePos.Distance(node.Pos);
+				closestUnclaimedNodeDistance = BasePos.Distance(node.Pos);
 			}
 		}
 
@@ -326,8 +335,8 @@ public struct RtsState
 
 	private void SetBaseArmyValues(WorldState worldState)
 	{
-		float enemyArmyValueNearBase = ArmyValueOfUnitsInBase(_basePos, _baseRadius, worldState, _enemyId);
-		float armyValueNearEnemyBase = ArmyValueOfUnitsInBase(_enemyBasePos, _enemyBaseRadius, worldState, _playerId);
+		float enemyArmyValueNearBase = ArmyValueOfUnitsInBase(BasePos, BaseRadius, worldState, EnemyId);
+		float armyValueNearEnemyBase = ArmyValueOfUnitsInBase(EnemyBasePos, EnemyBaseRadius, worldState, PlayerId);
 
 		Set(StateEntry.EnemyArmyValueNearBase, enemyArmyValueNearBase / maxArmyValue);
 		Set(StateEntry.ArmyValueNearEnemyBase, armyValueNearEnemyBase / maxArmyValue);

@@ -70,7 +70,7 @@ public class RtsAI : IRtsPlayer
 		_lastState = currState;
 		_lastAction = action;
 
-		return _actionUtils.ActionToCommand(state, action);
+		return _actionUtils.ActionToCommand(currState, state, action);
 	}
 
 	public void GameStarted(WorldState initialState)

@@ -75,28 +75,28 @@ public class RtsActionUtils
 		// _buildLocations.Enqueue(new Tuple<BaseStructure, Direction>(structure, Direction.Down));
 	// }
 
-	public ICommand? ActionToCommand(WorldState state, RtsAction action)
+	public ICommand? ActionToCommand(RtsState currState, WorldState currWorld, RtsAction action)
 	{
 		switch (action)
 		{
 			case RtsAction.TrainWorker:
-				return TrainWorker(state);
+				return TrainWorker(currWorld);
 			case RtsAction.TrainKnight:
-				return TrainKnight(state);
+				return TrainKnight(currWorld);
 			case RtsAction.BuildBarracks:
-				return BuildBarracks(state);
+				return BuildBarracks(currWorld);
 			case RtsAction.BuildCastle:
-				return BuildCastle(state);
+				return BuildCastle(currWorld);
 			case RtsAction.Attack:
-				return Attack(state);
+				return Attack(currState, currWorld);
 			case RtsAction.Defend:
-				return Defend(state);
+				return Defend(currState, currWorld);
 			case RtsAction.MineGold:
-				return MineGold(state);
+				return MineGold(currWorld);
 			case RtsAction.BuildUnfinishedStructures:
-				return BuildUnfinishedStructures(state);
+				return BuildUnfinishedStructure(currWorld);
 			case RtsAction.Wait:
-				return Wait(state);
+				return Wait(currWorld);
 			default:
 				return null;
 		}
@@ -279,9 +279,47 @@ public class RtsActionUtils
 		return null;
 	}
 
+	private List<Worker> GetMostAvailableWorkers(WorldState state)
+	{
+		List<Worker> idleWorkers = new List<Worker>(50);
+		List<Worker> defendingWorkers = new List<Worker>();
+		List<Worker> gatheringWorkers = new List<Worker>();
+		List<Worker> buildingWorkers = new List<Worker>();
+
+		foreach (Worker worker in state.Units)
+		{
+			if (worker.OwnerId != _playerId) continue;
+			Goal goal = worker.State.Goal;
+
+			switch (goal)
+			{
+				case Goal.None:
+					idleWorkers.Add(worker);
+					break;
+				case Goal.Walk:
+					break; // attacker
+				case Goal.Attack:
+					defendingWorkers.Add(worker);
+					break;
+				case Goal.Gather:
+					gatheringWorkers.Add(worker);
+					break;
+				case Goal.Build:
+					buildingWorkers.Add(worker);
+					break;
+			}
+		}
+
+		idleWorkers.AddRange(gatheringWorkers);
+		idleWorkers.AddRange(buildingWorkers);
+		idleWorkers.AddRange(defendingWorkers);
+
+		return idleWorkers;
+	}
+
 	private Worker? GetMostAvailableWorker(WorldState state)
 	{
-		Worker? walking = null;
+		Worker? defender = null;
 		Worker? gathering = null;
 		Worker? building = null;
 
@@ -293,9 +331,13 @@ public class RtsActionUtils
 			{
 				return worker;
 			}
-			else if (goal == Goal.Walk || goal == Goal.Attack)
+			else if (goal == Goal.Walk)
 			{
-				walking = worker;
+				continue; // attacker
+			}
+			else if (goal == Goal.Attack)
+			{
+				defender = worker;
 			}
 			else if (goal == Goal.Gather)
 			{
@@ -307,30 +349,166 @@ public class RtsActionUtils
 			}
 		}
 
-		if (walking != null) return walking;
 		if (gathering != null) return gathering;
 		if (building != null) return building;
+		if (defender != null) return defender;
 		return null;
 	}
 
-	private ICommand? Attack(WorldState state)
+	private ICommand? Attack(RtsState state, WorldState world)
 	{
+		Vec2 enemyBase = state.EnemyBasePos;
 
+		bool attackerIsKnight = false;
+		BaseUnit? attacker = null;
+
+		foreach (BaseUnit unit in world.Units)
+		{
+			if (unit.OwnerId != _playerId) continue;
+
+			if (unit is Knight knight)
+			{
+				if (knight.State.Goal == Goal.None)
+				{
+					attackerIsKnight = true;
+					attacker = unit;
+					break;
+				}
+				else if (knight.State.Goal == Goal.Attack)
+				{
+					attackerIsKnight = true;
+					attacker = unit;
+				}
+			}
+			else if (!attackerIsKnight)
+			{
+				attacker = unit;
+			}
+		}
+
+		if (attacker == null) return null;
+
+		List<uint> entities = new List<uint> { attacker.Id };
+		AggroMoveCommandArgs args = new AggroMoveCommandArgs(entities, enemyBase, true);
+		return new AggroMoveCommand(_playerId, args);
 	}
 
-	private ICommand? Defend(WorldState state)
+	private ICommand? Defend(RtsState state, WorldState world)
 	{
+		bool defenderIsKnight = false;
+		BaseUnit? defender = null;
 
+		BaseUnit? closestEnemy = null;
+		float closestEnemyDistance = float.PositiveInfinity;
+		int numTargets = int.MaxValue;
+
+		foreach (BaseUnit unit in world.Units)
+		{
+			if (unit.OwnerId == _playerId)
+			{
+				if (defenderIsKnight) continue;
+				else if (unit is Knight knight)
+				{
+					if (knight.State.Goal == Goal.Walk) continue; // is attacking
+					else if (knight.State.Goal == Goal.Attack) continue; // is defending
+					else if (knight.State.Goal == Goal.None)
+					{
+						defenderIsKnight = true;
+					}
+				}
+				defender = unit;
+				continue;
+			}
+
+			float distance = state.BasePos.Distance(unit.Pos);
+			if (distance > state.BaseRadius) continue;
+
+			if (unit.TargetedByNum > numTargets) continue;
+
+			if (unit.TargetedByNum < numTargets)
+			{
+				closestEnemyDistance = distance;
+				closestEnemy = unit;
+				numTargets = unit.TargetedByNum;
+				continue;
+			}
+
+			if (distance < closestEnemyDistance)
+			{
+				closestEnemyDistance = distance;
+				closestEnemy = unit;
+			}
+		}
+
+		if (defender == null) return null;
+		if (closestEnemy == null) return null;
+
+		List<uint> entities = new List<uint> { defender.Id };
+		AttackCommandArgs args = new AttackCommandArgs(entities, closestEnemy.Id);
+		return new AttackCommand(_playerId, args);
 	}
 
 	private ICommand? MineGold(WorldState state)
 	{
+		Dictionary<IGatherable, int> controlledNodes = new Dictionary<IGatherable, int>();
+		HashSet<IGatherable> fullNodes = new HashSet<IGatherable>();
 
+		foreach (Worker worker in state.Units)
+		{
+			if (worker.OwnerId != _playerId) continue;
+			if (worker.State.Goal != Goal.Gather) continue;
+			IGatherable? gatherable = worker.GatherableGoal;
+			if (gatherable == null) continue;
+
+			if (controlledNodes.ContainsKey(gatherable))
+			{
+				int workers = ++controlledNodes[gatherable];
+				if (workers >= 3)
+				{
+					fullNodes.Add(gatherable);
+				}
+			}
+			else
+			{
+				controlledNodes[gatherable] = 1;
+			}
+		}
+
+
+		float minDistance = float.PositiveInfinity;
+		GoldNode? nearestNode = null;
+
+		foreach (GoldNode node in state.Entities)
+		{
+			if (fullNodes.Contains(node)) continue;
+
+			float distance = node.Pos.Distance(state.Map.WorldSpaceFromCellPos(_baseStart.Start));
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				nearestNode = node;
+			}
+		}
+
+		if (nearestNode == null) return null;
+		Worker? availableWorker = GetMostAvailableWorker(state);
+		if (availableWorker == null) return null;
+
+		List<uint> entities = new List<uint> { availableWorker.Id };
+		GatherCommandArgs args = new GatherCommandArgs(entities, nearestNode);
+		return new GatherCommand(_playerId, args);
 	}
 
-	private ICommand? BuildUnfinishedStructures(WorldState state)
+	private ICommand? BuildUnfinishedStructure(WorldState state)
 	{
+		BaseStructure? unfinishedStructure = state.Structures.First(s => (s.OwnerId == _playerId) && !s.IsBuilt);
+		if (unfinishedStructure == null) return null;
+		Worker? worker = GetMostAvailableWorker(state);
+		if (worker == null) return null;
 
+		List<uint> entities = new List<uint> { worker.Id };
+		BuildCommandArgs args = new BuildCommandArgs(entities, unfinishedStructure.Id);
+		return new BuildCommand(_playerId, args);
 	}
 
 	private ICommand? Wait(WorldState state)
