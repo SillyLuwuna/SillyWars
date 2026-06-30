@@ -119,7 +119,7 @@ public class Trainer
 
 		foreach (IRtsPlayer player in _players)
 		{
-			player.GameEnded(_engine.State);
+			player.GameEnded(_engine.State, _statTicks);
 		}
 
 		_engine.Stop();

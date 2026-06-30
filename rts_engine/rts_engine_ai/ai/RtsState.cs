@@ -60,6 +60,7 @@ public struct RtsState
 	const float maxArmyValue = 50f * knightArmyValue;
 
 	private float[] _state;
+	private float[] _values;
 
 	public uint PlayerId;
 	public Vec2 BasePos;
@@ -72,6 +73,7 @@ public struct RtsState
 	public RtsState(RtsState? previousState, WorldState state, uint playerId, ulong elapsedTicks)
 	{
 		_state = new float[Size];
+		_values = new float[Size];
 		EnemyId = playerId == 0 ? 1u : 0u;
 		BasePos = GetBasePos(previousState == null ? null : previousState.Value.BasePos, state, playerId);
 		BaseRadius = GetBaseRadius(BasePos, state, playerId);
@@ -135,8 +137,15 @@ public struct RtsState
 
 	private void SetGoldInfo(RtsState? previousState, WorldState worldState)
 	{
-		Set(StateEntry.Gold, worldState.GetResource(PlayerId, Resource.Gold) / 1000f);
-		Set(StateEntry.GoldIncome, previousState == null ? 0 : previousState.Value.Get(StateEntry.Gold) / 50f);
+		float currGold = worldState.GetResource(PlayerId, Resource.Gold);
+		SetValue(StateEntry.Gold, currGold);
+		Set(StateEntry.Gold, currGold / 1000f);
+
+		float lastGold = previousState == null ? 0 : previousState.Value.GetValue(StateEntry.Gold);
+		float goldDifference = currGold - lastGold;
+		float goldDifferenceNormalized = 0.5f + (goldDifference / 50f / 2f);
+		SetValue(StateEntry.GoldIncome, previousState == null ? 0 : goldDifference);
+		Set(StateEntry.GoldIncome, previousState == null ? 0 : goldDifferenceNormalized);
 	}
 
 	private void SetUnitInfo(WorldState worldState)
@@ -186,13 +195,22 @@ public struct RtsState
 			}
 		}
 
+
+
+		SetValue(StateEntry.IdleWorkers, idleWorkerCount);
 		Set(StateEntry.IdleWorkers, idleWorkerCount / 50f);
+		SetValue(StateEntry.Workers, workerCount);
 		Set(StateEntry.Workers, workerCount / 50f);
+		SetValue(StateEntry.Knights, knightCount);
 		Set(StateEntry.Knights, knightCount / 50f);
+		SetValue(StateEntry.TotalUnits, totalUnits);
 		Set(StateEntry.TotalUnits, totalUnits / 50f);
 
+		SetValue(StateEntry.EnemyWorkers, enemyWorkerCount);
 		Set(StateEntry.EnemyWorkers, enemyWorkerCount / 50f);
+		SetValue(StateEntry.EnemyKnights, enemyKnightCount);
 		Set(StateEntry.EnemyKnights, enemyKnightCount / 50f);
+		SetValue(StateEntry.TotalEnemyUnits, totalEnemyUnits);
 		Set(StateEntry.TotalEnemyUnits, totalEnemyUnits / 50f);
 
 		float armyValue = workerCount * workerArmyValue + knightCount * knightArmyValue;
@@ -207,6 +225,7 @@ public struct RtsState
 		{
 			armyRatio = MathF.Min((armyValue) / (enemyArmyValue), maxArmyValue);
 		}
+		SetValue(StateEntry.ArmyRatio, armyRatio);
 		Set(StateEntry.ArmyRatio, armyRatio / maxArmyValue);
 	}
 
@@ -268,13 +287,19 @@ public struct RtsState
 			}
 		}
 
+		SetValue(StateEntry.EnqueuedWorkers, enqueuedWorkerCount);
 		Set(StateEntry.EnqueuedWorkers, enqueuedWorkerCount / 50f);
+		SetValue(StateEntry.EnqueuedKnights, enqueuedKnightCount);
 		Set(StateEntry.EnqueuedKnights, enqueuedKnightCount / 50f);
 
+		SetValue(StateEntry.Castles, castleCount);
 		Set(StateEntry.Castles, castleCount / 20f);
+		SetValue(StateEntry.Barracks, barracksCount);
 		Set(StateEntry.Barracks, barracksCount / 20f);
 
+		SetValue(StateEntry.EnemyCastles, enemyCastleCount);
 		Set(StateEntry.EnemyCastles, enemyCastleCount / 20f);
+		SetValue(StateEntry.EnemyBarracks, enemyBarracksCount);
 		Set(StateEntry.EnemyBarracks, enemyBarracksCount / 20f);
 	}
 
@@ -299,6 +324,7 @@ public struct RtsState
 			}
 		}
 
+		SetValue(StateEntry.ClosestEnemyStructureDistance, closestDistance);
 		Set(StateEntry.ClosestEnemyStructureDistance, closestDistance / maxDistance);
 	}
 
@@ -329,7 +355,9 @@ public struct RtsState
 			}
 		}
 
+		SetValue(StateEntry.NearestUnworkedGoldNodeDistance, closestUnclaimedNodeDistance);
 		Set(StateEntry.NearestUnworkedGoldNodeDistance, closestUnclaimedNodeDistance / maxDistance);
+		SetValue(StateEntry.GoldNodesControlledRatio, (float)controlledNodes.Count / (float)totalGoldNodes);
 		Set(StateEntry.GoldNodesControlledRatio, (float)controlledNodes.Count / (float)totalGoldNodes);
 	}
 
@@ -338,7 +366,9 @@ public struct RtsState
 		float enemyArmyValueNearBase = ArmyValueOfUnitsInBase(BasePos, BaseRadius, worldState, EnemyId);
 		float armyValueNearEnemyBase = ArmyValueOfUnitsInBase(EnemyBasePos, EnemyBaseRadius, worldState, PlayerId);
 
+		SetValue(StateEntry.EnemyArmyValueNearBase, enemyArmyValueNearBase);
 		Set(StateEntry.EnemyArmyValueNearBase, enemyArmyValueNearBase / maxArmyValue);
+		SetValue(StateEntry.ArmyValueNearEnemyBase, armyValueNearEnemyBase);
 		Set(StateEntry.ArmyValueNearEnemyBase, armyValueNearEnemyBase / maxArmyValue);
 	}
 
@@ -366,6 +396,7 @@ public struct RtsState
 
 	public void SetGameTime(ulong elapsedTicks)
 	{
+		SetValue(StateEntry.GameTime, (float)elapsedTicks);
 		Set(StateEntry.GameTime, (float)elapsedTicks / (float)Trainer.MaxAllowedTicks);
 	}
 
@@ -374,16 +405,43 @@ public struct RtsState
 		_state[(int)entry] = value;
 	}
 
-	private float Get(StateEntry entry)
+	private void SetValue(StateEntry entry, float value)
 	{
-		return _state[(int)entry];
+		_values[(int)entry] = value;
 	}
 
-	private float Gold
+	public float GetValue(StateEntry entry)
 	{
-		get => _state[0];
-		set => _state[0] = value;
+		return _values[(int)entry];
 	}
+
+	public float Gold => this.GetValue(StateEntry.Gold);
+	public float GoldIncome => this.GetValue(StateEntry.GoldIncome);
+	public float IdleWorkers => this.GetValue(StateEntry.IdleWorkers);
+	public float Workers => this.GetValue(StateEntry.Workers);
+	public float Knights => this.GetValue(StateEntry.Knights);
+	public float TotalUnits => this.GetValue(StateEntry.TotalUnits);
+	// public float IdleKnights => this.Get(StateEntry.IdleKnights);
+	// public float DefendingKnights => this.Get(StateEntry.DefendingKnights);
+	// public float WorkersBuilding => this.Get(StateEntry.WorkersBuilding);
+	// public float UnfinishedStructures => this.Get(StateEntry.UnfinishedStructures);
+	// public float LastCommand => this.Get(StateEntry.LastCommand);
+	public float EnemyWorkers => this.GetValue(StateEntry.EnemyWorkers);
+	public float EnemyKnights => this.GetValue(StateEntry.EnemyKnights);
+	public float TotalEnemyUnits => this.GetValue(StateEntry.TotalEnemyUnits);
+	public float ArmyRatio => this.GetValue(StateEntry.ArmyRatio);
+	public float EnqueuedWorkers => this.GetValue(StateEntry.EnqueuedWorkers);
+	public float EnqueuedKnights => this.GetValue(StateEntry.EnqueuedKnights);
+	public float Castles => this.GetValue(StateEntry.Castles);
+	public float Barracks => this.GetValue(StateEntry.Barracks);
+	public float EnemyCastles => this.GetValue(StateEntry.EnemyCastles);
+	public float EnemyBarracks => this.GetValue(StateEntry.EnemyBarracks);
+	public float ClosestEnemyStructureDistance => this.GetValue(StateEntry.ClosestEnemyStructureDistance);
+	public float NearestUnworkedGoldNodeDistance => this.GetValue(StateEntry.NearestUnworkedGoldNodeDistance);
+	public float GoldNodesControlledRatio => this.GetValue(StateEntry.GoldNodesControlledRatio);
+	public float EnemyArmyValueNearBase => this.GetValue(StateEntry.EnemyArmyValueNearBase);
+	public float ArmyValueNearEnemyBase => this.GetValue(StateEntry.ArmyValueNearEnemyBase);
+	public float GameTime;
 
 	public float[] Array => _state;
 }
