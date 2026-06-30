@@ -368,9 +368,9 @@ public class WorldState : ISerializable
 		if (!Map.ContainsPos(tile)) return true;
 		if (!Map[tile].IsWalkable) return true;
 
-		foreach (BaseUnit unit in _units)
+		foreach (PhysicsObject physicsObject in _physicsObjects)
 		{
-			if (Map.CellPosFromWorldSpace(unit.Pos) == tile) return true;
+			if (Map.CellPosFromWorldSpace(physicsObject.Pos) == tile) return true;
 		}
 
 		return false;

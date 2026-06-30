@@ -17,6 +17,9 @@ public enum StateEntry
 	Knights,
 	TotalUnits,
 
+	// units lost
+	// enemy units lost
+
 	EnemyWorkers,
 	EnemyKnights,
 	TotalEnemyUnits,

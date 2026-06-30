@@ -10,23 +10,28 @@ public class RtsAI : IRtsPlayer
 	private static readonly int ActionCount = Enum.GetValues(typeof(RtsAction)).Length;
 
 	private const float Epsilon = 0.3f;
-	private const int GamesUntilNetworkMerge = 100;
 
 	private int _currGames;
 	private Random _rng;
 	private DQNModel _policyNetwork;
 	private DQNModel _targetNetwork;
 
+	private RtsActionUtils _actionUtils;
+
 	private RtsState? _lastState;
 	private RtsAction _lastAction;
 
-	public RtsAI()
+	private uint _playerId;
+
+	public RtsAI(DQNModel policyNetwork, DQNModel targetNetwork, uint playerId)
 	{
+		_policyNetwork = policyNetwork;
+		_targetNetwork = targetNetwork;
+		_playerId = playerId;
 		_currGames = 0;
 		_rng = new Random();
-		_policyNetwork = new DQNModel();
-		_targetNetwork = new DQNModel(_policyNetwork);
 		_lastState = null;
+		_actionUtils = new RtsActionUtils(_playerId);
 	}
 
 	private void Learn(RtsState state, RtsAction actionTaken, RtsState resultingState, float reward)
@@ -41,9 +46,10 @@ public class RtsAI : IRtsPlayer
 		_policyNetwork.Train(state, targetQValues);
 	}
 
-	public ICommand? MakePlay(WorldState state, uint playerId)
+	public ICommand? MakePlay(WorldState state, ulong currTick)
 	{
-		RtsState currState = new RtsState(state, playerId);
+		_actionUtils.Update(state);
+		RtsState currState = new RtsState(_lastState, state, _playerId, currTick);
 
 		RtsAction action;
 		if (_rng.NextDouble() < Epsilon)
@@ -64,22 +70,17 @@ public class RtsAI : IRtsPlayer
 		_lastState = currState;
 		_lastAction = action;
 
-		return RtsActionUtils.ActionToCommand(state, action);
+		return _actionUtils.ActionToCommand(state, action);
 	}
 
 	public void GameStarted(WorldState initialState)
 	{
 		_lastState = null;
+		_actionUtils = new RtsActionUtils(_playerId);
 	}
 
 	public void GameEnded(WorldState finalState)
 	{
-		_currGames++;
-		if (_currGames > GamesUntilNetworkMerge)
-		{
-			_targetNetwork.SetCopyFrom(_policyNetwork);
-			_currGames = 0;
-		}
 
 		// TODO reward for winning / losing
 		// TODO check if game actually ended or if it was a draw;

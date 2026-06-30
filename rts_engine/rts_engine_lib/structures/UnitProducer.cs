@@ -169,6 +169,8 @@ public abstract class UnitProducer : BaseStructure
 
 	public Queue<UnitType> ProductionQueue { get => new Queue<UnitType>(_productionQueue); }
 
+	public bool IsAtProductionCapacity => QueuedUnitsCount >= MaxUnitProduction;
+
 	public int TicksLeftForProduction { get => _productionCooldown; }
 }
 

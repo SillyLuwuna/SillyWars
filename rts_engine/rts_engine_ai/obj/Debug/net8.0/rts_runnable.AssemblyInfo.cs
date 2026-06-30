@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("rts_engine_ai")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2958f4485d822cb3696dffc1cb0ca353abc6141c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd8edca466b1c7a3e9a669eb681645fa65489035")]
 [assembly: System.Reflection.AssemblyProductAttribute("rts_engine_ai")]
 [assembly: System.Reflection.AssemblyTitleAttribute("rts_engine_ai")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

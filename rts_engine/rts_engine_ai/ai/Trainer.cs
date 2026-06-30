@@ -1,6 +1,9 @@
 using System.Diagnostics;
 using RtsEngine.Commands;
 using RtsEngine.Data;
+using RtsEngine.Map;
+using RtsEngine.Math;
+using RtsEngine.Structures;
 
 namespace RtsEngine.AI
 {
@@ -10,6 +13,8 @@ public class Trainer
 	private const int ExpectedTps = 500;
 	public const ulong MaxAllowedTicks = ExpectedTps * 60;
 
+	private const int GamesUntilNetworkMerge = 100;
+
 	private RtsEngine _engine = null!;
 	private WorldState _initialState = null!;
 	private WorldState _currState = null!;
@@ -17,21 +22,29 @@ public class Trainer
 
 	private Stopwatch _statTickStopwatch;
 	private Stopwatch _statGameStopwatch;
-	private int _statTicks;
-	private int _statTotalTicks;
+	private ulong _statTicks;
+	private ulong _statTotalTicks;
+
+	private DQNModel _policyNetwork;
+	private DQNModel _targetNetwork;
+
+	// HashSet<Vec2Int> _validBuildLocations;
 
 	public Trainer(WorldState initialState)
 	{
 		_initialState = initialState;
+		// _validBuildLocations = GetValidBuildLocations(initialState);
 		RestartState();
 		RestartEngine();
 		_players = new List<IRtsPlayer>();
 
-		RtsAI ai = new RtsAI();
+		_policyNetwork = new DQNModel();
+		_targetNetwork = new DQNModel(_policyNetwork);
+
 
 		for (uint i = 0; i < initialState.NumPlayers; i++)
 		{
-			_players.Add(ai);
+			_players.Add(new RtsAI(_policyNetwork, _targetNetwork, i));
 		}
 
 		_statTickStopwatch = new Stopwatch();
@@ -92,7 +105,7 @@ public class Trainer
 		{
 			IRtsPlayer player = _players[i];
 
-			ICommand? play = player.MakePlay(_engine.State, (uint)i);
+			ICommand? play = player.MakePlay(_engine.State, _statTicks);
 			if (play == null) continue;
 
 			_engine.EnqueueCommand(play);
@@ -134,10 +147,19 @@ public class Trainer
 		Console.WriteLine("Starting training...");
 		for (int i = 0; i < numGames; i++)
 		{
+			if (i % GamesUntilNetworkMerge == 0)
+			{
+				MergeNetworks();
+			}
 			RunGame();
 			CalcGameStatistics(i);
 		}
 		Console.WriteLine("Training complete!");
+	}
+
+	private void MergeNetworks()
+	{
+		_targetNetwork.SetCopyFrom(_policyNetwork);
 	}
 
 	private void CalcGameStatistics(int game)
@@ -149,6 +171,27 @@ public class Trainer
 		Console.WriteLine($"total ticks: {_statTotalTicks,3:F3}");
 		Console.WriteLine($"============================");
 	}
+
+	// private static HashSet<Vec2Int> GetValidBuildLocations(WorldState state, StructureType type)
+	// {
+	// 	HashSet<Vec2Int> validBuildLocations = new HashSet<Vec2Int>();
+	//
+	// 	Grid<Cell> map = state.Map;
+	// 	Vec2Int currPos = Vec2Int.Zero;
+	// 	while (currPos.x < map.Width)
+	// 	{
+	// 		while (currPos.y < map.Height)
+	// 		{
+	// 			BaseStructure structure = BaseStructure.FromType(type, state, ~0u, currPos);
+	// 			if (!structure.IsAreaObstructed)
+	// 			{
+	// 				validBuildLocations.Add(currPos);
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	return validBuildLocations;
+	// }
 }
 
 }
