@@ -5,7 +5,7 @@ namespace RtsEngine.AI
 
 public interface IRtsPlayer
 {
-	public ICommand? MakePlay(WorldState state);
+	public ICommand? MakePlay(WorldState state, uint playerId);
 	public void GameStarted(WorldState state);
 	public void GameEnded(WorldState state);
 }

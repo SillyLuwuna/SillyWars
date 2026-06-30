@@ -7,6 +7,9 @@ namespace RtsEngine.AI
 
 public class Trainer
 {
+	private const int ExpectedTps = 500;
+	public const ulong MaxAllowedTicks = ExpectedTps * 60;
+
 	private RtsEngine _engine = null!;
 	private WorldState _initialState = null!;
 	private WorldState _currState = null!;
@@ -24,9 +27,11 @@ public class Trainer
 		RestartEngine();
 		_players = new List<IRtsPlayer>();
 
-		for (int i = 0; i < initialState.NumPlayers; i++)
+		RtsAI ai = new RtsAI();
+
+		for (uint i = 0; i < initialState.NumPlayers; i++)
 		{
-			_players.Add(new RtsAI());
+			_players.Add(ai);
 		}
 
 		_statTickStopwatch = new Stopwatch();
@@ -53,7 +58,7 @@ public class Trainer
 	{
 		StartGame();
 
-		while (!_engine.State.IsGameOver)
+		while (!_engine.State.IsGameOver && ((ulong)_statTicks < MaxAllowedTicks))
 		{
 			MakeMoves();
 			_engine.Tick();
@@ -83,9 +88,11 @@ public class Trainer
 
 	private void MakeMoves()
 	{
-		foreach (IRtsPlayer player in _players)
+		for (int i = 0; i < _players.Count; i++)
 		{
-			ICommand? play = player.MakePlay(_engine.State);
+			IRtsPlayer player = _players[i];
+
+			ICommand? play = player.MakePlay(_engine.State, (uint)i);
 			if (play == null) continue;
 
 			_engine.EnqueueCommand(play);

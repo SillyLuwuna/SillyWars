@@ -384,5 +384,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 
 		return shortest;
 	}
+
+	public IGatherable? GatherableGoal => _gatherableGoal;
 }
 }

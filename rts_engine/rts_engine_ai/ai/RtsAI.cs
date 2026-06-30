@@ -1,17 +1,5 @@
-using static Tensorflow.Binding;
-using static Tensorflow.KerasApi;
-using Tensorflow;
-using Tensorflow.Keras;
 using Tensorflow.NumPy;
-// using Tensorflow.Keras;
-// using Tensorflow.Keras.Layers;
-// using Tensorflow.Keras.Losses;
-// using System;
-// using System.Linq;
-// using Tensorflow.Keras.Engine;
 using RtsEngine.Commands;
-using Tensorflow.Keras.Engine;
-// using Tensorflow.Keras.ArgsDefinition;
 
 namespace RtsEngine.AI
 {
@@ -21,110 +9,83 @@ public class RtsAI : IRtsPlayer
 	private static readonly int StateSize = RtsState.Size;
 	private static readonly int ActionCount = Enum.GetValues(typeof(RtsAction)).Length;
 
-	private IModel _model;
+	private const float Epsilon = 0.3f;
+	private const int GamesUntilNetworkMerge = 100;
+
+	private int _currGames;
 	private Random _rng;
-	private const float _epsilon = 0.3f;
-	// private float[] _lastStateInput;
-	// private int _lastActionIndex;
+	private DQNModel _policyNetwork;
+	private DQNModel _targetNetwork;
+
+	private RtsState? _lastState;
+	private RtsAction _lastAction;
 
 	public RtsAI()
 	{
-		GenerateModel();
+		_currGames = 0;
+		_rng = new Random();
+		_policyNetwork = new DQNModel();
+		_targetNetwork = new DQNModel(_policyNetwork);
+		_lastState = null;
 	}
 
-	private void GenerateModel()
+	private void Learn(RtsState state, RtsAction actionTaken, RtsState resultingState, float reward)
 	{
-		var inputs = keras.Input(shape: StateSize, name: "state");
+		RtsAction nextAction = _policyNetwork.PredictBestAction(resultingState);
+		float bestQValue = _targetNetwork.PredictBestQValue(resultingState);
+		float targetQValue = reward + 0.95f * bestQValue;
 
-		var x = keras.layers.Dense(16, activation: "relu").Apply(inputs);
-		x = keras.layers.Dense(16, activation: "relu").Apply(x);
-		var outputs = keras.layers.Dense(ActionCount, activation: "linear").Apply(x);
+		NDArray targetQValues = _policyNetwork.Predict(state);
+		targetQValues[0, (int)actionTaken] = targetQValue;
 
-		_model = keras.Model(inputs, outputs, name: "dqn");
-
-		_model.compile(
-			optimizer: keras.optimizers.Adam(0.01f),
-			loss: keras.losses.MeanSquaredError()
-		);
+		_policyNetwork.Train(state, targetQValues);
 	}
 
-	private void Learn(RtsState state, RtsAction action, float reward)
+	public ICommand? MakePlay(WorldState state, uint playerId)
 	{
-		NDArray stateArray = GetNumpyArray(state.Array);
-
-		var targetQValues = Predict(stateArray);
-		targetQValues[0, (int)action] = reward;
-
-		_model.fit(stateArray, targetQValues, batch_size: 1, epochs: 1, verbose: 0);
-	}
-
-	private NDArray GetNumpyArray(float[] arr)
-	{
-		var ndArr = new NDArray(new float[1, arr.Length]);
-		for (int i = 0; i < arr.Length; i++)
-		{
-			ndArr[0, i] = arr[i];
-		}
-		return ndArr;
-	}
-
-	public ICommand? MakePlay(WorldState state)
-	{
-		RtsState currState = new RtsState(state);
+		RtsState currState = new RtsState(state, playerId);
 
 		RtsAction action;
-		if (_rng.NextDouble() < _epsilon)
+		if (_rng.NextDouble() < Epsilon)
 		{
 			action = (RtsAction)_rng.Next(ActionCount);
 		}
 		else
 		{
-			action = PredictBestAction(currState);
+			action = _policyNetwork.PredictBestAction(currState);
 		}
 
-		return ActionToCommand(action);
-	}
-
-	private RtsAction PredictBestAction(RtsState state)
-	{
-		NDArray QValues = Predict(state);
-
-		int max = 0;
-		float maxVal = QValues[0, 0];
-		for (int i = 1; i < ActionCount; i++)
+		if (_lastState != null)
 		{
-			if (QValues[0, i] > maxVal)
-			{
-				max = i;
-				maxVal = QValues[0, i];
-			}
+			float reward = CalcReward(_lastState.Value, _lastAction, currState);
+			Learn(_lastState.Value, _lastAction, currState, reward);
 		}
 
-		return (RtsAction)max;
-	}
+		_lastState = currState;
+		_lastAction = action;
 
-	private NDArray Predict(RtsState state)
-	{
-		NDArray stateArray = GetNumpyArray(state.Array);
-		return Predict(stateArray);
-	}
-
-	private NDArray Predict(NDArray stateArray)
-	{
-		return _model.predict(stateArray).numpy();
-	}
-
-	private ICommand ActionToCommand(RtsAction action)
-	{
-
+		return RtsActionUtils.ActionToCommand(state, action);
 	}
 
 	public void GameStarted(WorldState initialState)
 	{
-
+		_lastState = null;
 	}
 
 	public void GameEnded(WorldState finalState)
+	{
+		_currGames++;
+		if (_currGames > GamesUntilNetworkMerge)
+		{
+			_targetNetwork.SetCopyFrom(_policyNetwork);
+			_currGames = 0;
+		}
+
+		// TODO reward for winning / losing
+		// TODO check if game actually ended or if it was a draw;
+	}
+
+	public float CalcReward(RtsState lastState, RtsAction lastAction, RtsState currState)
 	{
 
 	}

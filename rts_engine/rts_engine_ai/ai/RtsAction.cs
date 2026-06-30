@@ -1,3 +1,5 @@
+using RtsEngine.Commands;
+
 namespace RtsEngine.AI
 {
 
@@ -5,9 +7,24 @@ public enum RtsAction
 {
 	TrainWorker,
 	TrainKnight,
-	MineGold,
+
+	BuildBarracks,
+	BuildCastle,
+
 	Attack,
-	DoNothing,
+	Defend,
+
+	MineGold,
+
+	Wait,
+}
+
+public static class RtsActionUtils
+{
+	public static ICommand ActionToCommand(WorldState state, RtsAction action)
+	{
+
+	}
 }
 
 }
