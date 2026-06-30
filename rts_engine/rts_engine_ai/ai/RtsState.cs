@@ -20,6 +20,9 @@ public enum StateEntry
 	// units lost
 	// enemy units lost
 
+	// workersBuilding
+	// unfinishedStructures
+
 	EnemyWorkers,
 	EnemyKnights,
 	TotalEnemyUnits,

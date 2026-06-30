@@ -60,6 +60,11 @@ public struct Vec2Int : IEquatable<Vec2Int>
 		return new Vec2Int(left.x * right, left.y * right);
 	}
 
+	public static Vec2Int operator %(Vec2Int left, Vec2Int right)
+	{
+		return new Vec2Int(left.x % right.x, left.y % right.y);
+	}
+
 
 	public override bool Equals(object? obj)
 	{

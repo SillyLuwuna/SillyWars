@@ -1,6 +1,7 @@
 using System.Linq;
 using RtsEngine.Commands;
 using RtsEngine.EntityProperties;
+using RtsEngine.Map;
 using RtsEngine.Math;
 using RtsEngine.Resources;
 using RtsEngine.Structures;
@@ -21,126 +22,57 @@ public enum RtsAction
 	Defend,
 
 	MineGold,
+	BuildUnfinishedStructures,
 
 	Wait,
 }
 
 public class RtsActionUtils
 {
-	// private List<Castle> _castles;
-	// private int _castleIterator;
-	// private List<Barracks> _barracks;
-	// private int _barracksIterator;
-	//
-	// private List<Castle> _castlesClean;
-	// private List<Barracks> _barracksClean;
-
-	// private List<Vec2Int> _validBuildLocations;
+	// private enum Direction
+	// {
+	// 	Left,
+	// 	Right,
+	// 	Up,
+	// 	Down
+	// }
+	
+	// private Queue<Tuple<BaseStructure, Direction>> _buildLocations;
 
 	private uint _playerId;
+	private bool _start;
+	private BaseStructure _baseStart = null!;
 
 	public RtsActionUtils(uint playerId)
 	{
 		_playerId = playerId;
+		_start = true;
 
-		// _castlePool = new HashSet<Castle>();
-		// _barracksPool = new HashSet<Barracks>();
-
-		// _castles = new List<Castle>();
-		// _castlesClean = new List<Castle>();
-		// _castleIterator = 0;
-		//
-		// _barracks = new List<Barracks>();
-		// _barracksClean = new List<Barracks>();
-		// _barracksIterator = 0;
-
+		// _buildLocations = new Queue<Tuple<BaseStructure, Direction>>();
 	}
 
 	public void Update(WorldState state)
 	{
-		// foreach (uint entityId in state.AddedEntities)
-		// {
-		// 	Entity entity = state.GetEntity(entityId)!;
-		// 	if (entity.OwnerId != _playerId) continue;
-		//
-		// 	if (entity is Castle castle)
-		// 	{
-		// 		_castles.Add(castle);
-		// 	}
-		// 	else if (entity is Barracks barracks)
-		// 	{
-		// 		_barracks.Add(barracks);
-		// 	}
-		// }
+		if (_start)
+		{
+			_start = false;
+			foreach (BaseStructure structure in state.Structures)
+			{
+				if (structure.OwnerId != _playerId) continue;
+				if (structure is Castle)
+				{
+					_baseStart = structure;
+				}
+			}
+		}
 	}
 
-	// private Castle? GetNextCastle()
+	// private void GenerateChildren(BaseStructure structure)
 	// {
-	// 	if (_castles.Count == 0) return null;
-	//
-	// 	while ((_castleIterator < _castles.Count))
-	// 	{
-	// 		Castle currCastle = _castles[_castleIterator];
-	// 		if (currCastle.IsDestroyed)
-	// 		{
-	// 			_castleIterator++;
-	// 			continue;
-	// 		}
-	// 		else if (currCastle.IsAtProductionCapacity)
-	// 		{
-	// 			_castlesClean.Add(currCastle);
-	// 			_castleIterator++;
-	// 			continue;
-	// 		}
-	//
-	// 		_castleIterator++;
-	// 	}
-	//
-	// 	if (_castleIterator >= _castles.Count)
-	// 	{
-	// 		List<Castle> tmp = _castles;
-	// 		_castles = _castlesClean;
-	// 		_castlesClean = tmp;
-	//
-	// 		_castlesClean.Clear();
-	// 		_castleIterator = 0;
-	//
-	// 		return GetNextCastle();
-	// 	}
-	//
-	// 	Castle curr = _castles[_castleIterator];
-	// 	_castlesClean.Add(curr);
-	// 	_castleIterator++;
-	//
-	// 	return curr;
-	// }
-	//
-	// private Barracks? GetNextBarracks()
-	// {
-	// 	if (_barracks.Count == 0) return null;
-	//
-	// 	while ((_barracksIterator < _barracks.Count) && _barracks[_barracksIterator].IsDestroyed)
-	// 	{
-	// 		_barracksIterator++;
-	// 	}
-	//
-	// 	if (_barracksIterator >= _barracks.Count)
-	// 	{
-	// 		List<Barracks> tmp = _barracks;
-	// 		_barracks = _barracksClean;
-	// 		_barracksClean = tmp;
-	//
-	// 		_barracksClean.Clear();
-	// 		_barracksIterator = 0;
-	//
-	// 		return GetNextBarracks();
-	// 	}
-	//
-	// 	Barracks curr = _barracks[_barracksIterator];
-	// 	_barracksClean.Add(curr);
-	// 	_barracksIterator++;
-	//
-	// 	return curr;
+		// _buildLocations.Enqueue(new Tuple<BaseStructure, Direction>(structure, Direction.Left));
+		// _buildLocations.Enqueue(new Tuple<BaseStructure, Direction>(structure, Direction.Right));
+		// _buildLocations.Enqueue(new Tuple<BaseStructure, Direction>(structure, Direction.Up));
+		// _buildLocations.Enqueue(new Tuple<BaseStructure, Direction>(structure, Direction.Down));
 	// }
 
 	public ICommand? ActionToCommand(WorldState state, RtsAction action)
@@ -161,6 +93,8 @@ public class RtsActionUtils
 				return Defend(state);
 			case RtsAction.MineGold:
 				return MineGold(state);
+			case RtsAction.BuildUnfinishedStructures:
+				return BuildUnfinishedStructures(state);
 			case RtsAction.Wait:
 				return Wait(state);
 			default:
@@ -230,26 +164,153 @@ public class RtsActionUtils
 
 	private ICommand? BuildBarracks(WorldState state)
 	{
-		// when new building do 4 neighbours from it (left, right, up, down)
-		// save the ones where buildings can be built
-		// put them in a queue: the locations who appeared first are the ones to be used (should save the building and the direction)
-		// dequeue the next position, if nothing can be placed there anymore, skip
-		// if it can be placed, place it and add 4 neighbours.
-
-		// what is "left"? we know the start, width and height of the building we are building left of, as well
-		// as the building being built.
-		// to the left specific, it would try to build on the x coordinate:
-		// (curr.x - 1 - newBuilding.width)
-		// for the "top" it's weirder since they have different lengths
-		// go to (curr.y + curr.height + 1) and then try from (x = curr.x) to (x = curr.x + width - newBuilding.width)
-
-		// put gold nodes in clumps instead of spread
-		// make sure there are no "bridges" that are small enough that the AI could block movement when placing there
+		Vec2Int center = new Vec2Int(_baseStart.Start.x, _baseStart.Start.y + Barracks.BaseHeight + 1);
+		return BuildNew(state, StructureType.Barracks, center);
 	}
 
 	private ICommand? BuildCastle(WorldState state)
 	{
+		Vec2Int center = _baseStart.Start;
+		return BuildNew(state, StructureType.Castle, center);
+	}
 
+	private ICommand? BuildNew(WorldState state, StructureType type, Vec2Int center)
+	{
+		BaseStructure dummy = BaseStructure.FromType(type, state, ~0u, Vec2Int.Zero);
+
+		if (state.GetResource(_playerId, Resource.Gold) < dummy.Cost.Amount) return null;
+
+		BaseStructure? structure = GetNextStructure(state, type, center);
+		if (structure == null) return null;
+
+		Worker? worker = GetMostAvailableWorker(state);
+		if (worker == null) return null;
+
+		List<uint> entities = new List<uint> { worker.Id };
+		BuildNewCommandArgs args = new BuildNewCommandArgs(entities, structure.Start, type);
+		return new BuildNewCommand(_playerId, args);
+	}
+
+	private BaseStructure? GetNextStructure(WorldState state, StructureType type, Vec2Int center)
+	{
+		BaseStructure dummy = BaseStructure.FromType(type, state, ~0u, Vec2Int.Zero);
+
+		Grid<Cell> map = state.Map;
+		int maxLength = Int32.Max((int)map.Width, (int)map.Height);
+		maxLength = (maxLength / 2) + (maxLength % 2);
+
+		Vec2Int offsets = new Vec2Int(dummy.Width + 1, dummy.Height + 1);
+		Vec2Int minValue = center % offsets;
+		// int yMin = center.y % offsets.y;
+		// int xMin = center.x % offsets.x;
+
+		for (int i = 0; i < maxLength; i++)
+		{
+			// Vec2Int currOffsets = offsets * i;
+			Vec2Int currOffsets = new Vec2Int(offsets.x * i, offsets.y * (i - (i % 2)));
+
+			Vec2Int start = center - currOffsets;
+			Vec2Int end = center + currOffsets;
+
+			int yStart = Int32.Max(start.y, minValue.y);
+			int xStart = Int32.Max(start.x, minValue.x);
+
+			bool hasOneEdge = false;
+
+			if (start.x >= 0) // left edge is within map
+			{
+				hasOneEdge = true;
+				for (int y = yStart; y < map.Height; y += 2 * offsets.y)
+				{
+					Vec2Int candidate = new Vec2Int(start.x, y);
+					BaseStructure structure = BaseStructure.FromType(type, state, _playerId, candidate);
+					if (!structure.IsAreaObstructed)
+					{
+						return structure;
+					}
+				}
+			}
+
+			if (end.x < map.Width) // right edge is within map
+			{
+				hasOneEdge = true;
+				for (int y = yStart; y < map.Height; y += 2 * offsets.y)
+				{
+					Vec2Int candidate = new Vec2Int(end.x, y);
+					BaseStructure structure = BaseStructure.FromType(type, state, _playerId, candidate);
+					if (!structure.IsAreaObstructed)
+					{
+						return structure;
+					}
+				}
+			}
+
+			if (start.y >= 0) // down edge is within map
+			{
+				hasOneEdge = true;
+				for (int x = xStart; x < map.Width; x += offsets.x)
+				{
+					Vec2Int candidate = new Vec2Int(x, start.y);
+					BaseStructure structure = BaseStructure.FromType(type, state, _playerId, candidate);
+					if (!structure.IsAreaObstructed)
+					{
+						return structure;
+					}
+				}
+			}
+
+			if (end.y < map.Height) // up edge is within map
+			{
+				hasOneEdge = true;
+				for (int x = xStart; x < map.Width; x += offsets.x)
+				{
+					Vec2Int candidate = new Vec2Int(x, end.y);
+					BaseStructure structure = BaseStructure.FromType(type, state, _playerId, candidate);
+					if (!structure.IsAreaObstructed)
+					{
+						return structure;
+					}
+				}
+			}
+
+			if (!hasOneEdge) break;
+		}
+
+		return null;
+	}
+
+	private Worker? GetMostAvailableWorker(WorldState state)
+	{
+		Worker? walking = null;
+		Worker? gathering = null;
+		Worker? building = null;
+
+		foreach (Worker worker in state.Units)
+		{
+			if (worker.OwnerId != _playerId) continue;
+			Goal goal = worker.State.Goal;
+			if (goal == Goal.None)
+			{
+				return worker;
+			}
+			else if (goal == Goal.Walk || goal == Goal.Attack)
+			{
+				walking = worker;
+			}
+			else if (goal == Goal.Gather)
+			{
+				gathering = worker;
+			}
+			else if (goal == Goal.Build)
+			{
+				building = worker;
+			}
+		}
+
+		if (walking != null) return walking;
+		if (gathering != null) return gathering;
+		if (building != null) return building;
+		return null;
 	}
 
 	private ICommand? Attack(WorldState state)
@@ -263,6 +324,11 @@ public class RtsActionUtils
 	}
 
 	private ICommand? MineGold(WorldState state)
+	{
+
+	}
+
+	private ICommand? BuildUnfinishedStructures(WorldState state)
 	{
 
 	}
