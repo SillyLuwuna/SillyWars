@@ -129,7 +129,7 @@ public class Worker : BaseUnit, IBuilder, IGatherer
 	{
 		// if (args.OldState.Goal != args.NewState.Goal)
 		// {
-		// 	Console.WriteLine($"{args.OldState.Goal} -> {args.NewState.Goal}");
+		// 	Console.WriteLine($"{Id}: {args.OldState.Goal} -> {args.NewState.Goal}");
 		// }
 
 		if (args.OldState.Goal == Goal.Build && args.NewState.Goal != Goal.Build)

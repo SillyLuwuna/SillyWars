@@ -1,0 +1,3 @@
+Found primary file at /home/luna/.nuget/packages/scisharp.tensorflow.redist-linux-gpu-primary/2.11.1/runtimes/linux-x64/native/libtensorflow.so
+Found primary file at /home/luna/.nuget/packages/scisharp.tensorflow.redist-linux-gpu-primary/2.11.1/runtimes/linux-x64/native/libtensorflow.so.sha
+Found primary file at /home/luna/.nuget/packages/scisharp.tensorflow.redist-linux-gpu-primary/2.11.1/runtimes/linux-x64/native/libtensorflow_framework.so.2

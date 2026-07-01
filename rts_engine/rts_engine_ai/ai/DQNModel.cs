@@ -5,13 +5,26 @@ using Tensorflow.Keras;
 using Tensorflow.NumPy;
 using RtsEngine.Commands;
 using Tensorflow.Keras.Engine;
+using System.Diagnostics;
+using System.Reflection;
+using Tensorflow.Keras.Engine.DataAdapters;
+using Tensorflow.Keras.ArgsDefinition;
 
 namespace RtsEngine.AI
 {
 
 public class DQNModel
 {
-	private static readonly int StateSize = RtsState.Size;
+	private static MethodInfo _predictStepMethod = typeof(Model).GetMethod("predict_step", BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance)!;
+	private static readonly MethodInfo _trainStepMethod = typeof(Model)
+    .GetMethod("train_step", 
+        BindingFlags.InvokeMethod | 
+        BindingFlags.NonPublic | 
+        BindingFlags.Instance,
+        null,
+        new Type[] { typeof(DataHandler), typeof(Tensors), typeof(Tensors) },
+        null)!;int StateSize = RtsState.Size;
+
 	private static readonly int ActionCount = Enum.GetValues(typeof(RtsAction)).Length;
 
 	private IModel _model;
@@ -35,7 +48,8 @@ public class DQNModel
 	{
 		var inputs = keras.Input(shape: StateSize, name: "state");
 
-		var x = keras.layers.Dense(16, activation: "relu").Apply(inputs);
+		var x = keras.layers.Dense(64, activation: "relu").Apply(inputs);
+		x = keras.layers.Dense(32, activation: "relu").Apply(x);
 		x = keras.layers.Dense(16, activation: "relu").Apply(x);
 		var outputs = keras.layers.Dense(ActionCount, activation: "linear").Apply(x);
 
@@ -51,23 +65,38 @@ public class DQNModel
 
 	public void Train(RtsState state, NDArray targetQValues)
 	{
-		_model.fit(GetNumpyArray(state.Array), targetQValues, batch_size: 1, epochs: 1, verbose: 0);
-	}
+		var oldOut = Console.Out;
+		// var sw = Stopwatch.StartNew();
+		try
+		{
+			// Console.SetOut(TextWriter.Null);
+			Tensors x = tf.convert_to_tensor(GetNumpyArray(state.Array));
+			Tensors y = tf.convert_to_tensor(targetQValues);
 
+			DataHandlerArgs args = new DataHandlerArgs();
+			args.BatchSize = 1;
+			args.Model = _model;
+			args.X = x;
+			args.Y = y;
+			// args.Workers = 8;
+			// args.UseMultiprocessing = true;
+			// args.StepsPerEpoch = 1;
 
-	public void Learn(RtsState state, RtsAction action, RtsState resultingState, float reward)
-	{
-		NDArray stateArray = GetNumpyArray(state.Array);
-		NDArray resultingStateArray = GetNumpyArray(resultingState.Array);
+			DataHandler dataHandler = new DataHandler(args);
 
-		RtsAction nextAction = PredictBestAction(resultingState, out float bestQValue);
+			_ = _trainStepMethod.Invoke(_model, new object[] { dataHandler, x, y })!;
+			// var result = (Dictionary<string, float>)_trainStepMethod.Invoke(_model, new object[] { dataHandler, x, y })!;
 
-		float targetQValue = reward + 0.95f * bestQValue;
+			// Console.WriteLine(result["loss"]);
 
-		NDArray targetQValues = Predict(stateArray);
-		targetQValues[0, (int)action] = targetQValue;
-
-		_model.fit(stateArray, targetQValues, batch_size: 1, epochs: 1, verbose: 0);
+			// _model.fit(GetNumpyArray(state.Array), targetQValues, batch_size: 1, epochs: 1, verbose: 0);
+		}
+		finally
+		{
+			Console.SetOut(oldOut);
+		}
+		// sw.Stop();
+		// Console.WriteLine($"Train: {sw.ElapsedMilliseconds} ms");
 	}
 
 	public static NDArray GetNumpyArray(float[] arr)
@@ -99,12 +128,14 @@ public class DQNModel
 		maxVal = QValues[0, 0];
 		for (int i = 1; i < ActionCount; i++)
 		{
+			// Console.Write($"{QValues[0, i]} ");
 			if (QValues[0, i] > maxVal)
 			{
 				max = i;
 				maxVal = QValues[0, i];
 			}
 		}
+		// Console.WriteLine();
 
 		return (RtsAction)max;
 	}
@@ -117,7 +148,34 @@ public class DQNModel
 
 	public NDArray Predict(NDArray stateArray)
 	{
-		return _model.predict(stateArray).numpy();
+		// var sw = Stopwatch.StartNew();
+
+		// Tensor tensor = new Tensor(stateArray);
+		// Tensor tensors = new Tensors(tensor);
+		Tensors tensors = tf.convert_to_tensor(stateArray);
+		Tensors prediction = (Tensors)_predictStepMethod.Invoke(_model, new object[] { tensors })!;
+		// Tensors prediction2 = _model.predict(stateArray, verbose: 0);
+		// Tensors tensor = tf.constant(prediction);
+		// sw.Stop();
+		// Console.WriteLine($"prediction: {sw.ElapsedMilliseconds} ms");
+		return prediction.numpy();
+	}
+
+	public void Save(string path)
+	{
+		_model.save_weights(path);
+	}
+
+	public void SaveFull(string path)
+	{
+		_model.save(path);
+	}
+
+	public static DQNModel Load(string path)
+	{
+		DQNModel model = new DQNModel();
+		model._model.load_weights(path);
+		return model;
 	}
 }
 

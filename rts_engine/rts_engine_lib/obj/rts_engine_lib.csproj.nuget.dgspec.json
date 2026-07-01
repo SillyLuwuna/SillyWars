@@ -67,6 +67,11 @@
           },
           "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.108/RuntimeIdentifierGraph.json"
         }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
       }
     }
   }

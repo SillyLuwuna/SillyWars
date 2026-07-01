@@ -2,4 +2,6 @@
 /Temp
 /Logs
 /Build
+**/Release
+**/Debug
 build.zip

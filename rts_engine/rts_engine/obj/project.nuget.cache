@@ -1,13 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "2O81n2OtOtI=",
+  "dgSpecHash": "Gj5mbBMPh18=",
   "success": true,
   "projectFilePath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine/rts_runnable.csproj",
   "expectedPackageFiles": [
+    "/home/luna/.nuget/packages/microsoft.net.illink.tasks/8.0.27/microsoft.net.illink.tasks.8.0.27.nupkg.sha512",
     "/home/luna/.nuget/packages/system.commandline/2.0.9/system.commandline.2.0.9.nupkg.sha512",
     "/home/luna/.nuget/packages/microsoft.netcore.app.ref/8.0.27/microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "/home/luna/.nuget/packages/microsoft.netcore.app.runtime.win-x64/8.0.27/microsoft.netcore.app.runtime.win-x64.8.0.27.nupkg.sha512",
     "/home/luna/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.27/microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512",
-    "/home/luna/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.27/microsoft.netcore.app.host.linux-x64.8.0.27.nupkg.sha512"
+    "/home/luna/.nuget/packages/microsoft.aspnetcore.app.runtime.win-x64/8.0.27/microsoft.aspnetcore.app.runtime.win-x64.8.0.27.nupkg.sha512",
+    "/home/luna/.nuget/packages/microsoft.netcore.app.host.win-x64/8.0.27/microsoft.netcore.app.host.win-x64.8.0.27.nupkg.sha512"
   ],
   "logs": []
 }

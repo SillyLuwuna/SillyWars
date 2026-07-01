@@ -5,7 +5,7 @@ namespace RtsEngine.EntityProperties
 
 public abstract class Entity : IEntity
 {
-	private static uint _CURR_ID = 0;
+	private static ulong _CURR_ID = 0;
 
 	public WorldState World { get; set; }
 	public uint Id { get; private set; }
@@ -13,7 +13,7 @@ public abstract class Entity : IEntity
 
 	public Entity(uint ownerId, WorldState world)
 	{
-		Id = _CURR_ID;
+		Id = (uint)_CURR_ID;
 		_CURR_ID++;
 		OwnerId = ownerId;
 		World = world;

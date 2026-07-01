@@ -1,19 +1,19 @@
-using System.Diagnostics;
+using static Tensorflow.Binding;
+using Tensorflow;
 using RtsEngine.Commands;
+using System.Diagnostics;
 using RtsEngine.Data;
-using RtsEngine.Map;
-using RtsEngine.Math;
-using RtsEngine.Structures;
+using RtsEngine.Resources;
 
 namespace RtsEngine.AI
 {
 
 public class Trainer
 {
-	private const int ExpectedTps = 500;
+	private const int ExpectedTps = 100;
 	public const ulong MaxAllowedTicks = ExpectedTps * 60;
 
-	private const int GamesUntilNetworkMerge = 100;
+	private const int GamesUntilNetworkMerge = 10;
 
 	private RtsEngine _engine = null!;
 	private WorldState _initialState = null!;
@@ -28,17 +28,23 @@ public class Trainer
 	private DQNModel _policyNetwork;
 	private DQNModel _targetNetwork;
 
-	// HashSet<Vec2Int> _validBuildLocations;
+	private DateTime _now = DateTime.Now;
 
-	public Trainer(WorldState initialState)
+	public Trainer(WorldState initialState, string network = "")
 	{
 		_initialState = initialState;
-		// _validBuildLocations = GetValidBuildLocations(initialState);
 		RestartState();
 		RestartEngine();
 		_players = new List<IRtsPlayer>();
 
-		_policyNetwork = new DQNModel();
+		if (network == "")
+		{
+			_policyNetwork = new DQNModel();
+		}
+		else
+		{
+			_policyNetwork = DQNModel.Load(network);
+		}
 		_targetNetwork = new DQNModel(_policyNetwork);
 
 
@@ -59,20 +65,41 @@ public class Trainer
 
 	private void RestartEngine()
 	{
-		if (_engine != null)
+		var oldOut = Console.Out;
+		try
 		{
-			_engine.Stop();
-		}
+			Console.SetOut(TextWriter.Null);
+			if (_engine != null)
+			{
+				_engine.Stop();
+			}
 
-		_engine = new RtsEngine(_currState);
+			_engine = new RtsEngine(_currState);
+			_engine.Start(isServer: false, useInternalClock: false);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine(ex.Message);
+			Console.Error.WriteLine(ex.StackTrace);
+		}
+		finally
+		{
+			Console.SetOut(oldOut);
+		}
 	}
 
 	public void RunGame()
 	{
 		StartGame();
 
-		while (!_engine.State.IsGameOver && ((ulong)_statTicks < MaxAllowedTicks))
+		while (!_engine.State.IsGameOver && ((ulong)_statTotalTicks < MaxAllowedTicks))
 		{
+			int player0Gold = _currState.GetResource(0, Resource.Gold);
+			int player1Gold = _currState.GetResource(1, Resource.Gold);
+			int enqueuedUnits0 = _currState._playerTotalEnqueuedUnits[0];
+			int enqueuedUnits1 = _currState._playerTotalEnqueuedUnits[1];
+			// Console.WriteLine($"{player0Gold}/{player1Gold} | {_currState.Units.Count}");
+			if (_currState.Units.Count <= 0 && player0Gold < 20 && player1Gold < 20 && enqueuedUnits0 <= 0 && enqueuedUnits1 <= 0) break;
 			MakeMoves();
 			_engine.Tick();
 			CalcStatistics();
@@ -85,8 +112,6 @@ public class Trainer
 	{
 		RestartState();
 		RestartEngine();
-
-		_engine.Start(isServer: false, useInternalClock: false);
 
 		foreach (IRtsPlayer player in _players)
 		{
@@ -105,7 +130,7 @@ public class Trainer
 		{
 			IRtsPlayer player = _players[i];
 
-			ICommand? play = player.MakePlay(_engine.State, _statTicks);
+			ICommand? play = player.MakePlay(_engine.State, _statTotalTicks);
 			if (play == null) continue;
 
 			_engine.EnqueueCommand(play);
@@ -119,10 +144,24 @@ public class Trainer
 
 		foreach (IRtsPlayer player in _players)
 		{
-			player.GameEnded(_engine.State, _statTicks);
+			player.GameEnded(_engine.State, _statTotalTicks);
 		}
 
-		_engine.Stop();
+		var oldOut = Console.Out;
+		try
+		{
+			Console.SetOut(TextWriter.Null);
+			_engine.Stop();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine(ex.Message);
+			Console.Error.WriteLine(ex.StackTrace);
+		}
+		finally
+		{
+			Console.SetOut(oldOut);
+		}
 	}
 
 	private void CalcStatistics()
@@ -130,16 +169,16 @@ public class Trainer
 		_statTicks++;
 		_statTotalTicks++;
 
-		long elapsed = _statTickStopwatch.ElapsedMilliseconds;
-		if (elapsed >= 1000)
-		{
-			float tps = (float)_statTicks / ((float)elapsed / 1000f);
-
-			_statTickStopwatch.Restart();
-			_statTicks = 0;
-
-			Console.WriteLine($"simulation speed: {tps,5} tps");
-		}
+		// long elapsed = _statTickStopwatch.ElapsedMilliseconds;
+		// if (elapsed >= 10000)
+		// {
+		// 	float tps = (float)_statTicks / ((float)elapsed / 1000f);
+		//
+		// 	_statTickStopwatch.Restart();
+		// 	_statTicks = 0;
+		//
+		// 	// Console.WriteLine($"simulation speed: {tps,5} tps");
+		// }
 	}
 
 	public void RunGames(int numGames)
@@ -147,12 +186,14 @@ public class Trainer
 		Console.WriteLine("Starting training...");
 		for (int i = 0; i < numGames; i++)
 		{
-			if (i % GamesUntilNetworkMerge == 0)
+			RunGame();
+			SaveNetworks(i);
+			CalcGameStatistics(i);
+			if ((i + 1) % GamesUntilNetworkMerge == 0)
 			{
+				Console.WriteLine("Merging...");
 				MergeNetworks();
 			}
-			RunGame();
-			CalcGameStatistics(i);
 		}
 		Console.WriteLine("Training complete!");
 	}
@@ -161,15 +202,39 @@ public class Trainer
 	{
 		_targetNetwork.SetCopyFrom(_policyNetwork);
 	}
+	
+	private void SaveNetworks(int game)
+	{
+		_policyNetwork.Save($"networks/policy_{_now.Hour:00}{_now.Minute:00}{_now.Second:00}_{game}.h5");
+		_policyNetwork.SaveFull($"networks/policy_{_now.Hour:00}{_now.Minute:00}{_now.Second:00}_{game}_full.h5");
+	}
 
 	private void CalcGameStatistics(int game)
 	{
 		float elapsedSeconds = (float)_statGameStopwatch.ElapsedMilliseconds / 1000f;
+		float tps = (float)_statTotalTicks / elapsedSeconds;
+		bool p0Won = _currState.PlayerWon(0);
+		bool p1Won = _currState.PlayerWon(1);
+		bool draw = p0Won == p1Won;
+		int win = -1;
+		if (draw)
+		{
+			win = -1;
+		}
+		else if (p0Won)
+		{
+			win = 0;
+		}
+		else if (p1Won)
+		{
+			win = 1;
+		}
 
-		Console.WriteLine($"=== Finished game {game,5:D} ===");
-		Console.WriteLine($"elapsed: {elapsedSeconds,3:F3}");
-		Console.WriteLine($"total ticks: {_statTotalTicks,3:F3}");
-		Console.WriteLine($"============================");
+		Console.WriteLine($"======== Finished game {game,4:D} ========");
+		Console.WriteLine($"elapsed:\t\t{elapsedSeconds:F1} s");
+		Console.WriteLine($"total ticks:\t\t{_statTotalTicks:D}");
+		Console.WriteLine($"simulation speed:\t{tps:F0} TPS");
+		Console.WriteLine($"won: {win}");
 	}
 
 	// private static HashSet<Vec2Int> GetValidBuildLocations(WorldState state, StructureType type)

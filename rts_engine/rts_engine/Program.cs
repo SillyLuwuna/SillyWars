@@ -19,59 +19,59 @@ public static class Program
 		{
 			for (int y = 0; y < grid.Height; y++)
 			{
-				if (x < 10 || x >= 40)
-				{
-					grid[x, y] = new Cell(CellType.Ground);
-					continue;
-				}
-
-				if ((x >= 10 && x <= 14) || (x >= 35 && x <= 39))
-				{
-					if (y < 3 || y >= 27)
-					{
-						grid[x, y] = new Cell(CellType.Ground);
-						continue;
-					}
-				}
-
-				if ((x >= 15 && x <= 19) || (x >= 30 && x <= 34))
-				{
-					grid[x, y] = new Cell(CellType.Ground);
-					continue;
-				}
-
-				if ((x >= 20 && x <= 24) || (x >= 25 && x <= 29))
-				{
-					if (y >= 14 && y <= 16)
-					{
-						grid[x, y] = new Cell(CellType.Ground);
-						continue;
-					}
-				}
-
-				if (x >= 23 && x < 27)
-				{
-					grid[x, y] = new Cell(CellType.Ground);
-					continue;
-				}
-
-				if (x >= 21 && x <= 22)
-				{
-					if (y >= 27 || y < 3)
-					{
-						grid[x, y] = new Cell(CellType.Ground);
-						continue;
-					}
-				}
-
-				if (x >= 27 && x <= 28)
-				{
-					if (y >= 27 || y < 3)
-					{
-						grid[x, y] = new Cell(CellType.Ground);
-						continue;
-					}
-				}
+				// if (x < 10 || x >= 40)
+				// {
+				// 	grid[x, y] = new Cell(CellType.Ground);
+				// 	continue;
+				// }
+				//
+				// if ((x >= 10 && x <= 14) || (x >= 35 && x <= 39))
+				// {
+				// 	if (y < 3 || y >= 27)
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Ground);
+				// 		continue;
+				// 	}
+				// }
+				//
+				// if ((x >= 15 && x <= 19) || (x >= 30 && x <= 34))
+				// {
+				// 	grid[x, y] = new Cell(CellType.Ground);
+				// 	continue;
+				// }
+				//
+				// if ((x >= 20 && x <= 24) || (x >= 25 && x <= 29))
+				// {
+				// 	if (y >= 14 && y <= 16)
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Ground);
+				// 		continue;
+				// 	}
+				// }
+				//
+				// if (x >= 23 && x < 27)
+				// {
+				// 	grid[x, y] = new Cell(CellType.Ground);
+				// 	continue;
+				// }
+				//
+				// if (x >= 21 && x <= 22)
+				// {
+				// 	if (y >= 27 || y < 3)
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Ground);
+				// 		continue;
+				// 	}
+				// }
+				//
+				// if (x >= 27 && x <= 28)
+				// {
+				// 	if (y >= 27 || y < 3)
+				// 	{
+				// 		grid[x, y] = new Cell(CellType.Ground);
+				// 		continue;
+				// 	}
+				// }
 
 				// if ((x >= 10 && x <= 20) || (x >= 30 && x <= 40))
 				// {
@@ -91,7 +91,9 @@ public static class Program
 				// 	continue;
 				// }
 
-				grid[x, y] = new Cell(CellType.Empty);
+				// grid[x, y] = new Cell(CellType.Empty);
+
+				grid[x, y] = new Cell(CellType.Ground);
 			}
 		}
 
@@ -100,8 +102,14 @@ public static class Program
 
 	public static void GenerateStructures(WorldState world)
 	{
-		Castle castle0 = Castle.CreateBuilt(0, world, new Vec2Int(0, 9));
-		Castle castle1 = Castle.CreateBuilt(1, world, new Vec2Int(45, 9));
+		// Castle castle0 = Castle.CreateBuilt(0, world, new Vec2Int(0, 9));
+		// Castle castle1 = Castle.CreateBuilt(1, world, new Vec2Int(45, 9));
+		//
+		// world.AddEntity(castle0);
+		// world.AddEntity(castle1);
+
+		Castle castle0 = Castle.CreateBuilt(0, world, new Vec2Int(0, 14));
+		Castle castle1 = Castle.CreateBuilt(1, world, new Vec2Int(45, 14));
 
 		world.AddEntity(castle0);
 		world.AddEntity(castle1);
@@ -109,45 +117,105 @@ public static class Program
 
 	public static void GenerateResources(WorldState world)
 	{
+		// Random rng = new Random();
+		// int numNodes = 20;
+		// for (int i = 0; i < numNodes; i++)
+		// {
+		// 	int x = (int)(rng.Next() % (world.Map.Width / 2 - 4));
+		// 	int y = (int)(rng.Next() % world.Map.Height);
+		// 	Vec2 pos0 = new Vec2(x + 0.5f, y + 0.5f);
+		// 	Vec2 pos1 = new Vec2((world.Map.Width - x - 1) + 0.5f, (y + 0.5f));
+		// 	if (world.IsTileOccupied(world.Map.CellPosFromWorldSpace(pos0)))
+		// 	{
+		// 		i--;
+		// 		continue;
+		// 	}
+		// 	world.AddEntity(new GoldNode(pos0, world, ~0u));
+		// 	world.AddEntity(new GoldNode(pos1, world, ~0u));
+		// }
+		//
+		// Grid<Cell> grid = world.Map;
+		// for (int x = 0; x < grid.Width; x++)
+		// {
+		// 	for (int y = 0; y < grid.Height; y++)
+		// 	{
+		// 		if (x >= 21 && x <= 28)
+		// 		{
+		// 			if (y >= 27 || y < 3)
+		// 			{
+		// 				Vec2 pos = new Vec2(x + 0.5f, y + 0.5f);
+		// 				world.AddEntity(new GoldNode(pos, world, ~0u));
+		// 				continue;
+		// 			}
+		// 		}
+		// 	}
+		// }
+
 		Random rng = new Random();
-		int numNodes = 20;
-		for (int i = 0; i < numNodes; i++)
+		bool occupied = false;
+		int numClumps = 5;
+		int clumpNodesMin = 3;
+		int clumpNodesMax = 3;
+		int clumpRadius = 1;
+		for (int i = 0; i < numClumps; i++)
 		{
-			int x = (int)(rng.Next() % (world.Map.Width / 2 - 4));
-			int y = (int)(rng.Next() % world.Map.Height);
-			Vec2 pos0 = new Vec2(x + 0.5f, y + 0.5f);
-			Vec2 pos1 = new Vec2((world.Map.Width - x - 1) + 0.5f, (y + 0.5f));
-			if (world.IsTileOccupied(world.Map.CellPosFromWorldSpace(pos0)))
+			int xCenter = rng.Next((int)world.Map.Width / 2 - 4);
+			int yCenter = rng.Next((int)world.Map.Height);
+
+			int clumpNodesNum = (int)(rng.Next(clumpNodesMin, clumpNodesMax + 1));
+			List<GoldNode> clumpNodes = new List<GoldNode>();
+			for (int j = 0; j < clumpNodesNum; j++)
 			{
+				int xOffset = rng.Next(-clumpRadius, clumpRadius + 1);
+				int yOffset = rng.Next(-clumpRadius, clumpRadius + 1);
+				int x = xCenter + xOffset;
+				int y = yCenter + yOffset;
+				Vec2 pos0 = new Vec2(x + 0.5f, y + 0.5f);
+				Vec2 pos1 = new Vec2((world.Map.Width - x - 1) + 0.5f, (y + 0.5f));
+				if (world.IsTileOccupied(world.Map.CellPosFromWorldSpace(pos0)))
+				{
+					occupied = true;
+					break;
+				}
+				foreach (GoldNode node in clumpNodes)
+				{
+					if (node.Pos == pos0)
+					{
+						occupied = true;
+						break;
+					}
+				}
+				if (occupied == true)
+				{
+					break;
+				}
+				clumpNodes.Add(new GoldNode(pos0, world, ~0u));
+				clumpNodes.Add(new GoldNode(pos1, world, ~0u));
+			}
+
+			if (occupied)
+			{
+				occupied = false;
 				i--;
 				continue;
 			}
-			world.AddEntity(new GoldNode(pos0, world, ~0u));
-			world.AddEntity(new GoldNode(pos1, world, ~0u));
-		}
 
-		Grid<Cell> grid = world.Map;
-		for (int x = 0; x < grid.Width; x++)
-		{
-			for (int y = 0; y < grid.Height; y++)
+			foreach (GoldNode node in clumpNodes)
 			{
-				if (x >= 21 && x <= 28)
-				{
-					if (y >= 27 || y < 3)
-					{
-						Vec2 pos = new Vec2(x + 0.5f, y + 0.5f);
-						world.AddEntity(new GoldNode(pos, world, ~0u));
-						continue;
-					}
-				}
+				world.AddEntity(node);
 			}
 		}
 	}
 
 	public static void GenerateUnits(WorldState world)
 	{
-		Worker worker0 = new Worker(new Vec2(2.5f, 8.5f), world, 0);
-		Worker worker1 = new Worker(new Vec2(47.5f, 8.5f), world, 1);
+		// Worker worker0 = new Worker(new Vec2(2.5f, 8.5f), world, 0);
+		// Worker worker1 = new Worker(new Vec2(47.5f, 8.5f), world, 1);
+		//
+		// world.AddEntity(worker0);
+		// world.AddEntity(worker1);
+		Worker worker0 = new Worker(new Vec2(2.5f, 13.5f), world, 0);
+		Worker worker1 = new Worker(new Vec2(47.5f, 13.5f), world, 1);
 
 		world.AddEntity(worker0);
 		world.AddEntity(worker1);
@@ -170,8 +238,8 @@ public static class Program
 		GenerateUnits(world);
 		GenerateResources(world);
 		GenerateInitialResources(world);
-		world.Save("generated.sworld");
-		Console.WriteLine($"Generated map to \"generated.sworld\".");
+		world.Save("generated.sstate");
+		Console.WriteLine($"Generated map to \"generated.sstate\".");
 	}
 
 	public static void Run(ParseResult result)

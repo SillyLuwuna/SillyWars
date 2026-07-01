@@ -1,14 +1,17 @@
 using UnityEngine;
+// using RtsEngine.AI;
 
 public class PlayMenu : MonoBehaviour
 {
-	[SerializeField] private const string _easyMap = "map1.sstate";
+	[SerializeField] private const string _easyMap = "testmap1.sstate";
 	[SerializeField] private const string _mediumMap = "map2.sstate";
 	[SerializeField] private const string _hardMap = "map3.sstate";
 
 	[SerializeField] private MainMenu _mainMenu;
 	[SerializeField] private GameplayUI _gameplayUI;
 	[SerializeField] private InputManager _inputManager;
+
+	[SerializeField] private Agent _agent;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -35,7 +38,8 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnEasyButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_easyMap);
+		// DQNModel model;
+		LocalEngine.Instance.StartEngine(_easyMap, _agent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 
@@ -44,7 +48,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnMediumButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_mediumMap);
+		LocalEngine.Instance.StartEngine(_mediumMap, _agent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 
@@ -53,7 +57,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnHardButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_hardMap);
+		LocalEngine.Instance.StartEngine(_hardMap, _agent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 

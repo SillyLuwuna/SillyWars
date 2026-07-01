@@ -168,6 +168,30 @@
           "lib/netstandard2.0/Razorvine.Pickle.dll": {}
         }
       },
+      "SciSharp.TensorFlow.Redist/2.16.0": {
+        "type": "package",
+        "build": {
+          "build/netstandard2.0/SciSharp.TensorFlow.Redist.props": {}
+        },
+        "runtimeTargets": {
+          "runtimes/linux-x64/native/libtensorflow.so": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
+          "runtimes/linux-x64/native/libtensorflow_framework.so.2": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
+          "runtimes/osx-x64/native/_._": {
+            "assetType": "native",
+            "rid": "osx-x64"
+          },
+          "runtimes/win-x64/native/tensorflow.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          }
+        }
+      },
       "Serilog/2.10.0": {
         "type": "package",
         "compile": {
@@ -549,6 +573,24 @@
         "razorvine.pickle.nuspec"
       ]
     },
+    "SciSharp.TensorFlow.Redist/2.16.0": {
+      "sha512": "2RFkGfdTIoo8ineDUhQyjTNjXzrVLvPmgI4IaRLxqXy2TeepCmRLKG4CTN71IGC2hkPnnKyPIaXv3jkN+QcTFw==",
+      "type": "package",
+      "path": "scisharp.tensorflow.redist/2.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "THIRD_PARTY_NOTICES.txt",
+        "build/netstandard2.0/SciSharp.TensorFlow.Redist.props",
+        "runtimes/linux-x64/native/libtensorflow.so",
+        "runtimes/linux-x64/native/libtensorflow_framework.so.2",
+        "runtimes/osx-x64/native/_._",
+        "runtimes/win-x64/native/tensorflow.dll",
+        "scisharp.tensorflow.redist.2.16.0.nupkg.sha512",
+        "scisharp.tensorflow.redist.nuspec"
+      ]
+    },
     "Serilog/2.10.0": {
       "sha512": "+QX0hmf37a0/OZLxM3wL7V6/ADvC1XihXN4Kq/p6d8lCPfgkRdiuhbWlMaFjR9Av0dy5F0+MBeDmDdRZN/YwQA==",
       "type": "package",
@@ -749,6 +791,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "SciSharp.TensorFlow.Redist >= 2.16.0",
       "SillyWars.Engine >= 1.0.0",
       "System.CommandLine >= 2.0.9",
       "TensorFlow.Keras >= 0.15.0",
@@ -802,6 +845,10 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
+          "SciSharp.TensorFlow.Redist": {
+            "target": "Package",
+            "version": "[2.16.0, )"
+          },
           "System.CommandLine": {
             "target": "Package",
             "version": "[2.0.9, )"

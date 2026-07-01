@@ -5,6 +5,7 @@ using RtsEngine;
 using System;
 using System.Text;
 using System.IO;
+using RtsEngine.Commands;
 
 public class LocalEngine : MonoBehaviour
 {
@@ -19,6 +20,9 @@ public class LocalEngine : MonoBehaviour
 	public event EventHandler<WorldState>? TickEnded;
 	public event Action? Started;
 	public event Action? Stopped;
+
+	private bool _updated = false;
+	private Agent? _agent;
 
 	private LocalEngine() { }
 
@@ -55,11 +59,38 @@ public class LocalEngine : MonoBehaviour
 		if (this != _instance) return;
     }
 
-	public void StartEngine(string stateFileName)
+	void Update()
+	{
+		if (_updated)
+		{
+			_updated = false;
+			if (_engine != null && _engine.State.IsGameOver)
+			{
+				_agent = null;
+				return;
+			}
+			if (_agent != null) // FIXME
+			{
+				ICommand? command = _agent.MakePlay(_engine!.State);
+				if (command != null)
+				{
+					_engine!.EnqueueCommand(command);
+				}
+			}
+		}
+	}
+
+	public void StartEngine(string stateFileName, Agent? agent = null)
 	{
 		if (_engine != null) return;
 
 		WorldState state = WorldState.Load($"{Environment.CurrentDirectory}/{_mapsPath}/{stateFileName}");
+
+		_agent = agent;
+		if (agent != null)
+		{
+			agent.Load(1); // FIXME
+		}
 
 		// _engine = RtsEngine.RtsEngine.StartInstance(state, ServerTps);
 		if (_engine != null)
@@ -78,6 +109,7 @@ public class LocalEngine : MonoBehaviour
 	{
 		if (_engine == null) return;
 
+		_agent = null;
 		_engine.Stop();
 		_engine = null;
 		OnStopped();
@@ -87,6 +119,7 @@ public class LocalEngine : MonoBehaviour
 
 	private void OnTickEnded(object? sender, WorldState state)
 	{
+		_updated = true;
 		TickEnded?.Invoke(this, state);
 	}
 

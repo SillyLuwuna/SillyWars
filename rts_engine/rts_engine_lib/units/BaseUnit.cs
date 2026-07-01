@@ -217,18 +217,28 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 
 	protected void MoveTick()
 	{
-		// Console.WriteLine("============= MoveTick =============");
-		// Console.WriteLine($"Id: {Id}");
-		// Console.WriteLine($"Goal: {State.Goal}");
-		// Console.WriteLine($"Aggro: {State.IsAggro}");
-		// Console.WriteLine($"HasTarget: {HasTarget}");
-		// Console.WriteLine($"IsWalking: {State.IsWalking}");
-		// Console.WriteLine($"HasWalkGoal: {HasWalkGoal}");
-		// int walkPathLength = CurrWalkPath == null ? -1 : CurrWalkPath.Count;
-		// Console.WriteLine($"PathLength: {walkPathLength}");
-		// Console.WriteLine($"PathCheckpoint: {CurrWalkPathCheckpoint}");
-		// Console.WriteLine($"IsGoingToPivot: {IsGoingToPivot}");
-		// Console.WriteLine("============= MoveTick =============");
+		// if (CurrWalkPath == null || CurrWalkPathCheckpoint > CurrWalkPath.Count)
+		// {
+		// 	Console.WriteLine("============= MoveTick =============");
+		// 	Console.WriteLine($"Id: {Id}");
+		// 	Console.WriteLine($"Goal: {State.Goal}");
+		// 	Console.WriteLine($"Aggro: {State.IsAggro}");
+		// 	Console.WriteLine($"HasTarget: {HasTarget}");
+		// 	Console.WriteLine($"IsWalking: {State.IsWalking}");
+		// 	Console.WriteLine($"HasWalkGoal: {HasWalkGoal}");
+		// 	int walkPathLength = CurrWalkPath == null ? -1 : CurrWalkPath.Count;
+		// 	Console.WriteLine($"PathLength: {walkPathLength}");
+		// 	Console.WriteLine($"PathCheckpoint: {CurrWalkPathCheckpoint}");
+		// 	Console.WriteLine($"IsGoingToPivot: {IsGoingToPivot}");
+		// 	Console.WriteLine("============= MoveTick =============");
+		// 	Console.Out.Flush();
+		// 	Environment.Exit(0);
+		// }
+		if (CurrWalkPath == null || CurrWalkPathCheckpoint > CurrWalkPath.Count)
+		{
+			Halt();
+			return;
+		}
 		Vec2 target = CurrWalkPath![CurrWalkPathCheckpoint];
 
 		if (target.Distance(Pos) <= MoveSpeed)
@@ -352,6 +362,11 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 		// Console.WriteLine($"{Id}: Continuing walking to goal");
 		_pivot = null;
 		_isGoingToPivot = false;
+		// if (_walkGoal == null)
+		// {
+		// 	Halt();
+		// 	return;
+		// }
 		RestoreWalkGoal();
 	}
 
@@ -364,7 +379,14 @@ public abstract class BaseUnit : PhysicsObject, ISerializable, IMovable, IAttack
 	{
 		if (State.Goal == Goal.None)
 		{
-			ReturnToPivot();
+			if (_pivot != null)
+			{
+				ReturnToPivot();
+			}
+		}
+		else if (State.Goal == Goal.Attack)
+		{
+			SetTarget(_targetGoal!); // correct?
 		}
 		else
 		{

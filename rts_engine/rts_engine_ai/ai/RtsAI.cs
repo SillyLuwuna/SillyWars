@@ -12,7 +12,6 @@ public class RtsAI : IRtsPlayer
 
 	private const float Epsilon = 0.3f;
 
-	private int _currGames;
 	private Random _rng;
 	private DQNModel _policyNetwork;
 	private DQNModel _targetNetwork;
@@ -31,7 +30,6 @@ public class RtsAI : IRtsPlayer
 		_targetNetwork = targetNetwork;
 		_playerId = playerId;
 		_enemyId = playerId == 0 ? 1u : 0u;
-		_currGames = 0;
 		_rng = new Random();
 		_lastState = null;
 		_actionUtils = new RtsActionUtils(_playerId);
@@ -64,16 +62,35 @@ public class RtsAI : IRtsPlayer
 			action = _policyNetwork.PredictBestAction(currState);
 		}
 
+		ICommand? command = _actionUtils.ActionToCommand(currState, currWorldState, action);
+
 		if (_lastState != null)
 		{
-			float reward = CalcReward(_lastState.Value, _lastAction, currState, currWorldState);
+			float reward;
+			// if (command == null)
+			// {
+			// 	reward = -0.5f;
+			// }
+			// else
+			// {
+			reward = CalcReward(_lastState.Value, _lastAction, currState, currWorldState, command);
+			// }
+
 			Learn(_lastState.Value, _lastAction, currState, reward);
 		}
 
 		_lastState = currState;
 		_lastAction = action;
 
-		return _actionUtils.ActionToCommand(currState, currWorldState, action);
+		// ICommand? command = _actionUtils.ActionToCommand(currState, currWorldState, action);
+		// if command is null give negative infinity reward
+
+		// string str = $"{_playerId}: ";
+		// str += $"{action} ";
+		// str += $"{command == null} ";
+		// Console.WriteLine(str);
+
+		return command;
 	}
 
 	public void GameStarted(WorldState initialState)
@@ -89,9 +106,21 @@ public class RtsAI : IRtsPlayer
 		Learn(_lastState.Value, _lastAction, currState, reward);
 	}
 
+	public float CalcReward(RtsState lastState, RtsAction lastAction, RtsState currState, WorldState currWorldState, ICommand? command)
+	{
+		float reward = CalcReward(lastState, lastAction, currState, currWorldState);
+		if (command == null)
+		{
+			reward += -1.0f;
+		}
+
+		return reward;
+	}
+
 	public float CalcReward(RtsState lastState, RtsAction lastAction, RtsState currState, WorldState currWorldState)
 	{
 		float reward = 0;
+
 
 		// economy rewards
 		reward += currState.GetValue(StateEntry.GoldIncome) * 0.01f;
@@ -162,7 +191,7 @@ public class RtsAI : IRtsPlayer
 		// game over rewards
 		if (currWorldState.IsGameOver)
 		{
-			if (IsTie(currWorldState)) reward += -0.5f;
+			if (IsTie(currWorldState)) reward += -10f;
 			else if (currWorldState.PlayerWon(_playerId)) reward += 100f;
 			else reward += -100f;
 		}

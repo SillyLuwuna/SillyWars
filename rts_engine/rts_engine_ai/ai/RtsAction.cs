@@ -106,7 +106,7 @@ public class RtsActionUtils
 	{
 		if (state.GetResource(_playerId, Resource.Gold) < BaseUnit.Dummy(UnitType.Worker).Cost.Amount) return null;
 
-		IEnumerable<Castle> playerCastles = state.Structures.OfType<Castle>().Where(c => c.OwnerId != _playerId);
+		IEnumerable<Castle> playerCastles = state.Structures.OfType<Castle>().Where(c => c.OwnerId == _playerId);
 
 		Castle? minProductionCastle = null;
 		int minProduction = int.MaxValue;
@@ -136,7 +136,7 @@ public class RtsActionUtils
 	{
 		if (state.GetResource(_playerId, Resource.Gold) < BaseUnit.Dummy(UnitType.Knight).Cost.Amount) return null;
 
-		IEnumerable<Barracks> playerBarracks = state.Structures.OfType<Barracks>().Where(c => c.OwnerId != _playerId);
+		IEnumerable<Barracks> playerBarracks = state.Structures.OfType<Barracks>().Where(c => c.OwnerId == _playerId);
 
 		Barracks? minProductionBarracks = null;
 		int minProduction = int.MaxValue;
@@ -183,7 +183,7 @@ public class RtsActionUtils
 		BaseStructure? structure = GetNextStructure(state, type, center);
 		if (structure == null) return null;
 
-		Worker? worker = GetMostAvailableWorker(state);
+		Worker? worker = GetMostAvailableWorker(state, Goal.Build);
 		if (worker == null) return null;
 
 		List<uint> entities = new List<uint> { worker.Id };
@@ -279,61 +279,70 @@ public class RtsActionUtils
 		return null;
 	}
 
-	private List<Worker> GetMostAvailableWorkers(WorldState state)
-	{
-		List<Worker> idleWorkers = new List<Worker>(50);
-		List<Worker> defendingWorkers = new List<Worker>();
-		List<Worker> gatheringWorkers = new List<Worker>();
-		List<Worker> buildingWorkers = new List<Worker>();
+	// private List<Worker> GetMostAvailableWorkers(WorldState state)
+	// {
+	// 	// has bug! Walk != attacking, it also needs to be IsAggro = true
+	// 	List<Worker> idleWorkers = new List<Worker>(50);
+	// 	List<Worker> defendingWorkers = new List<Worker>();
+	// 	List<Worker> gatheringWorkers = new List<Worker>();
+	// 	List<Worker> buildingWorkers = new List<Worker>();
+	//
+	// 	foreach (BaseUnit unit in state.Units)
+	// 	{
+	// 		if (!(unit is Worker worker)) continue;
+	//
+	// 		if (worker.OwnerId != _playerId) continue;
+	// 		Goal goal = worker.State.Goal;
+	//
+	// 		switch (goal)
+	// 		{
+	// 			case Goal.None:
+	// 				idleWorkers.Add(worker);
+	// 				break;
+	// 			case Goal.Walk:
+	// 				break; // attacker
+	// 			case Goal.Attack:
+	// 				defendingWorkers.Add(worker);
+	// 				break;
+	// 			case Goal.Gather:
+	// 				gatheringWorkers.Add(worker);
+	// 				break;
+	// 			case Goal.Build:
+	// 				buildingWorkers.Add(worker);
+	// 				break;
+	// 		}
+	// 	}
+	//
+	// 	idleWorkers.AddRange(gatheringWorkers);
+	// 	idleWorkers.AddRange(buildingWorkers);
+	// 	idleWorkers.AddRange(defendingWorkers);
+	//
+	// 	return idleWorkers;
+	// }
 
-		foreach (Worker worker in state.Units)
-		{
-			if (worker.OwnerId != _playerId) continue;
-			Goal goal = worker.State.Goal;
-
-			switch (goal)
-			{
-				case Goal.None:
-					idleWorkers.Add(worker);
-					break;
-				case Goal.Walk:
-					break; // attacker
-				case Goal.Attack:
-					defendingWorkers.Add(worker);
-					break;
-				case Goal.Gather:
-					gatheringWorkers.Add(worker);
-					break;
-				case Goal.Build:
-					buildingWorkers.Add(worker);
-					break;
-			}
-		}
-
-		idleWorkers.AddRange(gatheringWorkers);
-		idleWorkers.AddRange(buildingWorkers);
-		idleWorkers.AddRange(defendingWorkers);
-
-		return idleWorkers;
-	}
-
-	private Worker? GetMostAvailableWorker(WorldState state)
+	private Worker? GetMostAvailableWorker(WorldState state, Goal requiredGoal)
 	{
 		Worker? defender = null;
 		Worker? gathering = null;
 		Worker? building = null;
 
-		foreach (Worker worker in state.Units)
+		foreach (BaseUnit unit in state.Units)
 		{
+			if (!(unit is Worker worker)) continue;
+
 			if (worker.OwnerId != _playerId) continue;
 			Goal goal = worker.State.Goal;
-			if (goal == Goal.None)
+			if (goal == Goal.Walk || worker.State.IsAggro)
+			{
+				continue;
+			}
+			else if (goal == requiredGoal)
+			{
+				continue;
+			}
+			else if (goal == Goal.None)
 			{
 				return worker;
-			}
-			else if (goal == Goal.Walk)
-			{
-				continue; // attacker
 			}
 			else if (goal == Goal.Attack)
 			{
@@ -357,7 +366,7 @@ public class RtsActionUtils
 
 	private ICommand? Attack(RtsState state, WorldState world)
 	{
-		Vec2 enemyBase = state.EnemyBasePos;
+		Vec2 enemyBase = GetClosestWalkableTile(state.EnemyBasePos, world);
 
 		bool attackerIsKnight = false;
 		BaseUnit? attacker = null;
@@ -365,6 +374,7 @@ public class RtsActionUtils
 		foreach (BaseUnit unit in world.Units)
 		{
 			if (unit.OwnerId != _playerId) continue;
+			if (unit.State.IsAggro) continue;
 
 			if (unit is Knight knight)
 			{
@@ -393,6 +403,71 @@ public class RtsActionUtils
 		return new AggroMoveCommand(_playerId, args);
 	}
 
+	private Vec2 GetClosestWalkableTile(Vec2 pos, WorldState world)
+	{
+		Grid<Cell> map = world.Map;
+		Vec2Int center = map.CellPosFromWorldSpace(pos);
+
+		int maxLength = Int32.Max((int)map.Width, (int)map.Height);
+
+		for (int i = 0; i < maxLength; i++)
+		{
+			Vec2Int currOffsets = new Vec2Int(i, i);
+
+			Vec2Int start = center - currOffsets;
+			Vec2Int end = center + currOffsets;
+
+			int yStart = Int32.Max(start.y, 0);
+			int xStart = Int32.Max(start.x, 0);
+
+			bool hasOneEdge = false;
+
+			if (start.x >= 0) // left edge is within map
+			{
+				hasOneEdge = true;
+				for (int y = yStart; y < map.Height; y++)
+				{
+					Vec2Int candidate = new Vec2Int(start.x, y);
+					if (map[candidate].IsWalkable) return map.WorldSpaceFromCellPos(candidate);
+				}
+			}
+
+			if (end.x < map.Width) // right edge is within map
+			{
+				hasOneEdge = true;
+				for (int y = yStart; y < map.Height; y++)
+				{
+					Vec2Int candidate = new Vec2Int(end.x, y);
+					if (map[candidate].IsWalkable) return map.WorldSpaceFromCellPos(candidate);
+				}
+			}
+
+			if (start.y >= 0) // down edge is within map
+			{
+				hasOneEdge = true;
+				for (int x = xStart; x < map.Width; x++)
+				{
+					Vec2Int candidate = new Vec2Int(x, start.y);
+					if (map[candidate].IsWalkable) return map.WorldSpaceFromCellPos(candidate);
+				}
+			}
+
+			if (end.y < map.Height) // up edge is within map
+			{
+				hasOneEdge = true;
+				for (int x = xStart; x < map.Width; x++)
+				{
+					Vec2Int candidate = new Vec2Int(x, end.y);
+					if (map[candidate].IsWalkable) return map.WorldSpaceFromCellPos(candidate);
+				}
+			}
+
+			if (!hasOneEdge) break;
+		}
+
+		throw new InvalidOperationException("map is completely filled out. Apparently.");
+	}
+
 	private ICommand? Defend(RtsState state, WorldState world)
 	{
 		bool defenderIsKnight = false;
@@ -409,7 +484,7 @@ public class RtsActionUtils
 				if (defenderIsKnight) continue;
 				else if (unit is Knight knight)
 				{
-					if (knight.State.Goal == Goal.Walk) continue; // is attacking
+					if (knight.State.Goal == Goal.Walk || knight.State.IsAggro) continue; // is attacking
 					else if (knight.State.Goal == Goal.Attack) continue; // is defending
 					else if (knight.State.Goal == Goal.None)
 					{
@@ -453,8 +528,9 @@ public class RtsActionUtils
 		Dictionary<IGatherable, int> controlledNodes = new Dictionary<IGatherable, int>();
 		HashSet<IGatherable> fullNodes = new HashSet<IGatherable>();
 
-		foreach (Worker worker in state.Units)
+		foreach (BaseUnit unit in state.Units)
 		{
+			if (!(unit is Worker worker)) continue;
 			if (worker.OwnerId != _playerId) continue;
 			if (worker.State.Goal != Goal.Gather) continue;
 			IGatherable? gatherable = worker.GatherableGoal;
@@ -478,8 +554,9 @@ public class RtsActionUtils
 		float minDistance = float.PositiveInfinity;
 		GoldNode? nearestNode = null;
 
-		foreach (GoldNode node in state.Entities)
+		foreach (Entity entity in state.Entities)
 		{
+			if (!(entity is GoldNode node)) continue;
 			if (fullNodes.Contains(node)) continue;
 
 			float distance = node.Pos.Distance(state.Map.WorldSpaceFromCellPos(_baseStart.Start));
@@ -491,7 +568,7 @@ public class RtsActionUtils
 		}
 
 		if (nearestNode == null) return null;
-		Worker? availableWorker = GetMostAvailableWorker(state);
+		Worker? availableWorker = GetMostAvailableWorker(state, Goal.Gather);
 		if (availableWorker == null) return null;
 
 		List<uint> entities = new List<uint> { availableWorker.Id };
@@ -501,9 +578,9 @@ public class RtsActionUtils
 
 	private ICommand? BuildUnfinishedStructure(WorldState state)
 	{
-		BaseStructure? unfinishedStructure = state.Structures.First(s => (s.OwnerId == _playerId) && !s.IsBuilt);
+		BaseStructure? unfinishedStructure = state.Structures.FirstOrDefault(s => (s.OwnerId == _playerId) && !s.IsBuilt);
 		if (unfinishedStructure == null) return null;
-		Worker? worker = GetMostAvailableWorker(state);
+		Worker? worker = GetMostAvailableWorker(state, Goal.Build);
 		if (worker == null) return null;
 
 		List<uint> entities = new List<uint> { worker.Id };

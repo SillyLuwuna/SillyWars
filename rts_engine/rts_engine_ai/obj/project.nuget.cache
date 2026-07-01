@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "0gPjkNJ/3sM=",
+  "dgSpecHash": "7dSuGLbaJAc=",
   "success": true,
   "projectFilePath": "/home/luna/Documents/code/silly_wars/silly_wars/rts_engine/rts_engine_ai/rts_runnable.csproj",
   "expectedPackageFiles": [
@@ -14,6 +14,7 @@
     "/home/luna/.nuget/packages/protobuf.text/0.7.2/protobuf.text.0.7.2.nupkg.sha512",
     "/home/luna/.nuget/packages/purehdf/1.0.0-beta.2/purehdf.1.0.0-beta.2.nupkg.sha512",
     "/home/luna/.nuget/packages/razorvine.pickle/1.4.0/razorvine.pickle.1.4.0.nupkg.sha512",
+    "/home/luna/.nuget/packages/scisharp.tensorflow.redist/2.16.0/scisharp.tensorflow.redist.2.16.0.nupkg.sha512",
     "/home/luna/.nuget/packages/serilog/2.10.0/serilog.2.10.0.nupkg.sha512",
     "/home/luna/.nuget/packages/serilog.sinks.console/4.1.0/serilog.sinks.console.4.1.0.nupkg.sha512",
     "/home/luna/.nuget/packages/sharpziplib/1.4.2/sharpziplib.1.4.2.nupkg.sha512",
@@ -22,9 +23,9 @@
     "/home/luna/.nuget/packages/system.resources.extensions/7.0.0/system.resources.extensions.7.0.0.nupkg.sha512",
     "/home/luna/.nuget/packages/tensorflow.keras/0.15.0/tensorflow.keras.0.15.0.nupkg.sha512",
     "/home/luna/.nuget/packages/tensorflow.net/0.150.0/tensorflow.net.0.150.0.nupkg.sha512",
+    "/home/luna/.nuget/packages/microsoft.netcore.app.ref/8.0.27/microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
     "/home/luna/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.27/microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512",
-    "/home/luna/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.27/microsoft.netcore.app.host.linux-x64.8.0.27.nupkg.sha512",
-    "/home/luna/.nuget/packages/microsoft.netcore.app.ref/8.0.27/microsoft.netcore.app.ref.8.0.27.nupkg.sha512"
+    "/home/luna/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.27/microsoft.netcore.app.host.linux-x64.8.0.27.nupkg.sha512"
   ],
   "logs": []
 }
