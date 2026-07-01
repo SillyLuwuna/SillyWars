@@ -23,6 +23,7 @@ public class LocalEngine : MonoBehaviour
 
 	private bool _updated = false;
 	private Agent? _agent;
+	private HeuristicAgent? _hagent;
 
 	private LocalEngine() { }
 
@@ -67,6 +68,7 @@ public class LocalEngine : MonoBehaviour
 			if (_engine != null && _engine.State.IsGameOver)
 			{
 				_agent = null;
+				_hagent = null;
 				return;
 			}
 			if (_agent != null) // FIXME
@@ -77,19 +79,32 @@ public class LocalEngine : MonoBehaviour
 					_engine!.EnqueueCommand(command);
 				}
 			}
+			else if (_hagent != null) // FIXME
+			{
+				ICommand? command = _hagent.MakePlay(_engine!.State);
+				if (command != null)
+				{
+					_engine!.EnqueueCommand(command);
+				}
+			}
 		}
 	}
 
-	public void StartEngine(string stateFileName, Agent? agent = null)
+	public void StartEngine(string stateFileName, Agent? agent = null, HeuristicAgent? hagent = null)
 	{
 		if (_engine != null) return;
 
 		WorldState state = WorldState.Load($"{Environment.CurrentDirectory}/{_mapsPath}/{stateFileName}");
 
+		_hagent = hagent;
 		_agent = agent;
 		if (agent != null)
 		{
 			agent.Load(1); // FIXME
+		}
+		if (hagent != null)
+		{
+			hagent.Load(1); // FIXME
 		}
 
 		// _engine = RtsEngine.RtsEngine.StartInstance(state, ServerTps);
@@ -110,6 +125,7 @@ public class LocalEngine : MonoBehaviour
 		if (_engine == null) return;
 
 		_agent = null;
+		_hagent = null;
 		_engine.Stop();
 		_engine = null;
 		OnStopped();

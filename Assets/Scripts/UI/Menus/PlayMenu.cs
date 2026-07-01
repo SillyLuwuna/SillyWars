@@ -12,6 +12,7 @@ public class PlayMenu : MonoBehaviour
 	[SerializeField] private InputManager _inputManager;
 
 	[SerializeField] private Agent _agent;
+	[SerializeField] private HeuristicAgent _hagent;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,8 +39,8 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnEasyButtonPressed()
 	{
-		// DQNModel model;
-		LocalEngine.Instance.StartEngine(_easyMap, _agent);
+		// LocalEngine.Instance.StartEngine(_easyMap, _agent);
+		LocalEngine.Instance.StartEngine(_easyMap, hagent: _hagent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 
@@ -48,7 +49,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnMediumButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_mediumMap, _agent);
+		LocalEngine.Instance.StartEngine(_mediumMap, hagent: _hagent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 
@@ -57,7 +58,7 @@ public class PlayMenu : MonoBehaviour
 
 	public void OnHardButtonPressed()
 	{
-		LocalEngine.Instance.StartEngine(_hardMap, _agent);
+		LocalEngine.Instance.StartEngine(_hardMap, hagent: _hagent);
 
 		if (!LocalEngine.Instance.IsRunning) return;
 

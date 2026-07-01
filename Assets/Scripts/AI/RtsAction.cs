@@ -488,12 +488,12 @@ public class RtsActionUtils
 		{
 			if (unit.OwnerId == _playerId)
 			{
+				if (unit.State.Goal == Goal.Walk || unit.State.IsAggro) continue; // is attacking
+				if (unit.State.Goal == Goal.Attack) continue; // is defending
 				if (defenderIsKnight) continue;
 				else if (unit is Knight knight)
 				{
-					if (knight.State.Goal == Goal.Walk || knight.State.IsAggro) continue; // is attacking
-					else if (knight.State.Goal == Goal.Attack) continue; // is defending
-					else if (knight.State.Goal == Goal.None)
+					if (knight.State.Goal == Goal.None)
 					{
 						defenderIsKnight = true;
 					}

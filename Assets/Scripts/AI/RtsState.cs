@@ -146,7 +146,6 @@ public class RtsState
 
 	private void SetGoldInfo(RtsState? previousState, WorldState worldState)
 	{
-		Debug.Log($"{PlayerId}");
 		float currGold = worldState.GetResource(PlayerId, Resource.Gold);
 		SetValue(StateEntry.Gold, currGold);
 		Set(StateEntry.Gold, currGold / 100f);

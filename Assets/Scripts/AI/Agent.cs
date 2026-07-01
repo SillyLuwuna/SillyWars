@@ -40,12 +40,12 @@ public class Agent : MonoBehaviour
 
 		float[] actions = output!.DownloadToArray();
 
-		string qstate = "";
-		foreach (float f in actions)
-		{
-			qstate += $"{f} ";
-		}
-		Debug.Log(qstate);
+		// string qstate = "";
+		// foreach (float f in actions)
+		// {
+		// 	qstate += $"{f} ";
+		// }
+		// Debug.Log(qstate);
 
 		input.Dispose();
 		output.Dispose();
@@ -58,12 +58,12 @@ public class Agent : MonoBehaviour
 		_actionUtils.Update(state);
 		RtsState currState = new RtsState(_lastState, state, _playerId, _tick);
 
-		string stateArr = "";
-		foreach (float f in currState.Array)
-		{
-			stateArr += $"{f} ";
-		}
-		Debug.Log(stateArr);
+		// string stateArr = "";
+		// foreach (float f in currState.Array)
+		// {
+		// 	stateArr += $"{f} ";
+		// }
+		// Debug.Log(stateArr);
 
 		float[] qvalues = Predict(currState.Array);
 		_lastState = currState;
@@ -80,7 +80,7 @@ public class Agent : MonoBehaviour
 		}
 
 		RtsAction action = (RtsAction)max;
-		Debug.Log($"{action}");
+		// Debug.Log($"{action}");
 
 		return _actionUtils.ActionToCommand(currState, state, action);
 	}
